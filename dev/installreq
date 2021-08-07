@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+while read requirement; 
+  do conda install --yes $requirement | pip install -U $requirement;
+done < $1

@@ -1,0 +1,99 @@
+{%- extends "layout.html" %}
+
+{%- block content %}
+{% block docs_navbar %}
+<nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+  {%- include "docs-navbar.html" %}
+</nav>
+{% endblock %}
+<section class="color-header">
+  <div class="container">
+
+    <div class="row">
+
+      <div class="col-md-6">
+        <h1 class="homepage-title">{{project}}</h1>
+        <h2 class="homepage-subtitle">{{description}}</h2>
+
+        <!-- <div class="homepage-description">
+          Build complex geometries, numerical models easily with the
+          versatility provided by the Python ecosystem.
+        </div> -->
+
+
+      </div>
+      <div class="col-md-6">
+
+        <img src="_assets/landing.png" alt="image-landing">
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="button-banner">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <p class="button">
+          <a type="button" class="btn btn-round" href="reference.html">
+            Read the doc
+          </a>
+        </p>
+      </div>
+      <div class="col-md-4">
+        <p class="button">
+          <a type="button" class="btn btn-round" href="examples/index.html">
+            Browse examples
+          </a>
+        </p>
+      </div>
+      <div class="col-md-4">
+        <p class="button">
+          <a type="button" class="btn btn-round" href="tutorials/index.html">
+            Get started
+          </a>
+        </p>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<!-- <section class="features-banner">
+  <div class="container">
+    <h3>Features</h3>      
+
+    <div class="row">
+      <div class="col-md-6 vcenter">
+        <div class="media">
+          <span class="media-left">
+            <img src="_assets/gmsh.svg" alt="mesh">
+          </span>
+          <div class="media-body">
+            <h4 class="media-heading">sxsx</h4>
+
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 vcenter">
+        <div class="media">
+          <span class="media-left">
+            <img src="_assets/fenics.svg" alt="fenics">
+          </span>
+          <div class="media-body">
+            <h4 class="media-heading">xsaxsa</h4>
+
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</section> -->
+
+
+{{ _webpack.body_post() }}
+
+{% endblock %}

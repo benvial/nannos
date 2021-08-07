@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+# install fonts
+
+# git clone --depth=1 https://github.com/googlefonts/NunitoSans.git 
+# mkdir -p ~/.fonts/ && cp -r NunitoSans/fonts/ttf/*.ttf ~/.fonts/
+# fc-cache -f -v && fc-list | grep "NunitoSans"
+# rm -rf NunitoSans

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+lessexec=$1
+
+for filename in *.less; do
+    name=$(echo "$filename" | cut -f 1 -d '.')
+    # echo $name
+    $lessexec $filename $name.css
+done
+mv *.css ../

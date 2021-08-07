@@ -1,0 +1,27 @@
+
+
+{% extends "!layout.html" %}
+
+{% block extrahead %}
+  
+<script  type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+  TeX: { 
+      equationNumbers: { 
+        autoNumber: "all" 
+      } 
+  },
+  "HTML-CSS": {
+  availableFonts: ["TeX", "STIX-Web", "Asana-Math", "Neo-Euler", "Gyre-Pagella", "Gyre-Termes", "Latin-Modern"],
+  preferredFont: "STIX-Web",
+  webFont: "STIX-Web",
+  matchFontHeight: true,
+  },
+  });
+</script>
+
+{% endblock %}
+
+{%- block footer %}
+{% include 'footer.html' %}
+{%- endblock %}

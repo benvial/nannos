@@ -1,0 +1,98 @@
+@import "variables.less";
+
+
+body {
+  font-family: @font-family-serif;
+  font-size: @font-size-base;
+  color: @gray-base;
+}
+
+
+button {
+    color: @gray-base;
+    border-radius: 10px;
+    padding: 6px 6px 6px 6px;
+    width: 100%;
+    border: solid @gray-base 2px;
+    background-color: @body-bg-darker;
+}
+
+button:hover {
+    color: lighten(@gray-base,10%);
+    border: solid lighten(@gray-base,10%) 2px ;
+    background-color: lighten(@body-bg-darker,2%);
+}
+
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 25rem;
+  padding: 2rem 1rem;
+  background-color: @body-bg-dark;
+  overflow: scroll;
+  display: inline-block;
+}
+
+.pagecontent {
+  margin-left: 25rem;
+  margin-right: 2rem;
+  padding: 2rem 1rem;
+}
+
+
+h1,h2,h3, h4 {
+  text-transform: uppercase;
+  // margin-bottom: 10px;
+  text-align: left;
+  color: @brand-primary;
+  // padding-bottom: 1em;
+}
+
+input {
+  width: 30%;
+}
+
+.logo {
+  color: @gray;
+  // position: absolute;
+  // bottom: 10px;
+}
+
+
+.rc-slider-handle {
+    border: solid 2px @brand-primary;
+}
+
+.rc-slider-dot-active {
+    border-color: @brand-primary;
+}
+.rc-slider-track {
+    background-color: @brand-primary;
+}
+.rc-slider-handle:hover {
+    border-color: darken(@brand-primary,20%);
+}
+.rc-slider-handle:active {
+    border-color: darken(@brand-primary,20%);
+    box-shadow: 0 0 5px darken(@brand-primary,20%);
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+}
+.rc-slider-handle:focus {
+    border-color: darken(@brand-primary,20%);
+    box-shadow: 0 0 0 5px lighten(@brand-primary,20%);
+    outline: none;
+}
+
+
+.homepage {
+    padding: 100px;
+}
+
+
+.appdescription {
+    padding-bottom: 40px;
+}
