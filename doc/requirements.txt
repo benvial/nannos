@@ -6,3 +6,4 @@ memory_profiler
 numpydoc
 sphinxcontrib-svg2pdfconverter
 sphinxcontrib-bibtex
+matplotlib

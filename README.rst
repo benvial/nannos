@@ -42,15 +42,15 @@
 .. .. image:: https://img.shields.io/badge/DOI-10.5281/zenodo.4938573-5fadad?logo=google-scholar&logoColor=ffffff&style=for-the-badge
 ..  :target: https://doi.org/10.5281/zenodo.4938573
 .. 
-.. .. image:: https://img.shields.io/badge/license-MIT-blue?color=bb798f&logo=open-access&logoColor=white&style=for-the-badge
-..  :target: https://gitlab.com/nannos/docker/-/blob/master/LICENCE.txt
-..  :alt: license
-.. 
+
+.. image:: https://img.shields.io/badge/license-GPLv3-blue?color=5faa9c&logo=open-access&logoColor=white&style=for-the-badge
+ :target: https://gitlab.com/nannos/nannos/-/blob/master/LICENCE.txt
+ :alt: license
 
 
-====================================================
-nannos: Fourier Modal Method for diffraction gratings.
-====================================================
+=============================================================
+nannos: Fourier Modal Method for multilayer metamaterials
+=============================================================
 
 
 License

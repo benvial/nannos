@@ -6,7 +6,7 @@
 # A minimal current TL is installed adding only the packages that are
 # required
 
-export PATH=/tmp/texlive/bin/x86_64-linux:$PATH
+export PATH=.cache/texlive/bin/x86_64-linux:$PATH
 
 # Obtain TeX Live
 wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
