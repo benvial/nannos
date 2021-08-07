@@ -3,8 +3,16 @@
 set -e
 
 # install fonts
-
-# git clone --depth=1 https://github.com/googlefonts/NunitoSans.git 
-# mkdir -p ~/.fonts/ && cp -r NunitoSans/fonts/ttf/*.ttf ~/.fonts/
-# fc-cache -f -v && fc-list | grep "NunitoSans"
-# rm -rf NunitoSans
+mkdir -p ~/.fonts/
+mkdir -p fonts/
+cd fonts
+wget -O Lato.zip https://fonts.google.com/download?family=Lato
+unzip Lato.zip && rm -rf Lato.zip && rm -rf *.txt
+wget -O Cousine.zip https://fonts.google.com/download?family=Cousine
+unzip Cousine.zip && rm -rf Cousine.zip && rm -rf *.txt
+wget -O Barlow.zip https://fonts.google.com/download?family=Barlow
+unzip Barlow.zip && rm -rf Barlow.zip && rm -rf *.txt
+mv *.ttf ~/.fonts/
+cd .. && rm -rf fonts
+fc-cache -f -v
+# fc-list
