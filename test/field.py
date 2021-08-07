@@ -23,15 +23,15 @@ pw = PlaneWave(frequency=freq, angles=(theta, phi, psi))
 Nx = 2 ** 8
 Ny = 2 ** 8
 
-eps_pattern = 4.
-eps_hole = 1.
+eps_pattern = 4.0
+eps_hole = 1.0
 mu_pattern = 1.0
 mu_hole = 1.0
 
-h = 1#0.5
-l = h#1/freq
+h = 1  # 0.5
+l = h  # 1/freq
 
-hsup = hsub = h#2*l
+hsup = hsub = h  # 2*l
 
 radius = 0.25
 x0 = np.linspace(0, 1.0, Nx)
@@ -93,7 +93,6 @@ RE = []
 Z = []
 for layer_index in range(3):
 
-
     z = 0
 
     nz = 100
@@ -101,11 +100,9 @@ for layer_index in range(3):
     shape = 2 ** 6, 2 ** 6
     E, H = simu.get_field_grid(layer_index, z=z, shape=shape)
 
-
     #
     # plt.figure()
     # plt.plot(z, field_fourier[:, 1, 1, :].T.real)
-
 
     # (ex,ey,ez),(hx,hy,hz) = f
     x0 = np.linspace(0, 1, shape[0])
@@ -114,16 +111,16 @@ for layer_index in range(3):
     x = np.broadcast_to(x1, (nz, shape[0], shape[1])).T
     y = np.broadcast_to(y1, (nz, shape[0], shape[1])).T
     kr = simu.k0para[0] * x + simu.k0para[1] * y
-    ex = E[0] * np.exp(1j*kr)
+    ex = E[0] * np.exp(1j * kr)
     # ex = np.exp(1j*kr)
 
-    p = np.abs(E[0])**2 + np.abs(E[1])**2 + np.abs(E[2])**2
+    p = np.abs(E[0]) ** 2 + np.abs(E[1]) ** 2 + np.abs(E[2]) ** 2
 
-    p = ex 
+    p = ex
 
     # p = np.exp(1j*3*x)
 
-    q = np.exp(1j *( simu.k0para[0] * x1 + simu.k0para[1] * y1))
+    q = np.exp(1j * (simu.k0para[0] * x1 + simu.k0para[1] * y1))
 
     iz = 0
 
@@ -136,37 +133,36 @@ for layer_index in range(3):
 
     # p = ex[0, :, :].T* np.exp(1j * simu.k0para[0] * x)
 
+    a = ex.T  # *q
+    re = a[:, 0, :].real
 
-    a = ex.T#*q
-    re = a[:,0,:].real
-    
     # re = np.flipud(re)
 
     # re = np.abs(ex[0, :, :].T)
 
     # plt.figure()
-    dz = z[1]-z[0]
+    dz = z[1] - z[0]
     z2 = z + z0
     # plt.imshow(re, extent=(0, L1[0], z0, z0+z[-1]+dz), cmap="RdBu_r", origin="lower")
     # plt.pcolor(x0,z2,re, cmap="RdBu_r",shading='auto')
     z0 += thicknesses[layer_index]
     # plt.colorbar()
     # plt.title("z")
-    
-    if layer_index>0:
-        a = re[1:,:]
+
+    if layer_index > 0:
+        a = re[1:, :]
         b = z2[1:]
     else:
         a = re
         b = z2
     RE.append(a)
     Z.append(b)
-    
+
 Z = np.hstack(Z)
 RE = np.vstack(RE)
-plt.pcolor(x0,Z,RE, cmap="RdBu_r",shading='flat')
+plt.pcolor(x0, Z, RE, cmap="RdBu_r", shading="flat")
 
-plt.ylim([0,sum(thicknesses)])
+plt.ylim([0, sum(thicknesses)])
 plt.axis("scaled")
 
 xsx

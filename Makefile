@@ -17,8 +17,8 @@ VERSION=$(shell python3 -c "import nannos; print(nannos.__version__)")
 BRANCH=$(shell git branch --show-current)
 URL=$(shell python3 -c "import nannos; print(nannos.__website__)")
 LESSC=$(PROJECT_DIR)/doc/node_modules/less/bin/lessc
-GITLAB_PROJECT_ID=22161961
-GITLAB_GROUP_ID=11118791
+GITLAB_PROJECT_ID=28703132
+GITLAB_GROUP_ID=12956132
 
 ifeq (,$(shell which conda))
 HAS_CONDA=False
