@@ -15,4 +15,6 @@ unzip Barlow.zip && rm -rf Barlow.zip && rm -rf *.txt
 mv *.ttf ~/.fonts/
 cd .. && rm -rf fonts
 fc-cache -f -v
-# fc-list
+fc-list | grep Lato
+fc-list | grep Cousine
+fc-list | grep Barlow
