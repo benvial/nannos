@@ -57,7 +57,7 @@ test:
   script:
     - pip install -e .
     - pip install -r dev/requirements.txt
-    - export MPLBACKEND=agg &&  pytest ./test --cov=src/nannos --cov-append --cov-report term --cov-report html --cov-report xml --durations=0
+    - export MPLBACKEND=agg && pytest ./test --cov=src/nannos --cov-append --cov-report term --cov-report html --cov-report xml --durations=0
     - coverage xml
   artifacts:
     reports:
