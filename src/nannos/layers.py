@@ -93,7 +93,7 @@ class Layer:
 
 
 class Pattern:
-    def __init__(self, epsilon=None, mu=None, name="pattern", grid=None):
+    def __init__(self, epsilon=1, mu=1, name="pattern", grid=None):
         self.name = name
         self.grid = grid
         self.epsilon = epsilon

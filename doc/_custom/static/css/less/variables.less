@@ -2,7 +2,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Cousine:ital,wght@0,400;0,700;1,400;1,700&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 
-@gray-base: rgb(51,51,51);
+@gray-base: rgb(51,51,71);
 @gray: rgb(159, 159, 151);
 @brand-primary: rgb(22, 114, 167); // #1672a7
 @brand-secondary: rgb(215, 164, 76); // #d7a44c
@@ -12,6 +12,7 @@
 @brand-warning: rgb(193, 135, 129);
 @brand-danger: @brand-secondary;
 @body-bg: rgb(255, 255, 255);
+@body-bg-alt: rgb(250, 250, 250);
 @font-size-base: 17px;
 @font-family-sans-serif: 'Barlow', Helvetica, Arial, sans-serif;
 @font-family-serif: 'Lato', Helvetica, Arial, sans-serif;
@@ -28,8 +29,8 @@
 @gray-light: lighten(@gray, 17%);
 @gray-lighter: lighten(@gray-light, 13.5%);
 @gray-alpha: fade(@gray-base, 80%);
-@body-bg-dark: darken(@body-bg, 3%);
-@body-bg-darker: darken(@body-bg-dark, 3%);
+@body-bg-dark: darken(@body-bg-alt, 1%);
+@body-bg-darker: darken(@body-bg-dark, 1%);
 @text-color: @gray-base;
 @link-color: @brand-danger;
 @link-hover-color: lighten(@link-color, 13.5%);

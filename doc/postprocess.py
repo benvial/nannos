@@ -50,7 +50,7 @@ def process_html(fn, lines):
         # Remove escaped arguments from the html files.
         line = line.replace("\*args", "*args")
         line = line.replace("\*\*kwargs", "**kwargs")
-        line = line.replace("col-md-3", "col-md-2")
+        # line = line.replace("col-md-3", "col-md-2")
         line = line.replace(
             "<title> &#8212;",
             f"<title> {package.__name__}: {package.__description__} &#8212;",
@@ -62,12 +62,12 @@ def process_html(fn, lines):
 
         line = line.replace(
             "https://mybinder.org/v2/gh/nannos/nannos",
-            "https://mybinder.org/v2/gl/nannos%2Fnann",
+            "https://mybinder.org/v2/gl/nannos%2Fnannos",
         )
 
         line = line.replace(
-            "https://mybinder.org/v2/gl/nannos%2Fnann/doc?filepath=notebooks/examples/",
-            "https://mybinder.org/v2/gl/nannos%2Fnann/doc?filepath=notebooks/",
+            "https://mybinder.org/v2/gl/nannos%2Fnannos/doc?filepath=notebooks/examples/",
+            "https://mybinder.org/v2/gl/nannos%2Fnannos/doc?filepath=notebooks/",
         )
         line = line.replace("binder_badge_logo1.svg", "binder_badge_logo.svg")
         line = line.replace("binder_badge_logo2.svg", "binder_badge_logo.svg")

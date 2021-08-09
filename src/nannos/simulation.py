@@ -114,9 +114,11 @@ class Simulation:
         else:
             epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
             mu_zz = mu[2, 2] if is_mu_anisotropic else mu
+            # TODO: check if mu or epsilon is homogeneous, no need to compute the Toepliz matrix
+
             eps_hat = self.get_toeplitz_matrix(epsilon_zz)
             # eps_hat = self.get_toeplitz_matrix(epsilon_zz,ana=False)
-            mu_hat = self.get_toeplitz_matrix(mu_zz)
+            mu_hat = self.IdG  # self.get_toeplitz_matrix(mu_zz)
             eps_hat_inv = np.linalg.inv(eps_hat)
             mu_hat_inv = np.linalg.inv(mu_hat)
             Keps = build_Kmatrix(eps_hat_inv, Ky, -Kx)

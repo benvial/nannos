@@ -10,16 +10,10 @@ Photonic crystal slab
 Metasurface with holes.
 """
 
-import nannos
-
-nannos.set_backend("autograd")
-
-# import numpy as np
-import autograd.numpy as np
 import matplotlib.pyplot as plt
-from autograd import grad
+import numpy as np
 
-from nannos import Lattice, Layer, Pattern, PlaneWave, Simulation
+import nannos as nn
 
 ##############################################################################
 # We will study a benchmark of hole in a dielectric surface
@@ -32,8 +26,8 @@ theta = 0.0 * np.pi / 180
 phi = 0.0 * np.pi / 180
 psi = 0.0 * np.pi / 180
 
-Nx = 400
-Ny = 400
+Nx = 2 ** 7
+Ny = 2 ** 7
 
 eps_sup = 1.0
 eps_pattern = 12.0
@@ -53,57 +47,72 @@ epsgrid[hole] = eps_hole
 mugrid = np.ones((Nx, Ny), dtype=float) * 1
 # mugrid[hole] = eps_pattern
 
-pattern = Pattern(epsgrid, mugrid)
 
-lattice = Lattice((L1, L2))
+##############################################################################
+# Visualize the permittivity
+import matplotlib as mpl
 
-sup = Layer("Superstrate", epsilon=eps_sup)
-ms = Layer("Metasurface", epsilon=2, thickness=3)
+cmap = mpl.colors.ListedColormap(["#ffe7c2", "#232a4e"])
+
+bounds = [1, 12]
+norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+plt.imshow(epsgrid, cmap=cmap, extent=(0, 1, 0, 1))
+plt.colorbar(ticks=bounds)
+plt.xlabel("$x$")
+plt.ylabel("$y$")
+plt.title(r"permittitivity $\varepsilon(x,y)$")
+plt.tight_layout()
+plt.show()
+
+
+##############################################################################
+# Define the lattice
+
+lattice = nn.Lattice((L1, L2))
+
+##############################################################################
+# Define the layers
+
+sup = nn.Layer("Superstrate", epsilon=eps_sup)
+ms = nn.Layer("Metasurface", epsilon=2, thickness=3)
+sub = nn.Layer("Substrate", epsilon=eps_sub)
+
+
+##############################################################################
+# Define the pattern and add it to the metasurface layer
+
+pattern = nn.Pattern(epsgrid, name="hole")
 ms.add_pattern(pattern)
-sub = Layer("Substrate", epsilon=eps_sub)
 
-pw = PlaneWave(frequency=freq, angles=(theta, phi, psi))
+##############################################################################
+# Define the incident plane wave
 
-simu = Simulation(lattice, [sup, ms, sub], pw, nG)
+pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+
+##############################################################################
+# Define the simulation
+
+simu = nn.Simulation(lattice, [sup, ms, sub], pw, nG)
+
+
+##############################################################################
+# Compute diffraction efficiencies
 
 R, T = simu.diffraction_efficiencies()
+
+##############################################################################
+# Compute diffraction efficiencies per order
+
+Ri, Ti = simu.diffraction_efficiencies(orders=True)
 
 
 plt.figure()
 plt.bar(range(2), [R, T], color=["#4a77ba", "#e69049"])
-plt.xticks
 plt.xticks((0, 1), labels=("R", "T"))
 plt.title("Diffraction efficiencies")
-
+nmax = 5
+print("Ri = ", Ri[:nmax])
+print("Ti = ", Ti[:nmax])
 print("R = ", R)
 print("T = ", T)
 print("R+T = ", R + T)
-
-
-def fun_reflection(epsgrid):
-
-    mugrid = np.ones_like(epsgrid)
-    pattern = Pattern(epsgrid, mugrid)
-    lattice = Lattice((L1, L2))
-
-    sup = Layer("Superstrate", epsilon=eps_sup)
-    ms = Layer("Metasurface", h)
-    ms.add_pattern(pattern)
-    sub = Layer("Substrate", epsilon=eps_sub)
-
-    pw = PlaneWave(frequency=freq, angles=(theta, phi, psi))
-
-    simu = Simulation(lattice, [sup, ms, sub], pw, nG)
-
-    R, T = simu.diffraction_efficiencies()
-
-    return R
-
-
-R = fun_reflection(epsgrid)
-
-grad_fun_reflection = grad(fun_reflection)
-dR_deps = grad_fun_reflection(epsgrid)
-
-plt.figure()
-plt.imshow(dR_deps)

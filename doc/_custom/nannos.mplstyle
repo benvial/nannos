@@ -249,12 +249,12 @@ patch.linewidth       : 1      ## edge width in points.
 ## relative to font.size, using the following values: xx-small, x-small,
 ## small, medium, large, x-large, xx-large, larger, or smaller
 
-font.family  : Nunito Sans
+font.family  : Lato
 font.style   : normal
 font.variant : normal
-font.weight  : light
+font.weight  : 300
 font.stretch : normal
-font.size    : 7
+font.size    : 5
 
 #font.serif      : DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 #font.sans-serif : DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
@@ -327,18 +327,18 @@ text.usetex : False  ## use latex for all text handling. The following fonts
 ## These settings are only used if mathtext.fontset is 'custom'.
 ## Note that this "custom" mode is unsupported and may go away in the future.
 # mathtext.cal : cursive
-# mathtext.rm  : Nunito Sans
+# mathtext.rm  : Lato
 # mathtext.tt  : monospace
-# mathtext.it  : Nunito Sans
-# mathtext.bf  : Nunito Sans
-# mathtext.sf  : Nunito Sans
+# mathtext.it  : Lato
+# mathtext.bf  : Lato
+# mathtext.sf  : Lato
 mathtext.fontset : stixsans  ## Should be 'dejavusans' (default),
                                 ## 'dejavuserif', 'cm' (Computer Modern), 'stix',
                                 ## 'stixsans' or 'custom'
 mathtext.fallback : stixsans  ## When True, use symbols from the Computer Modern
                                  ## fonts when a symbol can not be found in one of
                                  ## the custom math fonts.
-mathtext.default : it  ## The default font to use for math.
+mathtext.default : regular  ## The default font to use for math.
                         # Can be any of the LaTeX font names, including
                         # the special name "regular" for the same font
                         # used in regular text.
@@ -357,14 +357,14 @@ axes.linewidth     : 0.3     ## edge linewidth
 #axes.grid.axis     : both    ## which axis the grid should apply to
 #axes.grid.which    : major   ## gridlines at {major, minor, both} ticks
 #axes.titlelocation : center  ## alignment of the title: {left, right, center}
-axes.titlesize     : medium   ## fontsize of the axes title
-axes.titleweight   : light  ## font weight of title
+axes.titlesize     : large   ## fontsize of the axes title
+axes.titleweight   : 400  ## font weight of title
 #axes.titlecolor    : auto    ## color of the axes title, auto falls back to text.color
                               ## as default value
 #axes.titlepad      : 6.0     ## pad between axes and title in points
-#axes.labelsize     : medium  ## fontsize of the x any y labels
+axes.labelsize     : large  ## fontsize of the x any y labels
 #axes.labelpad      : 4.0     ## space between label and axis
-axes.labelweight   : light  ## weight of the x and y labels
+axes.labelweight   : 300  ## weight of the x and y labels
 #axes.labelcolor    : black
 #axes.axisbelow     : line    ## draw axis gridlines and ticks:
                               ##     - below patches (True)
@@ -525,7 +525,7 @@ legend.columnspacing : 1.0  ## column separation
 ## ***************************************************************************
 ## See https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
 figure.titlesize   : medium     ## size of the figure title (``Figure.suptitle()``)
-figure.titleweight : light    ## weight of the figure title
+figure.titleweight : 300    ## weight of the figure title
 figure.figsize     : 3.50, 2.16  ## figure size in inches
 figure.dpi         : 300       ## figure dots per inch
 #figure.facecolor   : white     ## figure facecolor

@@ -43,8 +43,8 @@ MANIFEST
 .coverage
 .coverage*
 bin
-docs/package-lock.json
-docs/package.json
+doc/package-lock.json
+doc/package.json
 
 # Logs and databases #
 ######################
@@ -97,7 +97,7 @@ pylint.html
 pylint.json
 
 
-# Docs css (we use less to generate those):
+# Doc css (we use less to generate those):
 doc/_custom/static/css/*.css
 doc/generated
 doc/biblio
