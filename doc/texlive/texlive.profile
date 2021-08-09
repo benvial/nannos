@@ -1,10 +1,10 @@
 selected_scheme scheme-basic
-TEXDIR /builds/nannos/nannos.gitlab.io/.cache/texlive
+TEXDIR $CI_PROJECT_DIR/.cache/texlive
 TEXMFCONFIG ~/.texlive/texmf-config
 TEXMFHOME ~/texmf
-TEXMFLOCAL /builds/nannos/nannos.gitlab.io/.cache/texlive/texmf-local
-TEXMFSYSCONFIG /builds/nannos/nannos.gitlab.io/.cache/texlive/texmf-config
-TEXMFSYSVAR /builds/nannos/nannos.gitlab.io/.cache/texlive/texmf-var
+TEXMFLOCAL $CI_PROJECT_DIR/.cache/texlive/texmf-local
+TEXMFSYSCONFIG $CI_PROJECT_DIR/.cache/texlive/texmf-config
+TEXMFSYSVAR $CI_PROJECT_DIR/.cache/texlive/texmf-var
 TEXMFVAR ~/.texlive/texmf-var
 option_doc 0
 option_src 0
