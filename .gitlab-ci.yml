@@ -2,7 +2,6 @@
 image: continuumio/miniconda3:latest
 
 
-
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
@@ -30,7 +29,6 @@ stages:
   - badge
   # - zenodo
   - trigdoc
-  # - trigdocker
   - test
   
   
@@ -46,11 +44,11 @@ badge:
     paths:
         - badges.json
 
-# staging:
-#   stage: trigdoc
-#   trigger: nannos/nannos.gitlab.io
-#   only:
-#     - master
+staging:
+  stage: trigdoc
+  trigger: nannos/nannos.gitlab.io
+  only:
+    - master
 
 
 test:
