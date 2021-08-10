@@ -13,7 +13,7 @@ PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PROJECT_NAME = nannos
 PYTHON_INTERPRETER = python3
 HOSTING = gitlab
-VERSION=$(shell python3 -c "import nannos; print(nannos.__version__)")
+VERSION=$(shell python3 -c "from configparser import ConfigParser; p = ConfigParser(); p.read('setup.cfg'); print(p['metadata']['version'])")
 BRANCH=$(shell git branch --show-current)
 URL=$(shell python3 -c "import nannos; print(nannos.__website__)")
 LESSC=$(PROJECT_DIR)/doc/node_modules/less/bin/lessc
@@ -278,7 +278,12 @@ covdoc:
 	@ls doc/_build/html/ || make doc
 	@ls htmlcov/ || make -s test && mv htmlcov/ doc/_build/html/coverage/
 	
-
+## Install locally
+install:
+	$(call message,${@})
+	pip install -e .
+	
+	
 ## Tag and push tags
 tag: clean style
 	$(call message,${@})
