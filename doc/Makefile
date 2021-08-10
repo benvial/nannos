@@ -6,6 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
+HTML_FILES = `find $(BUILDDIR)/html/ -type f -name "*.html" -print`
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -64,18 +65,8 @@ clean:
 
 ## Postprocess html doc
 postpro-html:
-	# @echo $(wildcard $(BUILDDIR)/html/**/*.html)
-	@python postprocess.py html _build/html/*.html
-	# @python postprocess.py html _build/html/generated/*.html
-	@python postprocess.py html $(wildcard $(BUILDDIR)/html/modules/**/*.html)
-	@python postprocess.py html $(wildcard $(BUILDDIR)/html/examples/**/*.html)
-	@python postprocess.py html $(BUILDDIR)/html/examples/*.html
-	@python postprocess.py html $(wildcard $(BUILDDIR)/html/tutorials/**/*.html)
-	@python postprocess.py html $(BUILDDIR)/html/tutorials/*.html
-	@cp -r _assets $(BUILDDIR)/html
-	@cp -r _assets $(BUILDDIR)/html/_static
-	# cat $(BUILDDIR)/html/_static/css/custom_gallery.css >> $(BUILDDIR)/html/_static/gallery.css
-
+	# @echo $(HTML_FILES)
+	@python postprocess.py html $(HTML_FILES)
 
 html-noplot: export SPHX_GLR_THEME = $(theme)
 html-noplot:

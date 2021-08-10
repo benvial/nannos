@@ -50,7 +50,7 @@ def process_html(fn, lines):
         # Remove escaped arguments from the html files.
         line = line.replace("\*args", "*args")
         line = line.replace("\*\*kwargs", "**kwargs")
-        # line = line.replace("col-md-3", "col-md-2")
+        line = line.replace("col-md-3", "col-md-2")
         line = line.replace(
             "<title> &#8212;",
             f"<title> {package.__name__}: {package.__description__} &#8212;",

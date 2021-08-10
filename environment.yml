@@ -6,6 +6,6 @@ dependencies:
   - pip
   - numpy
   - scipy
-  - matplotlib
+  - matplotlib-base
   - pip:
     - git+https://gitlab.com/nannos/nannos.git

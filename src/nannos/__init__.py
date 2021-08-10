@@ -8,9 +8,9 @@ except:
 
 from .constants import *
 from .excitation import *
-from .helpers import *
 from .lattice import *
 from .layers import *
+from .log import *
 from .simulation import *
 
 
@@ -20,7 +20,7 @@ def set_backend(backend):
     Parameters
     ----------
     backend : str
-        Either numpy or autograd.
+        Either ``numpy`` or ``autograd``.
 
 
     """

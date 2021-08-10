@@ -44,8 +44,6 @@ y0 = np.linspace(0, 1.0, Ny)
 x, y = np.meshgrid(x0, y0, indexing="ij")
 hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
 epsgrid[hole] = eps_hole
-mugrid = np.ones((Nx, Ny), dtype=float) * 1
-# mugrid[hole] = eps_pattern
 
 
 ##############################################################################
@@ -104,15 +102,18 @@ R, T = simu.diffraction_efficiencies()
 # Compute diffraction efficiencies per order
 
 Ri, Ti = simu.diffraction_efficiencies(orders=True)
-
-
-plt.figure()
-plt.bar(range(2), [R, T], color=["#4a77ba", "#e69049"])
-plt.xticks((0, 1), labels=("R", "T"))
-plt.title("Diffraction efficiencies")
 nmax = 5
 print("Ri = ", Ri[:nmax])
 print("Ti = ", Ti[:nmax])
 print("R = ", R)
 print("T = ", T)
 print("R+T = ", R + T)
+
+
+##############################################################################
+# Plot
+
+plt.figure()
+plt.bar(range(2), [R, T], color=["#4a77ba", "#e69049"])
+plt.xticks((0, 1), labels=("R", "T"))
+plt.title("Diffraction efficiencies")
