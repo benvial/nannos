@@ -1,6 +1,7 @@
 pip 
 setuptools 
 wheel
+build
 flake8
 pytest
 pytest-cov

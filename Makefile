@@ -303,17 +303,15 @@ release:
                                      
 
 ## Create python package
-package: setup.py
+package:
 	$(call message,${@})
 	@if [ "$(shell git rev-parse --abbrev-ref HEAD)" != "master" ]; then exit 1; fi
 	@rm -f dist/*
-	python3 setup.py sdist
-	python3 setup.py bdist_wheel --universal
+	@python3 -m build --sdist --wheel .
 
 ## Upload to pypi
 pypi: package
 	$(call message,${@})
-	@if [ "$(shell git rev-parse --abbrev-ref HEAD)" != "master" ]; then exit 1; fi
 	@twine upload dist/*
 
 ## Make checksum for release

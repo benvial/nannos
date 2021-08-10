@@ -1,9 +1,10 @@
 from .__about__ import __author__, __description__, __version__
 
 try:
-    NANN_ADJOINT
+    _ADJOINT
     from autograd import numpy
 except:
+    _ADJOINT = False
     import numpy
 
 from .constants import *
@@ -28,13 +29,13 @@ def set_backend(backend):
     import importlib
     import sys
 
-    global NANN_ADJOINT
+    global _ADJOINT
     if backend == "autograd":
-        NANN_ADJOINT = True
+        _ADJOINT = True
         log.info("Setting autograd backend")
     elif backend == "numpy":
         try:
-            del NANN_ADJOINT
+            del _ADJOINT
         except:
             pass
         log.info("Setting numpy backend")
@@ -50,3 +51,7 @@ def set_backend(backend):
     its = [s for s in sys.modules.items() if s[0].startswith("nannos")]
     for k, v in its:
         importlib.reload(v)
+
+
+def get_backend():
+    return "autograd" if _ADJOINT else "numpy"
