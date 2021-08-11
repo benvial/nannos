@@ -13,6 +13,10 @@ API Reference
   :template: class.rst
   
   Simulation
+  Lattice
+  Layer
+  PlaneWave
+  Pattern
   
   
 

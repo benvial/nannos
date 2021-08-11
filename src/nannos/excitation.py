@@ -8,6 +8,21 @@ __all__ = ["PlaneWave"]
 
 
 class PlaneWave:
+    """A plane wave object.
+
+    Parameters
+    ----------
+    frequency : float
+        Frequency (the default is 1).
+    angles : tuple
+        Incidence angles :math:`(\\theta,\phi,\psi)` (the default is (0, 0, 0)).
+        :math:`\\theta`: polar angle,
+        :math:`\phi`: azimuthal angle,
+        :math:`\psi`: polarization angle.
+
+
+    """
+
     def __init__(self, frequency=1, angles=(0, 0, 0)):
         self.frequency = frequency
         self.angles = angles

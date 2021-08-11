@@ -17,16 +17,17 @@ class Simulation:
 
     Parameters
     ----------
-    lattice : type
-        The lattice vectors [[L0_x,L0_y],[L1_x,L1_y]].
-    layers : type
-        A list of layer objects (the default is []).
-    excitation : type
+    lattice : :class:`~nannos.Lattice`
+        The lattice.
+    layers : list
+        A list of :class:`~nannos.Layer` objects (the default is []).
+    excitation : :class:`~nannos.PlaneWave`
         A plane wave excitation (the default is None).
     nG : type
-        Number of Fourier harmonics `nG` (the default is 100).
+        Number of Fourier harmonics (the default is 100).
     formulation : type
-        Formulation type.  (the default is "original").
+        Formulation type.  (the default is 'original').
+        Available formulations are 'original', 'tangent', 'jones'.
 
     """
 
@@ -375,6 +376,10 @@ class Simulation:
         return R, T
 
     def get_order_index(self, order):
+        try:
+            len(order) == 2
+        except:
+            raise ValueError("order must be a tuple of length 2")
         return [k for k, i in enumerate(self.G.T) if np.allclose(i, order)][0]
 
     def get_order(self, A, order):

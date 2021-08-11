@@ -10,6 +10,16 @@ __all__ = ["Lattice"]
 
 
 class Lattice:
+    """A lattice object.
+
+    Parameters
+    ----------
+    basis_vectors : tuple
+        The lattice vectors :math:`((u_x,u_y),(v_x,v_y))`.
+
+
+    """
+
     def __init__(self, basis_vectors):
         self.basis_vectors = basis_vectors
 

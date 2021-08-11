@@ -12,6 +12,22 @@ from .simulation import block
 
 
 class Layer:
+    """A layer object.
+
+    Parameters
+    ----------
+    name : str
+        Name of the layer (the default is "layer").
+    thickness : float
+        Thickness of the layer (the default is 0). Must be positive.
+    epsilon : complex
+        Permittivity `epsilon` (the default is 1).
+    mu : complex
+        Permeability `mu` (the default is 1).
+
+
+    """
+
     def __init__(self, name="layer", thickness=0, epsilon=1, mu=1):
         if thickness is not None:
             if thickness < 0:
@@ -32,6 +48,25 @@ class Layer:
         return f"Layer {self.name}"
 
     def solve_uniform(self, omega, kx, ky, nG):
+        """Solve for eigenmodes and eigenvalues of a uniform layer.
+
+        Parameters
+        ----------
+        omega : float
+            Pulsation.
+        kx : array_like
+            Transverse wavenumber x component.
+        ky : array_like
+            Transverse wavenumber y component.
+        nG : int
+            Number of harmonics.
+
+        Returns
+        -------
+        tuple
+            `(q,psi)`, with eigenvalues `q` and eigenvectors `psi`.
+
+        """
         epsilon = self.epsilon
         mu = self.mu
 
@@ -73,6 +108,19 @@ class Layer:
         return self.eigenvalues, self.eigenvectors
 
     def solve_eigenproblem(self, matrix):
+        """Solve the eigenproblem for a patterened layer.
+
+        Parameters
+        ----------
+        matrix : array_like
+            The matrix which we search for eigenvalues and eigenvectors.
+
+        Returns
+        -------
+        tuple
+            `(q,psi)`, with eigenvalues `q` and eigenvectors `psi`.
+
+        """
         w, v = np.linalg.eig(matrix)
         q = w ** 0.5
         q = np.where(np.imag(q) < 0.0, -q, q)
@@ -80,6 +128,14 @@ class Layer:
         return self.eigenvalues, self.eigenvectors
 
     def copy(self):
+        """Copy a layer.
+
+        Returns
+        -------
+        nannos.Layer
+            A copy of the layer.
+
+        """
         cp = copy(self)
         cp.name += " (copy)"
         return copy(self)
@@ -93,6 +149,23 @@ class Layer:
 
 
 class Pattern:
+    """A pattern object.
+
+    Parameters
+    ----------
+    epsilon : array_like
+        Permittivity `epsilon` (the default is 1).
+    mu : array_like
+        Permeability `mu` (the default is 1).
+    name : str
+        Name of the pattern (the default is "pattern").
+    grid : array_like
+        A 2d grid on which the pattern is defined(the default is None).
+
+
+
+    """
+
     def __init__(self, epsilon=1, mu=1, name="pattern", grid=None):
         self.name = name
         self.grid = grid
