@@ -34,7 +34,6 @@ The code of the project is `on Gitlab <https://gitlab.com/nannos/nannos>`_
 Features
 ========
 
-.. * :ref:`create_simple_gallery` by automatically running Python files,
 * Computation of transmitted and reflected efficiencies for the 
   various diffraction orders
 * Calculation of the electromagnetic field in the structure 
