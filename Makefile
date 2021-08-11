@@ -292,7 +292,8 @@ tag: clean style
 	@git add -A
 	git commit -a -m "Publish v$(VERSION)"
 	@git push origin $(BRANCH)
-	@git tag v$(VERSION) && git push --tags || echo Ignoring tag since it already exists
+	@git tag v$(VERSION) || echo Ignoring tag since it already exists
+	@git push --tags || echo Ignoring tag since it already exists on the remote
 	
 ## Create a release
 release:
