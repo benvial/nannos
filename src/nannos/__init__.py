@@ -4,7 +4,6 @@ try:
     _ADJOINT
     from autograd import numpy
 except:
-    _ADJOINT = False
     import numpy
 
 from .constants import *
@@ -54,4 +53,8 @@ def set_backend(backend):
 
 
 def get_backend():
-    return "autograd" if _ADJOINT else "numpy"
+    try:
+        _ADJOINT
+        return "autograd" if _ADJOINT else "numpy"
+    except:
+        return "numpy"

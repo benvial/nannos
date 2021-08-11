@@ -67,6 +67,9 @@ clean:
 postpro-html:
 	# @echo $(HTML_FILES)
 	@python postprocess.py html $(HTML_FILES)
+	@cp -r _assets $(BUILDDIR)/html
+	@cp -r _assets $(BUILDDIR)/html/_static
+
 
 html-noplot: export SPHX_GLR_THEME = $(theme)
 html-noplot:

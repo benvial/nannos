@@ -98,7 +98,7 @@ host = "gitlab"
 html_context = {
     "description": package.__description__,
     "show_fork": True,
-    "repo": f"nannos/{package.__name__}",
+    "repo": f"{package.__name__}/{package.__name__}",
     "show_pip_install": True,
     "pipname": package.__name__,
     "dockername": f"{package.__name__}/{package.__name__}",
@@ -163,7 +163,7 @@ def setup(app):
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.
 html_theme_options = {
-    "show_toc_level": 1,
+    "show_toc_level": 3,
     "show_prev_next": False,
 }
 
@@ -352,6 +352,9 @@ sphinx_gallery_conf = {
     # directory where function granular galleries are stored
     "backreferences_dir": "generated/backreferences",
     "remove_config_comments": True,
+    "filename_pattern": "/plot_",
+    "ignore_pattern": r"^((?!/plot_).)*$",  # ignore files that do not start with plot_
+    # "ignore_pattern": r"__init__\.py",
     "reference_url": {
         "sphinx_gallery": None,
     },

@@ -20,29 +20,31 @@ Documentation
 
 
 
-Welcome! This is the documentation for nannos |release|, last updated on |today|.
+Welcome! This is the documentation for ``nannos`` v |release|, last updated on |today|.
 
+``nannos`` is a `Python <http://python.org/>`_ package that solves Maxwell's equations 
+in bi-periodic multilayer stacks using the Fourier modal method.
 
+.. image:: _assets/landing.png
+   :width: 80%
+   :alt: Sketch of a multilayer grating
 
-Installation
-=============
+The code of the project is `on Gitlab <https://gitlab.com/nannos/nannos>`_
 
-.. code-block:: bash
+Features
+========
 
-  pip install nannos
-
-.. 
-.. 
-.. .. include:: ../README.rst
-..   :start-after: inclusion-marker-install-start
-..   :end-before: inclusion-marker-install-end
-
-
-
+.. * :ref:`create_simple_gallery` by automatically running Python files,
+* Computation of transmitted and reflected efficiencies for the 
+  various diffraction orders
+* Calculation of the electromagnetic field in the structure 
+* Automatic differentiation with the ``autograd`` package, enabling 
+  inverse design of metasurfaces.
 
 
 .. toctree::
    :maxdepth: 2
    :hidden:
 
+   installation
    api
