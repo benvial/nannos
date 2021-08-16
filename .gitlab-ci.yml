@@ -46,6 +46,7 @@ badge:
   artifacts:
     paths:
         - badges.json
+        - logobadge.json
 
 staging:
   # stage: trigdoc
