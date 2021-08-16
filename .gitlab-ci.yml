@@ -41,7 +41,7 @@ badge:
     - commits=`git rev-list --all --count`
     - latest_release_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
     - logo=$(cat ./doc/_assets/nannos.svg)
-    - echo {\"commits\":\"$commits\", \"release_tag\":\"$latest_release_tag\", \"logoSvg\":\"$logo\"} > badges.json
+    - echo {\'commits\':\'$commits\', \'release_tag\':\'$latest_release_tag\', \'logoSvg\':\'$logo\'} > badges.json
   artifacts:
     paths:
         - badges.json
