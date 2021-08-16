@@ -40,7 +40,8 @@ badge:
     - echo "collecting stats for badges"
     - commits=`git rev-list --all --count`
     - latest_release_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-    - echo {\"commits\":\"$commits\", \"release_tag\":\"$latest_release_tag\"} > badges.json
+    - logo=$(cat ./doc/_assets/nannos.base64)
+    - echo {\"commits\":\"$commits\", \"release_tag\":\"$latest_release_tag\", \"logo\":\"$logo\"} > badges.json
   artifacts:
     paths:
         - badges.json
