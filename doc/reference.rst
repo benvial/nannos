@@ -48,3 +48,4 @@ Features
    installation
    api
    biblio
+   license

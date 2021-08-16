@@ -129,7 +129,7 @@ def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
     return simu
 
 
-formulations = ["original", "normal", "jones", "pol"]
+formulations = ["original", "tangent", "jones"]
 
 
 @pytest.mark.parametrize("freq", [0.7, 1.1])

@@ -101,7 +101,21 @@ clone the repository and install with ``pip``:
 
 .. inclusion-marker-install-end
 
+
+Documentation
+=============
+
+The reference documentation and examples can be found on the  
+`project website <https://nannos.gitlab.io>`_.
+
+
 License
 =======
 
+
+.. inclusion-marker-license-start
+
 This software is published under the `GPLv3 license <https://www.gnu.org/licenses/gpl-3.0.en.html>`_.
+
+
+.. inclusion-marker-license-end
