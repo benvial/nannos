@@ -42,7 +42,7 @@ badge:
     - latest_release_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
     - logo=$(cat ./doc/_assets/opt.svg | tr '"' "'")
     - echo {\"schemaVersion\":"1", \"commits\":\"$commits\", \"release_tag\":\"$latest_release_tag\"} > badges.json
-    - echo {\"schemaVersion\":"1", \"logoSvg\":\"$logo\"} > logobadge.json
+    - echo {\"schemaVersion\":"1", \"logoSvg\":\"$logo\", \"label\":\"release\", \"message\":\"$latest_release_tag\"} > logobadge.json
   artifacts:
     paths:
         - badges.json
