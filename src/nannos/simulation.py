@@ -23,24 +23,24 @@ class Simulation:
         A list of :class:`~nannos.Layer` objects (the default is []).
     excitation : :class:`~nannos.PlaneWave`
         A plane wave excitation (the default is None).
-    nG : type
+    nh : int
         Number of Fourier harmonics (the default is 100).
-    formulation : type
+    formulation : str
         Formulation type.  (the default is 'original').
-        Available formulations are 'original', 'tangent', 'jones'.
+        Available formulations are 'original', 'tangent', and 'jones'.
 
     """
 
     def __init__(
-        self, lattice, layers=[], excitation=None, nG=100, formulation="original"
+        self, lattice, layers=[], excitation=None, nh=100, formulation="original"
     ):
         self.lattice = lattice
         self.layers = layers
         self.excitation = excitation
-        self.nG0 = nG
+        self.nh0 = int(nh)
         self.formulation = formulation
 
-        self.G, self.nG = self.lattice.get_harmonics(self.nG0)
+        self.G, self.nh = self.lattice.get_harmonics(self.nh0)
 
         self.omega = 2 * np.pi * self.excitation.frequency
         self.k0para = np.array(self.excitation.wavevector[:2]) * np.sqrt(
@@ -51,13 +51,13 @@ class Simulation:
         self.ky = self.k0para[1] + r[0, 1] * self.G[0, :] + r[1, 1] * self.G[1, :]
         self.Kx = np.diag(self.kx)
         self.Ky = np.diag(self.ky)
-        self.IdG = np.eye(self.nG)
+        self.IdG = np.eye(self.nh)
         self.ZeroG = np.zeros_like(self.IdG)
 
-        self.a0 = np.zeros(2 * self.nG, dtype=complex)
+        self.a0 = np.zeros(2 * self.nh, dtype=complex)
         self.a0[0] = self.excitation.amplitude[0]
-        self.a0[self.nG] = self.excitation.amplitude[1]
-        self.bN = np.zeros(2 * self.nG, dtype=complex)
+        self.a0[self.nh] = self.excitation.amplitude[1]
+        self.bN = np.zeros(2 * self.nh, dtype=complex)
 
         self.is_solved = False
 
@@ -74,7 +74,7 @@ class Simulation:
                 )
             else:
                 uft = fft.fourier_transform(u)
-            ix = range(self.nG)
+            ix = range(self.nh)
             jx, jy = np.meshgrid(ix, ix, indexing="ij")
             delta = self.G[:, jx] - self.G[:, jy]
             return uft[delta[0, :], delta[1, :]]
@@ -90,7 +90,7 @@ class Simulation:
         is_mu_anisotropic = np.shape(mu)[:2] == (3, 3)
         is_epsilon_anisotropic = np.shape(epsilon)[:2] == (3, 3)
         if layer.is_uniform:
-            I = np.eye(self.nG)
+            I = np.eye(self.nh)
             if is_epsilon_anisotropic:
                 _epsilon = block(
                     [
@@ -108,7 +108,7 @@ class Simulation:
             else:
                 _mu = mu
             Keps = build_Kmatrix(1 / epsilon * self.IdG, Ky, -Kx)
-            # Pmu = np.eye(self.nG * 2)
+            # Pmu = np.eye(self.nh * 2)
             Pmu = block([[mu * self.IdG, self.ZeroG], [self.ZeroG, mu * self.IdG]])
 
             Qeps = self.omega ** 2 * Pmu - Keps
@@ -139,17 +139,12 @@ class Simulation:
                 J = get_jones_field(t)
                 # J /= norm(J).max()
                 Peps = self.get_Peps(epsilon, eps_para_hat, J, direct=False)
-            elif self.formulation == "normal":
+            elif self.formulation == "tangent":
                 t = get_tangent_field(epsilon_zz)
-                Peps = self.get_Peps(epsilon, eps_para_hat, t)
-            elif self.formulation == "pol":
-                t = get_tangent_field(epsilon_zz, normalize=False)
-                norm_t = norm(t)
-                t /= norm_t.max()
                 Peps = self.get_Peps(epsilon, eps_para_hat, t)
             else:
                 raise ValueError(
-                    f"Unknown formulation {self.formulation}. Please choose between 'original', 'tangent', 'jones'."
+                    f"Unknown formulation {self.formulation}. Please choose between 'original', 'tangent' or 'jones'"
                 )
 
             if is_mu_anisotropic:
@@ -162,7 +157,7 @@ class Simulation:
             else:
                 Pmu = block([[mu_hat, self.ZeroG], [self.ZeroG, mu_hat]])
 
-            # Qeps = self.omega ** 2 * np.eye(self.nG * 2) - Keps
+            # Qeps = self.omega ** 2 * np.eye(self.nh * 2) - Keps
             # matrix = Peps @ Qeps - Kmu
             Qeps = self.omega ** 2 * Pmu - Keps
             matrix = self.omega ** 2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
@@ -186,8 +181,8 @@ class Simulation:
             layer = self.build_matrix(layer)
             # layer.solve_eigenproblem(layer.matrix)
             if layer.is_uniform:
-                # layer.eigenvectors = np.eye(self.nG*2)
-                layer.solve_uniform(self.omega, self.kx, self.ky, self.nG)
+                # layer.eigenvectors = np.eye(self.nh*2)
+                layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
             else:
                 layer.solve_eigenproblem(layer.matrix)
             layers_solved.append(layer)
@@ -200,10 +195,10 @@ class Simulation:
         # if hasattr(self, "S"):
         #     return self.S
 
-        S11 = np.eye(2 * self.nG, dtype=complex)
+        S11 = np.eye(2 * self.nh, dtype=complex)
         S12 = np.zeros_like(S11)
         S21 = np.zeros_like(S11)
-        S22 = np.eye(2 * self.nG, dtype=complex)
+        S22 = np.eye(2 * self.nh, dtype=complex)
 
         if indices is None:
             n_interfaces = len(self.layers) - 1
@@ -219,7 +214,7 @@ class Simulation:
                 phasor(layer_next.eigenvalues, z_next)
             )
             I_ = build_Imatrix(layer, layer_next)
-            I = [[get_block(I_, i, j, 2 * self.nG) for j in range(2)] for i in range(2)]
+            I = [[get_block(I_, i, j, 2 * self.nh) for j in range(2)] for i in range(2)]
 
             A = I[0][0] - f @ S12 @ I[1][0]
             B = np.linalg.inv(A)
@@ -242,8 +237,8 @@ class Simulation:
         cross_term = 0.5 * (np.conj(pb) * Aa - np.conj(Ab) * pa)
         forward_xy = np.real(np.conj(Aa) * pa) + cross_term
         backward_xy = -np.real(np.conj(Ab) * pb) + np.conj(cross_term)
-        forward = forward_xy[: self.nG] + forward_xy[self.nG :]
-        backward = backward_xy[: self.nG] + backward_xy[self.nG :]
+        forward = forward_xy[: self.nh] + forward_xy[self.nh :]
+        backward = backward_xy[: self.nh] + backward_xy[self.nh :]
         return forward, backward
 
     def _get_amplitudes(self, layer_index, z=0, translate=True):
@@ -268,7 +263,7 @@ class Simulation:
         n_interfaces = len(self.layers) - 1
         S = self.get_S_matrix(indices=(0, layer_index))
         P = self.get_S_matrix(indices=(layer_index, n_interfaces))
-        q = np.linalg.inv(np.eye(self.nG * 2) - np.dot(S[0][1], P[1][0]))
+        q = np.linalg.inv(np.eye(self.nh * 2) - np.dot(S[0][1], P[1][0]))
         ai = np.dot(q, np.dot(S[0][0], self.a0))
         bi = np.dot(P[1][0], ai)
         return ai, bi
@@ -296,12 +291,12 @@ class Simulation:
             ai, bi = _translate_amplitudes(layer, z_, ai0, bi0)
 
             ht_fourier = layer.eigenvectors @ (ai + bi)
-            hx, hy = ht_fourier[: self.nG], ht_fourier[self.nG :]
+            hx, hy = ht_fourier[: self.nh], ht_fourier[self.nh :]
 
             A = (ai - bi) / (self.omega * layer.eigenvalues)
             B = layer.eigenvectors @ A
             et_fourier = layer.Qeps @ B
-            ey, ex = -et_fourier[: self.nG], et_fourier[self.nG :]
+            ey, ex = -et_fourier[: self.nh], et_fourier[self.nh :]
 
             hz = (self.kx * ey - self.ky * ex) / self.omega
 
@@ -323,7 +318,7 @@ class Simulation:
             amplitudes = np.reshape(amplitudes, amplitudes.shape + (1,))
 
         s = 0
-        for i in range(self.nG):
+        for i in range(self.nh):
             f = np.zeros(shape + (amplitudes.shape[0],), dtype=complex)
             # print("f.shape", f.shape)
             f[self.G[0, i], self.G[1, i], :] = 1.0
@@ -396,7 +391,7 @@ class Simulation:
             nu1 = np.array(block2list(nu, N))
             nuhat = self.get_toeplitz_matrix(nu1, transverse=True)
 
-            nuhat_inv = block2list(np.linalg.inv(block(nuhat)), self.nG)
+            nuhat_inv = block2list(np.linalg.inv(block(nuhat)), self.nh)
 
         else:
             N = epsilon.shape[0]

@@ -9,7 +9,7 @@ import numpy as np
 from nannos import Lattice, Layer, Pattern, PlaneWave, Simulation, pi
 
 formulations = ["original", "normal", "jones", "pol"]
-nG = 101
+nh = 101
 L1 = [1.0, 0]
 L2 = [0, 1.0]
 freq = 1.6
@@ -58,7 +58,7 @@ formulation = "original"
 pattern = Pattern(epsgrid, mugrid)
 st = Layer("Structured", h)
 st.add_pattern(pattern)
-simu = Simulation(lattice, [sup, st, sub], pw, nG, formulation=formulation)
+simu = Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
 
 thicknesses = [l.thickness for l in simu.layers]
 
@@ -190,7 +190,7 @@ xs
 # amplitudes = field_fourier[0][0][0]
 #
 # s=0
-# for i in range(self.nG):
+# for i in range(self.nh):
 #     f = np.zeros(shape,dtype=complex)
 #     f[self.G[0,i], self.G[1,i]] = 1.
 #     s +=  amplitudes[i]*f
@@ -201,10 +201,10 @@ xs
 # s_in = amplitudes
 # Nx,Ny = shape
 # dN = 1./Nx/Ny
-# nG,_ = G.shape
+# nh,_ = G.shape
 #
 # s0 = 0#np.zeros((Nx,Ny),dtype=complex)
-# for i in range(nG):
+# for i in range(nh):
 #     x = G[i,0]
 #     y = G[i,1]
 #
@@ -274,10 +274,10 @@ def get_ifft(amplitudes, shape, G):
     """
     Reconstruct real-space fields
     """
-    nG = G.shape[1]
+    nh = G.shape[1]
 
     s = 0
-    for i in range(nG):
+    for i in range(nh):
         f = np.zeros(shape, dtype=complex)
         f[G[:, i]] = 1.0
         s += amplitudes[i] * f

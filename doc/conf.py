@@ -340,6 +340,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "matplotlib": ("https://matplotlib.org/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+    # "shapely": ("https://shapely.readthedocs.io/en/stable/", None),
     "nannos": ("https://nannos.gitlab.io/", None),
 }
 

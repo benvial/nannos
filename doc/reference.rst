@@ -35,8 +35,8 @@ Features
 ========
 
 * Computation of transmitted and reflected efficiencies for the 
-  various diffraction orders
-* Calculation of the electromagnetic field in the structure 
+  various diffraction orders.
+* Calculation of the electromagnetic field in the structure.
 * Automatic differentiation with the ``autograd`` package, enabling 
   inverse design of metasurfaces.
 
@@ -47,3 +47,4 @@ Features
 
    installation
    api
+   biblio

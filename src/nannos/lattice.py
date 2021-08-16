@@ -30,32 +30,64 @@ class Lattice:
 
     @property
     def matrix(self):
+        """Basis matrix.
+
+        Returns
+        -------
+        array like
+            Matrix containing the lattice vectors (L1,L2).
+
+        """
         return np.array(self.basis_vectors).T
 
     @property
     def reciprocal(self):
+        """Reciprocal matrix.
+
+        Returns
+        -------
+        array like
+            Matrix containing the lattice vectors (K1,K2) in reciprocal space.
+
+        """
         return 2 * pi * np.linalg.inv(self.matrix).T
 
     # wavevectors()
 
-    def get_harmonics(self, nG, method="circular"):
-        if not int(nG) == nG:
-            raise ValueError("nG must be integer.")
+    def get_harmonics(self, nh, method="circular"):
+        """Short summary.
+
+        Parameters
+        ----------
+        nh : int
+            Number of harmonics.
+        method : str
+            The truncation method, available values are "circular" and "parallelogrammic"
+             (the default is "circular").
+
+        Returns
+        -------
+        type
+            Description of returned object.
+
+        """
+        if not int(nh) == nh:
+            raise ValueError("nh must be integer.")
         if method == "circular":
-            return circular_truncation(nG, self.reciprocal)
-        elif method == "parallelogram":
-            return parallelogramic_truncation(nG, self.reciprocal)
+            return _circular_truncation(nh, self.reciprocal)
+        elif method == "parallelogrammic":
+            return _parallelogramic_truncation(nh, self.reciprocal)
         else:
             raise ValueError(
-                f"Unknown truncation method '{method}', please choose between 'circular' or 'parallelogram'."
+                f"Unknown truncation method '{method}', please choose between 'circular' or 'parallelogrammic'."
             )
 
 
-def parallelogramic_truncation(nG, Lk):
+def _parallelogramic_truncation(nh, Lk):
     u = [np.linalg.norm(l) for l in Lk]
     udot = np.dot(Lk[0], Lk[1])
 
-    NGroot = int(np.sqrt(nG))
+    NGroot = int(np.sqrt(nh))
     if np.mod(NGroot, 2) == 0:
         NGroot -= 1
 
@@ -71,18 +103,18 @@ def parallelogramic_truncation(nG, Lk):
     Gsorted = [g[jsort] for g in G]
 
     # final G
-    nG = NGroot ** 2
-    G = np.array(Gsorted, dtype=int)[:, :nG]
+    nh = NGroot ** 2
+    G = np.array(Gsorted, dtype=int)[:, :nh]
 
-    return G, nG
+    return G, nh
 
 
-def circular_truncation(nG, Lk):
+def _circular_truncation(nh, Lk):
     u = [np.linalg.norm(l) for l in Lk]
     udot = np.dot(Lk[0], Lk[1])
     ucross = Lk[0][0] * Lk[1][1] - Lk[0][1] * Lk[1][0]
 
-    circ_area = nG * np.abs(ucross)
+    circ_area = nh * np.abs(ucross)
     circ_radius = np.sqrt(circ_area / pi) + u[0] + u[1]
 
     u_extent = [
@@ -102,15 +134,15 @@ def circular_truncation(nG, Lk):
 
     # final G
     nGtmp = (2 * u_extent[0] + 1) * (2 * u_extent[1] + 1)
-    if nG < nGtmp:
-        nGtmp = nG
+    if nh < nGtmp:
+        nGtmp = nh
     # removing the part outside the cycle
     tol = 1e-10 * max(u[0] ** 2, u[1] ** 2)
     for i in range(nGtmp - 1, -1, -1):
         if np.abs(Gl2[i] - Gl2[i - 1]) > tol:
             break
-    nG = i
+    nh = i
 
-    G = np.array(Gsorted, dtype=int)[:, :nG]
+    G = np.array(Gsorted, dtype=int)[:, :nh]
 
-    return G, nG
+    return G, nh

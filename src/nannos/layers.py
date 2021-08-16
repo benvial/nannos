@@ -47,7 +47,7 @@ class Layer:
     def __repr__(self):
         return f"Layer {self.name}"
 
-    def solve_uniform(self, omega, kx, ky, nG):
+    def solve_uniform(self, omega, kx, ky, nh):
         """Solve for eigenmodes and eigenvalues of a uniform layer.
 
         Parameters
@@ -58,7 +58,7 @@ class Layer:
             Transverse wavenumber x component.
         ky : array_like
             Transverse wavenumber y component.
-        nG : int
+        nh : int
             Number of harmonics.
 
         Returns
@@ -77,9 +77,9 @@ class Layer:
             # TODO: anisotropic uniform layer
             raise NotImplementedError("Uniform layer material must be isotropic")
 
-        IdG = np.eye(2 * nG)
+        IdG = np.eye(2 * nh)
 
-        I = np.eye(nG)
+        I = np.eye(nh)
         if is_epsilon_anisotropic:
             _epsilon = block(
                 [
@@ -108,7 +108,7 @@ class Layer:
         return self.eigenvalues, self.eigenvectors
 
     def solve_eigenproblem(self, matrix):
-        """Solve the eigenproblem for a patterened layer.
+        """Solve the eigenproblem for a patterned layer.
 
         Parameters
         ----------
@@ -141,10 +141,26 @@ class Layer:
         return copy(self)
 
     def add_pattern(self, pattern):
+        """Add a pattern to the layer.
+
+        Parameters
+        ----------
+        pattern : :class:`~nannos.Pattern`
+            The pattern defined as a 2d grid on the unit cell.
+
+        """
         self.patterns.append(pattern)
 
     @property
     def is_uniform(self):
+        """Check if layer is uniform.
+
+        Returns
+        -------
+        bool
+            ``True`` if the layer is uniform, ``False`` if not.
+
+        """
         return len(self.patterns) == 0
 
 
@@ -160,7 +176,7 @@ class Pattern:
     name : str
         Name of the pattern (the default is "pattern").
     grid : array_like
-        A 2d grid on which the pattern is defined(the default is None).
+        A 2d grid on which the pattern is defined (the default is None).
 
 
 

@@ -19,7 +19,7 @@ import nannos as nn
 ##############################################################################
 # We will study a benchmark of hole in a dielectric surface
 
-nG = 100
+nh = 200
 L1 = [1.0, 0]
 L2 = [0, 1.0]
 freq = 1.4
@@ -27,8 +27,8 @@ theta = 0.0 * np.pi / 180
 phi = 0.0 * np.pi / 180
 psi = 0.0 * np.pi / 180
 
-Nx = 2 ** 7
-Ny = 2 ** 7
+Nx = 2 ** 9
+Ny = 2 ** 9
 
 eps_sup = 1.0
 eps_pattern = 6.0
@@ -90,7 +90,7 @@ pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
 ##############################################################################
 # Define the simulation
 
-simu = nn.Simulation(lattice, [sup, ms, sub], pw, nG)
+simu = nn.Simulation(lattice, [sup, ms, sub], pw, nh)
 
 
 ##############################################################################
@@ -115,7 +115,7 @@ print("R+T = ", R + T)
 
 simu.G[:, :nmax][:, 1]
 
-fig, (axR, axT) = plt.subplots(1, 2, figsize=(8, 4))
+fig, (axR, axT) = plt.subplots(1, 2, figsize=(4, 2))
 
 labels = [f"({g[0]},{g[1]})" for g in (simu.G[:, :nmax]).T]
 

@@ -9,7 +9,7 @@ import pytest
 
 from nannos import Lattice, Layer, Pattern, PlaneWave, Simulation, pi
 
-nG = 51
+nh = 51
 L1 = [1.0, 0]
 L2 = [0, 1.0]
 freq = 1.1
@@ -99,7 +99,7 @@ def test_uniform(freq, theta, phi, psi):
     sub = Layer("Substrate", epsilon=eps_sub, mu=mu_sub)
 
     un = Layer("Uniform", h, epsilon=eps, mu=mu)
-    simu = Simulation(lattice, [sup, un, sub], pw, nG=5)
+    simu = Simulation(lattice, [sup, un, sub], pw, nh=5)
     R, T = simu.diffraction_efficiencies()
     B = R + T
     assert np.allclose(B, 1)
@@ -108,7 +108,7 @@ def test_uniform(freq, theta, phi, psi):
     # sub = Layer("Substrate", epsilon=mu_sub, mu=eps_sub)
     #
     # un = Layer("Uniform", h, epsilon=mu, mu=eps)
-    # simu = Simulation(lattice, [sup, un, sub], pw, nG)
+    # simu = Simulation(lattice, [sup, un, sub], pw, nh)
     # Rdual, Tdual = simu.diffraction_efficiencies()
     # assert np.allclose(Rdual + Tdual, 1)
     #
@@ -121,11 +121,11 @@ def test_uniform(freq, theta, phi, psi):
     # assert np.allclose(T, Tdual, rtol=1e-3)
 
 
-def hole_array(epsgrid, mugrid, pw, nG=nG, formulation="original"):
+def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
     pattern = Pattern(epsgrid, mugrid)
     st = Layer("Structured", h)
     st.add_pattern(pattern)
-    simu = Simulation(lattice, [sup, st, sub], pw, nG, formulation=formulation)
+    simu = Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
     return simu
 
 

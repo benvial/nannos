@@ -21,12 +21,12 @@ def test_lattice():
 
 def test_truncate():
     l = Lattice(((1, 2), (3, 4)))
-    g, nG = l.get_harmonics(100)
-    g, nG = l.get_harmonics(100, method="parallelogram")
+    g, nh = l.get_harmonics(100)
+    g, nh = l.get_harmonics(100, method="parallelogrammic")
     with pytest.raises(ValueError) as excinfo:
         l.get_harmonics(100, method="unknown")
     assert "Unknown truncation method" in str(excinfo.value)
 
     with pytest.raises(ValueError) as excinfo:
         l.get_harmonics(1.2)
-    assert "nG must be integer." == str(excinfo.value)
+    assert "nh must be integer." == str(excinfo.value)
