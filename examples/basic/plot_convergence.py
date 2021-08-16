@@ -55,8 +55,6 @@ def checkerboard(nh, formulation):
 
 
 NH = [100, 200, 300, 400, 600]
-
-
 formulations = ["original", "tangent", "jones"]
 
 nhs = {f: [] for f in formulations}
@@ -69,7 +67,6 @@ colors = {
 }
 
 for nh in NH:
-    nh /= 10
     for formulation in formulations:
         Ri, Ti, t, simu = checkerboard(nh, formulation=formulation)
         R = np.sum(Ri)
