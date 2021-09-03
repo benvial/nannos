@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Benjamin Vial
-# License: MIT
+# This file is part of nannos
+# License: GPLv3
+# See the documentation at nannos.gitlab.io
 
 
 """
@@ -19,6 +21,7 @@ import nannos as nn
 #########################################################################
 # We will study the convergence on a benchmark case from
 # :cite:p:`Li1997`.
+# First we define the main function that performs the simulation.
 
 
 def checkerboard(nh, formulation):
@@ -48,23 +51,21 @@ def checkerboard(nh, formulation):
     st.add_pattern(pattern)
 
     simu = nn.Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
-    order = (1, 1)
+    order = (
+        -1,
+        -1,
+    )  # this actually corresponds to order (0,-1) for the other unit cell in [Li1997]
     R, T = simu.diffraction_efficiencies(orders=True)
     t = simu.get_order(T, order)
     return R, T, t, simu
 
 
+#########################################################################
+# Perform the simulation for different formulations and number of
+# of retained harmonics:
+
 NH = [100, 200, 300, 400, 600]
 formulations = ["original", "tangent", "jones"]
-
-nhs = {f: [] for f in formulations}
-ts = {f: [] for f in formulations}
-markers = {"original": "^", "tangent": "o", "jones": "s"}
-colors = {
-    "original": "#d4b533",
-    "tangent": "#d46333",
-    "jones": "#3395d4",
-}
 
 for nh in NH:
     for formulation in formulations:
@@ -81,6 +82,19 @@ for nh in NH:
         print("-----------------")
         nhs[formulation].append(simu.nh)
         ts[formulation].append(t)
+
+
+#########################################################################
+# Plot the results:
+
+nhs = {f: [] for f in formulations}
+ts = {f: [] for f in formulations}
+markers = {"original": "^", "tangent": "o", "jones": "s"}
+colors = {
+    "original": "#d4b533",
+    "tangent": "#d46333",
+    "jones": "#3395d4",
+}
 
 for formulation in formulations:
     plt.plot(

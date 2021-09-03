@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Benjamin Vial
-# License: MIT
+# This file is part of nannos
+# License: GPLv3
+# See the documentation at nannos.gitlab.io
+
+
 from . import numpy as np
 from .formulations import fft
 from .formulations.analytical import fourier_transform_circle

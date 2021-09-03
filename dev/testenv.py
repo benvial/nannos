@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Author: Benjamin Vial
+# License: MIT
+
+
 import sys
 
 REQUIRED_PYTHON = "python3"
