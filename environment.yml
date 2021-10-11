@@ -12,6 +12,8 @@ dependencies:
   - colorlog
   - psutil
   - ipython
+  - jax
+  - nlopt
   - pip:
     - autograd-latest
     - git+https://gitlab.com/nannos/nannos.git
