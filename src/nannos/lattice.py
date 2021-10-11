@@ -66,7 +66,7 @@ class Lattice:
             Number of harmonics.
         method : str
             The truncation method, available values are "circular" and "parallelogrammic"
-             (the default is "circular").
+            (the default is "circular").
 
         Returns
         -------
@@ -125,7 +125,7 @@ def _circular_truncation(nh, Lk):
         for q in u
     ]
 
-    xG, yG = [range(-q, q + 1) for q in u_extent]
+    xG, yG = [np.arange(-q, q + 1) for q in u_extent]
     G = np.meshgrid(xG, yG, indexing="ij")
     G = [g.flatten() for g in G]
 
@@ -141,7 +141,7 @@ def _circular_truncation(nh, Lk):
         nGtmp = nh
     # removing the part outside the cycle
     tol = 1e-10 * max(u[0] ** 2, u[1] ** 2)
-    for i in range(nGtmp - 1, -1, -1):
+    for i in np.arange(nGtmp - 1, -1, -1):
         if np.abs(Gl2[i] - Gl2[i - 1]) > tol:
             break
     nh = i

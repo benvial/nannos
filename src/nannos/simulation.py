@@ -59,8 +59,21 @@ class Simulation:
         self.ZeroG = np.zeros_like(self.IdG)
 
         self.a0 = np.zeros(2 * self.nh, dtype=complex)
-        self.a0[0] = self.excitation.amplitude[0]
-        self.a0[self.nh] = self.excitation.amplitude[1]
+
+        # self.a0[0] = self.excitation.amplitude[0]
+        # self.a0[self.nh] = self.excitation.amplitude[1]
+
+        self.a0 = []
+        for i in range(self.nh * 2):
+            if i == 0:
+                a0 = self.excitation.amplitude[0]
+            elif i == self.nh:
+                a0 = self.excitation.amplitude[1]
+            else:
+                a0 = 0
+            self.a0.append(a0)
+        self.a0 = np.array(self.a0)
+
         self.bN = np.zeros(2 * self.nh, dtype=complex)
 
         self.is_solved = False

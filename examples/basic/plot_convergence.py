@@ -66,6 +66,8 @@ def checkerboard(nh, formulation):
 
 NH = [100, 200, 300, 400, 600]
 formulations = ["original", "tangent", "jones"]
+nhs = {f: [] for f in formulations}
+ts = {f: [] for f in formulations}
 
 for nh in NH:
     for formulation in formulations:
@@ -87,8 +89,7 @@ for nh in NH:
 #########################################################################
 # Plot the results:
 
-nhs = {f: [] for f in formulations}
-ts = {f: [] for f in formulations}
+
 markers = {"original": "^", "tangent": "o", "jones": "s"}
 colors = {
     "original": "#d4b533",

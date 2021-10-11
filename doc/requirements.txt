@@ -7,3 +7,4 @@ numpydoc
 sphinxcontrib-svg2pdfconverter
 sphinxcontrib-bibtex
 matplotlib
+beautifulsoup4

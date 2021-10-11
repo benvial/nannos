@@ -5,20 +5,21 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
-import warnings
+
+import numpy as npo
 
 from .. import numpy as np
 from ..helpers import filter, norm
 
 
 def _normalize(x, n):
-    with np.errstate(invalid="ignore"):
+    with npo.errstate(invalid="ignore"):
         f = x / (n)
     return np.where(n == 0.0, 0, f)
 
 
 def _ft_filt(x, expo):
-    with np.errstate(divide="ignore"):
+    with npo.errstate(divide="ignore"):
         f = 1 / (x ** expo)
     return np.where(x == 0.0, 0, f)
 

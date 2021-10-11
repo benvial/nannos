@@ -41,6 +41,12 @@ def filter(x, rfilt):
         return np.fft.fftshift(out)
 
 
+def project(x, beta=1, thres=0.5):
+    return ((np.tanh(thres * beta)) + np.tanh(beta * (x - thres))) / (
+        np.tanh(thres * beta) + (np.tanh((1 - thres) * beta))
+    )
+
+
 def block(a):
     l1 = np.hstack([a[0][0], a[0][1]])
     l2 = np.hstack([a[1][0], a[1][1]])

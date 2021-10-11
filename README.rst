@@ -89,7 +89,7 @@ To install, simply use:
 From sources
 -------------
 
-Sources ara available on `gitlab <https://gitlab.com/nannos/nannos>`_. First 
+Sources are available on `gitlab <https://gitlab.com/nannos/nannos>`_. First 
 clone the repository and install with ``pip``:
 
 .. code-block:: bash

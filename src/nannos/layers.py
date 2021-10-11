@@ -10,6 +10,7 @@ __all__ = ["Layer", "Pattern"]
 
 from copy import copy
 
+from . import get_backend
 from . import numpy as np
 from .simulation import block
 
@@ -124,7 +125,19 @@ class Layer:
             `(q,psi)`, with eigenvalues `q` and eigenvectors `psi`.
 
         """
-        w, v = np.linalg.eig(matrix)
+        # FIXME: This gets slow because of the implementation
+        # workaround to cpmpute eigenvalues with jax
+        # TODO: implement custom autodiff rules for the evp with jax
+        if get_backend() == "jax":
+            from ._jax_eig_workaround import eig_jax
+
+            eig_func = eig_jax
+        else:
+            eig_func = np.linalg.eig
+
+        # eig_func = np.linalg.eig
+
+        w, v = eig_func(matrix)
         q = w ** 0.5
         q = np.where(np.imag(q) < 0.0, -q, q)
         self.eigenvalues, self.eigenvectors = q, v

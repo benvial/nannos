@@ -108,7 +108,8 @@ section.color-header h2 {
 }
 
 .btn-round {
-  border-radius: 10px !important;
+  border-radius: 14px !important;
+  border-width: 1px !important;
   color: white;
   background-color: transparent;
   border-color: white;
@@ -124,7 +125,9 @@ section.color-header h2 {
 section.button-banner {
   color: @gray-base;
   background-color: @brand-primary;
+  padding: 140px;
 }
+
 
 section.color-footer {
   background-color: @gray-base;
@@ -678,16 +681,17 @@ a.copybtn {
 }
 
 .o-tooltip--left::after {
-  background: @gray-base;
-  font-size: 1.2rem;
-  padding-left: 5px;
-  padding-right: 5px;
+  background: @brand-primary !important;
+  font-size: 0.8rem !important;
+  transform: translateX(0) translateY(0) !important;
 }
-// 
-// .reference.internal.nav-link {
-//   margin-left: 10px !important;
-//   margin-right: 10px !important;
-// }
+
+.o-tooltip--left:hover::after {
+  transform: translateX(-102%) translateY(-89%) !important;
+  transition: opacity 0.2s cubic-bezier(0.64, 0.09, 0.08, 1), transform 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
+  transition-delay: 0s, 0s !important;
+  transition-delay: 0.2s !important;
+}
 
 .navbar-nav > li {
   padding-left: 20px;
@@ -788,23 +792,62 @@ div.badges a.reference.external.image-reference img {
 }
 
 .bd-sidebar .nav li > a:hover {
-    // color: lighten(@gray-base, 33.5%);
-    color: @brand-secondary;
-    
-  }
-  div.sidebar, aside.sidebar {
-      margin: 0 0 0.5em 1em;
-      border: 3px solid #d0d0d0;
-      padding: 12px;
-      background-color: #e1f0eb;
-      width: 40%;
-      float: right;
-      clear: right;
-      overflow-x: auto;
-  }
+  // color: lighten(@gray-base, 33.5%);
+  color: @brand-secondary;
+}
 
+aside.sidebar,
+div.sidebar {
+  margin: 0 0 0.5em 1em;
+  border: 3px solid #d0d0d0;
+  padding: 12px;
+  background-color: #e1f0eb;
+  width: 40%;
+  float: right;
+  clear: right;
+  overflow-x: auto;
+}
 
-// .col-md-3 {
-//     flex: 0 0 25%;
-//     max-width: 36%;
-// }
+.col-12.col-md-9.col-xl-7.py-md-5.pl-md-5.pr-md-4.bd-content {
+  padding-top: 40px !important;
+  min-height: 77vh;
+}
+
+.d-none {
+  display: block !important;
+  margin: 0;
+  padding: 1px;
+}
+
+.bd-toc {
+  position: -webkit-sticky;
+  position: sticky;
+  top: calc(var(--pst-header-height) + 20px);
+  height: calc(70vh - 5rem);
+  overflow-y: auto;
+}
+
+dt:target,
+span.highlighted {
+  background-color: #ffe8b1;
+}
+
+.carousel-caption > h5 {
+  font-size: 150%;
+  color: white !important;
+}
+
+.carousel-caption > p {
+  color: white !important;
+}
+
+.carousel-caption.d-none.d-md-block {
+  background: #252a3382;
+  padding: 10px;
+}
+
+.carousel {
+  position: relative;
+  background: #eee;
+  padding: 20px;
+}

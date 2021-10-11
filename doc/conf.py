@@ -147,8 +147,12 @@ html_theme = "pydata_sphinx_theme"
 html_static_path = ["_custom/static"]
 
 
+def env_get_outdated(app, env, added, changed, removed):
+    return ["index"]
+
+
 def setup(app):
-    # app.add_css_file("css/theme.css")
+    app.connect("env-get-outdated", env_get_outdated)
     app.add_css_file("css/custom_styles.css")
     app.add_css_file("css/custom_gallery.css")
     app.add_css_file("css/custom_pygments.css")
@@ -366,8 +370,13 @@ sphinx_gallery_conf = {
     # "image_scrapers": ("matplotlib", PNGScraper()),
     # Modules for which function level galleries are created.
     "doc_module": package.__name__,
+    "thumbnail_size": (800, 800),
     "default_thumb_file": "./_assets/nannos.png",
     "show_memory": True,
+    "first_notebook_cell": (
+        "# This file is part of nannos\n" "# License: GPLv3\n" "%matplotlib notebook"
+    ),
+    "last_notebook_cell": ("import nannos.utils.jupyter\n" "%nannos_version_table"),
     "binder": {
         "org": "nannos",
         "repo": "nannos.gitlab.io",
