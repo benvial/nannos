@@ -111,7 +111,7 @@ dev:
 ## Clean generated files
 cleangen:
 	$(call message,${@})
-	@find . -not -path "./test/data/*" | grep -E "(__pycache__|\.pyc|\.pyo$\)" | xargs rm -rf
+	@find . -not -path "./test/data/*" | grep -E "(__pycache__|\.pyc|\.ipynb_checkpoints|\.pyo$\)" | xargs rm -rf
 	@rm -rf .pytest_cache  build/ dist/ tmp/ htmlcov/ #src/nannos.egg-info/
 	
 ## Clean documentation

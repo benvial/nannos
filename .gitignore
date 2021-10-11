@@ -95,6 +95,7 @@ htmlcov/
 coverage.xml
 pylint.html
 pylint.json
+.ipynb_checkpoints
 
 
 # Doc css (we use less to generate those):
