@@ -9,9 +9,8 @@ import pytest
 def test_backend():
     import nannos as nn
 
-    nn.set_backend("numpy")
-    assert nn.numpy.__name__ == "numpy"
     assert nn.get_backend() == "numpy"
+
     nn.set_backend("autograd")
     assert nn.numpy.__name__ == "autograd.numpy"
     assert nn.get_backend() == "autograd"
@@ -21,5 +20,6 @@ def test_backend():
     with pytest.raises(ValueError) as excinfo:
         nn.set_backend("fake")
     assert "Unknown backend" in str(excinfo.value)
-
-    # nn.set_backend("numpy")
+    nn.set_backend("numpy")
+    assert nn.numpy.__name__ == "numpy"
+    assert nn.get_backend() == "numpy"
