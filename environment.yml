@@ -13,6 +13,7 @@ dependencies:
   - psutil
   - ipython
   - jax
+  - jaxlib
   - nlopt
   - pip:
     - autograd-latest
