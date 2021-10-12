@@ -11,6 +11,7 @@ random.seed(1984)
 Nx = Ny = 4
 
 
+@pytest.mark.skip(reason="jax does not work")
 def test_grad():
     res = dict()
     dres = dict()
@@ -56,3 +57,4 @@ def test_grad():
     print(res["jax"], res["autograd"])
     assert np.allclose(res["jax"], res["autograd"])
     assert np.allclose(dres["jax"], dres["autograd"])
+    nn.set_backend("numpy")
