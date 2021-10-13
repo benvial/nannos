@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Benjamin Vial
-# License: MIT
+# This file is part of nannos
+# License: GPLv3
+# See the documentation at nannos.gitlab.io
 
 
 # from nannos import numpy as np
@@ -100,8 +102,8 @@ def test_uniform(freq, theta, phi, psi):
     sub = Layer("Substrate", epsilon=eps_sub, mu=mu_sub)
 
     un = Layer("Uniform", h, epsilon=eps, mu=mu)
-    simu = Simulation(lattice, [sup, un, sub], pw, nh=5)
-    R, T = simu.diffraction_efficiencies()
+    sim = Simulation(lattice, [sup, un, sub], pw, nh=5)
+    R, T = sim.diffraction_efficiencies()
     B = R + T
     assert np.allclose(B, 1)
 
@@ -109,8 +111,8 @@ def test_uniform(freq, theta, phi, psi):
     # sub = Layer("Substrate", epsilon=mu_sub, mu=eps_sub)
     #
     # un = Layer("Uniform", h, epsilon=mu, mu=eps)
-    # simu = Simulation(lattice, [sup, un, sub], pw, nh)
-    # Rdual, Tdual = simu.diffraction_efficiencies()
+    # sim = Simulation(lattice, [sup, un, sub], pw, nh)
+    # Rdual, Tdual = sim.diffraction_efficiencies()
     # assert np.allclose(Rdual + Tdual, 1)
     #
     # print(R)
@@ -126,8 +128,8 @@ def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
     pattern = Pattern(epsgrid, mugrid)
     st = Layer("Structured", h)
     st.add_pattern(pattern)
-    simu = Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
-    return simu
+    sim = Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
+    return sim
 
 
 formulations = ["original", "tangent", "jones"]
@@ -144,8 +146,8 @@ def test_fft(freq, theta, phi, psi, formulation):
     )
 
     epsgrid, mugrid = build_pattern(eps, mu, anisotropic=False)
-    simu = hole_array(epsgrid, mugrid, pw, formulation=formulation)
-    R, T = simu.diffraction_efficiencies()
+    sim = hole_array(epsgrid, mugrid, pw, formulation=formulation)
+    R, T = sim.diffraction_efficiencies()
     B = R + T
 
     print(">>> formulation = ", formulation)
@@ -154,8 +156,8 @@ def test_fft(freq, theta, phi, psi, formulation):
     print("R + T = ", B)
     assert np.allclose(B, 1, atol=1e-1)
 
-    a, b = simu._get_amplitudes(1, z=0.1)
-    field_fourier = simu.get_field_fourier(1, z=0.1)
+    a, b = sim._get_amplitudes(1, z=0.1)
+    field_fourier = sim.get_field_fourier(1, z=0.1)
 
     # epsgrid, mugrid = build_pattern(eps, mu, anisotropic=True)
     # simu_aniso = hole_array(epsgrid, mugrid, pw, formulation=formulation)
@@ -170,12 +172,12 @@ def test_fft(freq, theta, phi, psi, formulation):
     # assert np.allclose(Baniso, 1,atol=1e-1)
     # assert np.allclose(R, Raniso)
     # assert np.allclose(T, Taniso)
-    return R, T, simu
+    return R, T, sim
 
 
 # for f in formulations:
 #
-#     R,T,simu = test_fft(1.7, 0, 0, 0,f)
+#     R,T,sim = test_fft(1.7, 0, 0, 0,f)
 #     print("**********************************8")
 #     #
 #     # print(">>> formulation = ", f)

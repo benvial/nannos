@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Benjamin Vial
-# License: MIT
+# This file is part of nannos
+# License: GPLv3
+# See the documentation at nannos.gitlab.io
 
 
 import time
@@ -25,7 +27,7 @@ def test_para():
     for n_jobs in [1, 2]:
 
         @nn.parloop(n_jobs=n_jobs)
-        def simu(f):
+        def sim(f):
             xa = np.reshape(x, (Nx, Ny))
             eps_pattern = 2 + 1 * xa
             sup = nn.Layer("Superstrate")
@@ -33,14 +35,14 @@ def test_para():
             ms = nn.Layer("ms", 1)
             pattern = nn.Pattern(eps_pattern)
             ms.add_pattern(pattern)
-            simu = nn.Simulation(
+            sim = nn.Simulation(
                 nn.Lattice(([1, 0], [0, 1])), [sup, ms, sub], nn.PlaneWave(f), 50
             )
-            R, T = simu.diffraction_efficiencies()
+            R, T = sim.diffraction_efficiencies()
             return R
 
         t0 = nn.tic()
-        res.append(simu(F))
+        res.append(sim(F))
         t1 = nn.toc(t0)
         timing.append(t1)
 

@@ -93,18 +93,18 @@ pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
 ##############################################################################
 # Define the simulation
 
-simu = nn.Simulation(lattice, [sup, ms, sub], pw, nh)
+sim = nn.Simulation(lattice, [sup, ms, sub], pw, nh)
 
 
 ##############################################################################
 # Compute diffraction efficiencies
 
-R, T = simu.diffraction_efficiencies()
+R, T = sim.diffraction_efficiencies()
 
 ##############################################################################
 # Compute diffraction efficiencies per order
 
-Ri, Ti = simu.diffraction_efficiencies(orders=True)
+Ri, Ti = sim.diffraction_efficiencies(orders=True)
 nmax = 5
 print("Ri = ", Ri[:nmax])
 print("Ti = ", Ti[:nmax])
@@ -116,11 +116,10 @@ print("R+T = ", R + T)
 ##############################################################################
 # Plot
 
-simu.G[:, :nmax][:, 1]
 
 fig, (axR, axT) = plt.subplots(1, 2, figsize=(4, 2))
 
-labels = [f"({g[0]},{g[1]})" for g in (simu.G[:, :nmax]).T]
+labels = [f"({g[0]},{g[1]})" for g in (sim.harmonics[:, :nmax]).T]
 
 
 axR.bar(range(nmax), Ri[:nmax], color=["#e69049"])

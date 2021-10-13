@@ -50,14 +50,14 @@ def checkerboard(nh, formulation):
     pattern = nn.Pattern(epsgrid)
     st.add_pattern(pattern)
 
-    simu = nn.Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
+    sim = nn.Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
     order = (
         -1,
         -1,
     )  # this actually corresponds to order (0,-1) for the other unit cell in [Li1997]
-    R, T = simu.diffraction_efficiencies(orders=True)
-    t = simu.get_order(T, order)
-    return R, T, t, simu
+    R, T = sim.diffraction_efficiencies(orders=True)
+    t = sim.get_order(T, order)
+    return R, T, t, sim
 
 
 #########################################################################
@@ -71,18 +71,18 @@ ts = {f: [] for f in formulations}
 
 for nh in NH:
     for formulation in formulations:
-        Ri, Ti, t, simu = checkerboard(nh, formulation=formulation)
+        Ri, Ti, t, sim = checkerboard(nh, formulation=formulation)
         R = np.sum(Ri)
         T = np.sum(Ti)
         print("formulation = ", formulation)
         print("nh0 = ", nh)
-        print("nh = ", simu.nh)
+        print("nh = ", sim.nh)
         print("t = ", t)
         print("R = ", R)
         print("T = ", T)
         print("R+T = ", R + T)
         print("-----------------")
-        nhs[formulation].append(simu.nh)
+        nhs[formulation].append(sim.nh)
         ts[formulation].append(t)
 
 

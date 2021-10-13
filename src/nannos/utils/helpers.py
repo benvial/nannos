@@ -6,7 +6,7 @@
 # See the documentation at nannos.gitlab.io
 
 
-from . import numpy as np
+from .. import numpy as np
 
 
 def next_power_of_2(x):
@@ -17,6 +17,16 @@ def norm(v):
     ## avoid division by 0
     eps = np.finfo(float).eps
     return np.sqrt(eps + np.power(v[0], 2) + np.power(v[1], 2))
+
+
+def block(a):
+    l1 = np.hstack([a[0][0], a[0][1]])
+    l2 = np.hstack([a[1][0], a[1][1]])
+    return np.vstack([l1, l2])
+
+
+def get_block(M, i, j, n):
+    return M[i * n : (i + 1) * n, j * n : (j + 1) * n]
 
 
 def filter(x, rfilt):
@@ -39,19 +49,3 @@ def filter(x, rfilt):
         img2_ft = kernel_ft * img_ft
         out = np.real(np.fft.ifft2(img2_ft, axes=(0, 1)))
         return np.fft.fftshift(out)
-
-
-def project(x, beta=1, thres=0.5):
-    return ((np.tanh(thres * beta)) + np.tanh(beta * (x - thres))) / (
-        np.tanh(thres * beta) + (np.tanh((1 - thres) * beta))
-    )
-
-
-def block(a):
-    l1 = np.hstack([a[0][0], a[0][1]])
-    l2 = np.hstack([a[1][0], a[1][1]])
-    return np.vstack([l1, l2])
-
-
-def get_block(M, i, j, n):
-    return M[i * n : (i + 1) * n, j * n : (j + 1) * n]

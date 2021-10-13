@@ -8,7 +8,7 @@
 
 from .. import numpy as np
 from ..constants import pi
-from ..helpers import norm
+from ..utils import norm
 
 
 def get_jones_field(t):

@@ -9,7 +9,7 @@
 import numpy as npo
 
 from .. import numpy as np
-from ..helpers import filter, norm
+from ..utils import filter, norm
 
 
 def _normalize(x, n):
