@@ -60,7 +60,6 @@ def set_backend(backend):
 
     its = [s for s in sys.modules.items() if s[0].startswith("nannos")]
     for k, v in its:
-        print(v)
         importlib.reload(v)
 
 
