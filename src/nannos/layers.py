@@ -40,6 +40,8 @@ class Layer:
         self.thickness = thickness
         self.epsilon = epsilon
         self.mu = mu
+        self.iscopy = False
+        self.original = self
         self.patterns = []
 
         if self.mu != 1:
@@ -125,25 +127,32 @@ class Layer:
             `(q,psi)`, with eigenvalues `q` and eigenvectors `psi`.
 
         """
-        # FIXME: This gets slow because of the implementation
-        # workaround to cpmpute eigenvalues with jax
-        # TODO: implement custom autodiff rules for the evp with jax
-        if get_backend() == "jax":
-            from ._jax_eig_workaround import eig_jax
+        if self.iscopy:
+            self.eigenvalues, self.eigenvectors = (
+                self.original.eigenvalues,
+                self.original.eigenvectors,
+            )
 
-            eig_func = eig_jax
         else:
-            eig_func = np.linalg.eig
+            # FIXME: This gets slow because of the implementation
+            # workaround to cpmpute eigenvalues with jax
+            # TODO: implement custom autodiff rules for the evp with jax
+            if get_backend() == "jax":
+                from ._jax_eig_workaround import eig_jax
 
-        # eig_func = np.linalg.eig
+                eig_func = eig_jax
+            else:
+                eig_func = np.linalg.eig
 
-        w, v = eig_func(matrix)
-        q = w ** 0.5
-        q = np.where(np.imag(q) < 0.0, -q, q)
-        self.eigenvalues, self.eigenvectors = q, v
+            # eig_func = np.linalg.eig
+
+            w, v = eig_func(matrix)
+            q = w ** 0.5
+            q = np.where(np.imag(q) < 0.0, -q, q)
+            self.eigenvalues, self.eigenvectors = q, v
         return self.eigenvalues, self.eigenvectors
 
-    def copy(self):
+    def copy(self, name=None):
         """Copy a layer.
 
         Returns
@@ -153,8 +162,13 @@ class Layer:
 
         """
         cp = copy(self)
-        cp.name += " (copy)"
-        return copy(self)
+        cp.iscopy = True
+        cp.original = self
+        if name is None:
+            cp.name += " (copy)"
+        else:
+            cp.name = name
+        return cp
 
     def add_pattern(self, pattern):
         """Add a pattern to the layer.

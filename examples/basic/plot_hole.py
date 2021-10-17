@@ -13,6 +13,8 @@ Photonic crystal slab
 Metasurface with holes.
 """
 
+# sphinx_gallery_thumbnail_number = 1
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,9 +22,10 @@ import numpy as np
 import nannos as nn
 
 ##############################################################################
-# We will study a benchmark of hole in a dielectric surface
+# We will study a benchmark of hole in a dielectric surface similar to
+# those studied in :cite:p:`Fan2002`.
 
-nh = 200
+nh = 100
 L1 = [1.0, 0]
 L2 = [0, 1.0]
 freq = 1.4
@@ -34,12 +37,10 @@ Nx = 2 ** 9
 Ny = 2 ** 9
 
 eps_sup = 1.0
-eps_pattern = 6.0
+eps_pattern = 12.0
 eps_hole = 1.0
 eps_sub = 1.0
-
-
-h = 1.0
+h = 0.5
 
 radius = 0.2
 epsgrid = np.ones((Nx, Ny), dtype=float) * eps_pattern
@@ -75,7 +76,7 @@ lattice = nn.Lattice((L1, L2))
 # Define the layers
 
 sup = nn.Layer("Superstrate", epsilon=eps_sup)
-ms = nn.Layer("Metasurface", epsilon=2, thickness=3)
+ms = nn.Layer("Metasurface", thickness=h)
 sub = nn.Layer("Substrate", epsilon=eps_sub)
 
 
@@ -93,7 +94,8 @@ pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
 ##############################################################################
 # Define the simulation
 
-sim = nn.Simulation(lattice, [sup, ms, sub], pw, nh)
+stack = [sup, ms, sub]
+sim = nn.Simulation(lattice, stack, pw, nh)
 
 
 ##############################################################################
@@ -148,3 +150,32 @@ axT.annotate(
 plt.suptitle("Diffraction efficiencies: $R+T=$" + f"{sum(Ri[:nmax]+Ti[:nmax]):0.4f}")
 plt.tight_layout()
 plt.show()
+
+
+##############################################################################
+# Fig 12 (c) from :cite:p:`Fan2002`.
+
+
+def compute_transmission(fn):
+    pw = nn.PlaneWave(frequency=fn, angles=(0, 0, 0))
+    sim = nn.Simulation(lattice, stack, pw, 100)
+    R, T = sim.diffraction_efficiencies()
+    print(f"f = {fn} (normalized)")
+    print("T = ", T)
+    return T
+
+
+freqs_norma = np.linspace(0.25, 0.6, 100)
+freqs_adapted, transmission = nn.adaptive_sampler(
+    compute_transmission,
+    freqs_norma,
+)
+
+
+plt.figure()
+plt.plot(freqs_adapted, transmission, c="#be4c83")
+plt.xlim(freqs_norma[0], freqs_norma[-1])
+plt.ylim(0, 1)
+plt.xlabel(r"frequency ($2\pi c / a$)")
+plt.ylabel("Transmission")
+plt.tight_layout()

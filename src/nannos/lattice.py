@@ -55,8 +55,6 @@ class Lattice:
         """
         return 2 * pi * np.linalg.inv(self.matrix).T
 
-    # wavevectors()
-
     def get_harmonics(self, nh, method="circular"):
         """Short summary.
 
@@ -100,12 +98,10 @@ def _parallelogramic_truncation(nh, Lk):
     G = np.meshgrid(xG, xG, indexing="ij")
     G = [g.flatten() for g in G]
 
-    # sorting
     Gl2 = G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot
     jsort = np.argsort(Gl2)
     Gsorted = [g[jsort] for g in G]
 
-    # final G
     nh = NGroot ** 2
     G = np.array(Gsorted, dtype=int)[:, :nh]
 
@@ -129,17 +125,15 @@ def _circular_truncation(nh, Lk):
     G = np.meshgrid(xG, yG, indexing="ij")
     G = [g.flatten() for g in G]
 
-    # sorting
     Gl2 = G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot
     jsort = np.argsort(Gl2)
     Gsorted = [g[jsort] for g in G]
     Gl2 = Gl2[jsort]
 
-    # final G
     nGtmp = (2 * u_extent[0] + 1) * (2 * u_extent[1] + 1)
     if nh < nGtmp:
         nGtmp = nh
-    # removing the part outside the cycle
+
     tol = 1e-10 * max(u[0] ** 2, u[1] ** 2)
     for i in np.arange(nGtmp - 1, -1, -1):
         if np.abs(Gl2[i] - Gl2[i - 1]) > tol:

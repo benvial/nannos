@@ -32,18 +32,32 @@ class Simulation:
     formulation : str
         Formulation type.  (the default is ``'original'``).
         Available formulations are ``'original'``, ``'tangent'`` and ``'jones'``.
+    truncation : str
+        Truncation method.  (the default is ``'circular'``).
+        Available methods are ``'circular'`` and ``'parallelogrammic'``.
 
     """
 
     def __init__(
-        self, lattice, layers=[], excitation=None, nh=100, formulation="original"
+        self,
+        lattice,
+        layers=[],
+        excitation=None,
+        nh=100,
+        formulation="original",
+        truncation="circular",
     ):
         self.lattice = lattice
         self.layers = layers or []
         self.excitation = excitation
         self.nh0 = int(nh)
+        if self.nh0 == 1:
+            self.nh0 = 2
         self.formulation = formulation
-        self.harmonics, self.nh = self.lattice.get_harmonics(self.nh0)
+        self.truncation = truncation
+        self.harmonics, self.nh = self.lattice.get_harmonics(
+            self.nh0, method=self.truncation
+        )
         self.omega = 2 * np.pi * self.excitation.frequency
         self.k0para = np.array(self.excitation.wavevector[:2]) * np.sqrt(
             self.layers[0].epsilon * self.layers[0].mu
@@ -84,6 +98,25 @@ class Simulation:
 
         self.is_solved = False
 
+        self._layer_names = [l.name for l in self.layers]
+        if np.unique(self._layer_names).size != len(self._layer_names):
+            raise ValueError("Layers must have different names")
+
+    def _get_layer(self, id):
+        if isinstance(id, str):
+            if id in self._layer_names:
+                for i, l in enumerate(self.layers):
+                    if l.name == id:
+                        return l, i
+            else:
+                raise ValueError(f"Unknown layer name {id}")
+        elif isinstance(id, int):
+            return self.layers[id], id
+        else:
+            raise ValueError(
+                f"Wrong id for layer: {id}. Please use an integrer specifying the layer index or a string for the layer name"
+            )
+
     def solve(self):
         """Solve the grating problem."""
         layers_solved = []
@@ -116,8 +149,6 @@ class Simulation:
         """
         if not self.is_solved:
             self.solve()
-        # if hasattr(self, "S"):
-        #     return self.S
 
         S11 = np.eye(2 * self.nh, dtype=complex)
         S12 = np.zeros_like(S11)
@@ -139,10 +170,8 @@ class Simulation:
             )
             I_ = _build_Imatrix(layer, layer_next)
             I = [[get_block(I_, i, j, 2 * self.nh) for j in range(2)] for i in range(2)]
-
             A = I[0][0] - f @ S12 @ I[1][0]
             B = np.linalg.inv(A)
-
             S11 = B @ f @ S11
             S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
             S21 = S22 @ I[1][0] @ S11 + S21
@@ -154,6 +183,8 @@ class Simulation:
         return S
 
     def get_z_poynting_flux(self, layer, an, bn):
+        if not self.is_solved:
+            self.solve()
         q, phi = layer.eigenvalues, layer.eigenvectors
         A = (layer.Qeps @ phi) @ np.diag(1 / (self.omega * q))
         pa, pb = phi @ an, phi @ bn
@@ -165,9 +196,11 @@ class Simulation:
         backward = backward_xy[: self.nh] + backward_xy[self.nh :]
         return forward, backward
 
-    def get_field_fourier(self, layer_index, z):
+    def get_field_fourier(self, layer_index, z=0):
+        if not self.is_solved:
+            self.solve()
 
-        layer = self.layers[layer_index]
+        layer, layer_index = self._get_layer(layer_index)
 
         ai0, bi0 = self._get_amplitudes(layer_index, translate=False)
 
@@ -195,7 +228,8 @@ class Simulation:
 
             fields.append([[ex, ey, ez], [hx, hy, hz]])
 
-        return np.array(fields)
+        self.fields_fourier = np.array(fields)
+        return self.fields_fourier
 
     def get_ifft_amplitudes(self, amplitudes, shape, axes=(0, 1)):
 
@@ -218,24 +252,17 @@ class Simulation:
         # print("ft.shape", ft.shape)
         return ft
 
-    def get_field_grid(self, layer_index, z, shape=None):
-        layer = self.layers[layer_index]
+    def get_field_grid(self, layer_index, z=0, shape=None):
+        layer, layer_index = self._get_layer(layer_index)
         shape = shape or layer.patterns[0].epsilon.shape
 
-        field_fourier = self.get_field_fourier(layer_index, z)
+        fields_fourier = self.get_field_fourier(layer_index, z)
 
-        fe = field_fourier[:, 0]
-        fh = field_fourier[:, 1]
+        fe = fields_fourier[:, 0]
+        fh = fields_fourier[:, 1]
 
         E = np.array([self.get_ifft_amplitudes(fe[:, i, :], shape) for i in range(3)])
         H = np.array([self.get_ifft_amplitudes(fh[:, i, :], shape) for i in range(3)])
-
-        # eh = eh[0]  if np.isscalar(z) else eh
-        # eh = [E,H]
-        # q = np.array(eh)
-        # print(q)
-        # print(q.shape)
-
         return E, H
 
     def diffraction_efficiencies(self, orders=False):
@@ -253,8 +280,8 @@ class Simulation:
             The reflection and transmission ``R`` and ``T``.
 
         """
-        if not hasattr(self, "S"):
-            self.get_S_matrix()
+        # if not hasattr(self, "S"):
+        # self.get_S_matrix()
 
         aN, b0 = self._solve_ext()
         fwd_in, bwd_in = self.get_z_poynting_flux(self.layers[0], self.a0, b0)
@@ -270,6 +297,49 @@ class Simulation:
             R = np.sum(R)
             T = np.sum(T)
         return R, T
+
+    def get_z_stress_tensor_integral(self, layer_index, z=0):
+        if not hasattr(self, "fields_fourier"):
+            self.get_field_fourier(layer_index, z=z)
+        # ex, ey, ez = self.fields_fourier[0, 0,:,:]
+        # hx, hy, hz = self.fields_fourier[0, 1,:,:]
+
+        e = self.fields_fourier[0, 0]
+        h = self.fields_fourier[0, 1]
+        ex = e[0]
+        ey = e[1]
+        ez = e[2]
+
+        hx = h[0]
+        hy = h[1]
+        hz = h[2]
+
+        layer, layer_index = self._get_layer(layer_index)
+        dz = (self.ky * hx - self.kx * hy) / self.omega
+        if layer.is_uniform:
+            dx = ex * layer.epsilon
+            dy = ey * layer.epsilon
+        else:
+            exy = np.hstack((-ey, ex))
+            dxy = layer.eps_hat @ exy
+            dx = dxy[self.nh :]
+            dy = -dxy[: self.nh]
+
+        Tx = np.sum(ex * np.conj(dz) + hx * np.conj(hz), axis=-1).real
+        Ty = np.sum(ey * np.conj(dz) + hy * np.conj(hz), axis=-1).real
+        Tz = (
+            0.5
+            * np.sum(
+                ez * np.conj(dz)
+                + hz * np.conj(hz)
+                - ex * np.conj(dx)
+                - ey * np.conj(dy)
+                - hx * np.conj(hx)
+                - hy * np.conj(hy),
+                axis=-1,
+            ).real
+        )
+        return Tx, Ty, Tz
 
     def get_order_index(self, order):
         try:
@@ -300,6 +370,17 @@ class Simulation:
             return uft[delta[0, :], delta[1, :]]
 
     def _build_matrix(self, layer):
+        if layer.iscopy:
+            layer.matrix = layer.original.matrix
+            layer.Kmu = layer.original.Kmu
+            layer.eps_hat = layer.original.eps_hat
+            layer.eps_hat_inv = layer.original.eps_hat_inv
+            layer.mu_hat = layer.original.mu_hat
+            layer.mu_hat_inv = layer.original.mu_hat_inv
+            layer.Keps = layer.original.Keps
+            layer.Peps = layer.original.Peps
+            layer.Qeps = layer.original.Qeps
+            return layer
         Kx, Ky = self.Kx, self.Ky
         if layer.is_uniform:
             epsilon = layer.epsilon
@@ -406,11 +487,8 @@ class Simulation:
         else:
             ai, bi = self._solve_int(layer_index)
             layer = self.layers[layer_index]
-
-        # print(ai, bi)
         if translate:
             ai, bi = _translate_amplitudes(self.layers[layer_index], z, ai, bi)
-        # print(ai, bi)
         return ai, bi
 
     def _solve_int(self, layer_index):
@@ -423,13 +501,10 @@ class Simulation:
         return ai, bi
 
     def _solve_ext(self):
-        # aN = np.dot(self.S[0][0], self.a0)
-        # b0 = np.dot(self.S[1][0], self.a0)
-
+        if not hasattr(self, "S"):
+            self.get_S_matrix()
         aN = self.S[0][0] @ self.a0 + self.S[0][1] @ self.bN
         b0 = self.S[1][0] @ self.a0 + self.S[1][1] @ self.bN
-        # print(aN,b0)
-
         return aN, b0
 
     def _get_Peps(self, epsilon, eps_hat, t, direct=False):
@@ -531,11 +606,9 @@ def _build_Imatrix(layer1, layer2):
 
 
 def _translate_amplitudes(layer, z, ai, bi):
-    # print(ai, bi)
     q = layer.eigenvalues
     aim = ai * phasor(q, z)
     bim = bi * phasor(q, layer.thickness - z)
-    # print(aim, bim)
     return aim, bim
 
 
