@@ -103,4 +103,4 @@ from .layers import *
 from .parallel import *
 from .sample import *
 from .simulation import *
-from .time import *
+from .utils import *
