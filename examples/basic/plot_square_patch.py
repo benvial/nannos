@@ -83,7 +83,7 @@ def compute_transmission(fev):
 
 freqsev = np.linspace(1, 2.6, 101)
 fev_adapted, transmission = nn.adaptive_sampler(
-    compute_transmission, freqsev, max_bend=10, max_z_rel=0.001, max_df=0.005
+    compute_transmission, freqsev, max_bend=10, max_x_rel=0.001, max_df=0.005
 )
 
 #########################################################################
