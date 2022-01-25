@@ -481,7 +481,7 @@ class Simulation:
         if layer_index == 0:
             aN, b0 = self._solve_ext()
             ai, bi = self.a0, b0
-        elif layer_index == n_interfaces:
+        elif layer_index == n_interfaces or layer_index == -1:
             aN, b0 = self._solve_ext()
             ai, bi = aN, self.bN
         else:

@@ -323,16 +323,6 @@ checksum:
 conda: checksum
 	$(call message,${@})
 	@echo Conda package not published yet
-	# @cd .. && rm -rf nannos-feedstock && \
-	# git clone https://github.com/benvial/nannos-feedstock && cd nannos-feedstock  && \
-	# git branch v$(VERSION) && git checkout v$(VERSION) && \
-	# sed -i "s/sha256: .*/sha256: $(SHA256)/" recipe/meta.yaml && \
-	# sed -i "s/number: .*/number: 0/" recipe/meta.yaml && \
-	# sed -i "s/{% set version = .*/{% set version = \"$(VERSION)\" %}/" recipe/meta.yaml && \
-	# git add . && \
-	# git commit -a -m "New version $(VERSION)" && \
-	# git push origin v$(VERSION) && \
-	# # hub pull-request --no-edit --browse
 
 
 
