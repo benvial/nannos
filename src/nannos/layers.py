@@ -135,12 +135,18 @@ class Layer:
 
         else:
             # FIXME: This gets slow because of the implementation
-            # workaround to cpmpute eigenvalues with jax
+            # workaround to compute eigenvalues with jax
             # TODO: implement custom autodiff rules for the evp with jax
-            if get_backend() == "jax":
+            backend = get_backend()
+            if backend == "jax":
                 from ._jax_eig_workaround import eig_jax
 
                 eig_func = eig_jax
+            elif backend == "magma":
+                from ._magma import eig
+
+                eig_func = eig
+
             else:
                 eig_func = np.linalg.eig
 

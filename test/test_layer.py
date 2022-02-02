@@ -12,6 +12,7 @@ from nannos.layers import Layer
 
 np.random.seed(84)
 N = 3
+matrix_eig = np.random.rand(N, N) + 1j * np.random.rand(N, N)
 
 
 def test_layer():
@@ -32,3 +33,20 @@ def test_layer():
     with pytest.raises(ValueError) as excinfo:
         l = Layer("test", -0.1)
     assert "thickness must be positive." == str(excinfo.value)
+
+
+def test_eig():
+    i = 0
+    vals, vects = [], []
+    for backend in ["autograd", "jax", "magma", "numpy"]:
+        import nannos as nn
+
+        nn.set_backend(backend)
+        l = nn.Layer("test", 1)
+        w, v = l.solve_eigenproblem(matrix_eig)
+        vals.append(w)
+        vects.append(v)
+        if i > 0:
+            assert np.allclose(w, vals[0])
+            # assert np.allclose(v,vects[0])
+        i += 1

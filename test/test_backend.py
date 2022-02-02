@@ -16,9 +16,16 @@ def test_backend():
     nn.set_backend("autograd")
     assert nn.numpy.__name__ == "autograd.numpy"
     assert nn.get_backend() == "autograd"
-    # nn.set_backend("jax")
-    # assert nn.numpy.__name__ == "jax.numpy"
-    # assert nn.get_backend() == "jax"
+
+    nn.set_backend("jax")
+    assert nn.numpy.__name__ == "jax.numpy"
+    assert nn.get_backend() == "jax"
+
+    nn.set_backend("magma")
+    assert nn.numpy.__name__ == "numpy"
+    if nn.has_skcuda():
+        assert nn.get_backend() == "magma"
+
     with pytest.raises(ValueError) as excinfo:
         nn.set_backend("fake")
     assert "Unknown backend" in str(excinfo.value)

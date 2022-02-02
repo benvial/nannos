@@ -9,6 +9,15 @@ from .__about__ import __author__, __description__, __version__
 from .log import *
 
 
+def has_skcuda():
+    try:
+        import sckuda
+
+        return True
+    except ModuleNotFoundError:
+        return False
+
+
 def set_backend(backend):
     """Set the numerical backend.
 
@@ -23,6 +32,7 @@ def set_backend(backend):
     import importlib
     import sys
 
+    global MAGMA
     global JAX
     global AUTOGRAD
     if backend == "autograd":
@@ -32,9 +42,29 @@ def set_backend(backend):
             del JAX
         except:
             pass
+        try:
+            del MAGMA
+        except:
+            pass
     elif backend == "jax":
         JAX = True
         log.info("Setting jax backend")
+        try:
+            del AUTOGRAD
+        except:
+            pass
+        try:
+            del MAGMA
+        except:
+            pass
+    elif backend == "magma":
+        MAGMA = True
+        log.info("Setting magma backend")
+
+        try:
+            del JAX
+        except:
+            pass
         try:
             del AUTOGRAD
         except:
@@ -46,12 +76,14 @@ def set_backend(backend):
             try:
                 del AUTOGRAD
             except:
-                pass
-            pass
+                try:
+                    del MAGMA
+                except:
+                    pass
         log.info("Setting numpy backend")
     else:
         raise ValueError(
-            f"Unknown backend '{backend}'. Please choose between 'numpy' 'jax' and 'autograd'."
+            f"Unknown backend '{backend}'. Please choose between 'numpy' 'jax' 'magma' and 'autograd'."
         )
 
     import nannos
@@ -66,13 +98,17 @@ def set_backend(backend):
 def get_backend():
     try:
         AUTOGRAD
+        return "autograd"
     except:
         try:
             JAX
             return "jax"
         except:
-            return "numpy"
-    return "autograd"
+            try:
+                MAGMA
+                return "magma"
+            except:
+                return "numpy"
 
 
 try:
@@ -88,12 +124,25 @@ try:
     # see: https://github.com/google/jax/issues/2748
 except:
     try:
-        AUTOGRAD
-        from autograd import grad, numpy
-    except:
-        import numpy
 
-        grad = None
+        MAGMA
+        if has_skcuda():
+            import numpy
+
+            grad = None
+        else:
+
+            log.info("scikit-cuda not found. Falling back to default backend")
+            set_backend("numpy")
+
+    except:
+        try:
+            AUTOGRAD
+            from autograd import grad, numpy
+        except:
+            import numpy
+
+            grad = None
 
 
 from .constants import *
