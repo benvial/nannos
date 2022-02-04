@@ -24,8 +24,8 @@ def fourier_transform_circle(radius, Nx, Ny):
     fx = np.fft.fftfreq(Nx, d=dx)
     fy = np.fft.fftfreq(Ny, d=dy)
     kx, ky = np.meshgrid(fx, fy, indexing="ij")
-    r = (kx ** 2 + ky ** 2) ** 0.5
-    ft = 2 * pi * radius ** 2 * jinc(2 * pi * r * radius) + 0j
+    r = (kx**2 + ky**2) ** 0.5
+    ft = 2 * pi * radius**2 * jinc(2 * pi * r * radius) + 0j
     ft *= np.exp(-2 * np.pi * 1j * (0.5 * kx + 0.5 * ky))
     return ft
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     plt.close("all")
 
-    Nx = 2 ** 6
+    Nx = 2**6
     Ny = Nx
 
     radius = 0.4

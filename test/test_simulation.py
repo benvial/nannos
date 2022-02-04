@@ -25,8 +25,8 @@ pw = PlaneWave(
     frequency=freq, angles=(theta * pi / 180, phi * pi / 180, psi * pi / 180)
 )
 
-Nx = 2 ** 9
-Ny = 2 ** 9
+Nx = 2**9
+Ny = 2**9
 
 eps_pattern = 4.0
 eps_hole = 1.0
@@ -39,7 +39,7 @@ radius = 0.25
 x0 = np.linspace(0, 1.0, Nx)
 y0 = np.linspace(0, 1.0, Ny)
 x, y = np.meshgrid(x0, y0, indexing="ij")
-hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
+hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
 
 lattice = Lattice((L1, L2))
 sup = Layer("Superstrate", epsilon=1, mu=1)

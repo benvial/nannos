@@ -34,8 +34,8 @@ theta = 0.0 * np.pi / 180
 phi = 0.0 * np.pi / 180
 psi = 0.0 * np.pi / 180
 
-Nx = 2 ** 8
-Ny = 2 ** 8
+Nx = 2**8
+Ny = 2**8
 
 eps_sup = 1.0
 eps_pattern = 12.0
@@ -48,7 +48,7 @@ epsgrid = np.ones((Nx, Ny), dtype=float) * eps_pattern
 x0 = np.linspace(0, 1.0, Nx)
 y0 = np.linspace(0, 1.0, Ny)
 x, y = np.meshgrid(x0, y0, indexing="ij")
-hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
+hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
 epsgrid[hole] = eps_hole
 
 ##############################################################################
@@ -123,7 +123,7 @@ for i, sep in enumerate(seps):
         freqs_norma,
     )
 
-    plt.plot(freqs_adapted, transmission, c=colors[i], label=fr"$d = {sep}a$")
+    plt.plot(freqs_adapted, transmission, c=colors[i], label=rf"$d = {sep}a$")
     plt.xlim(freqs_norma[0], freqs_norma[-1])
     plt.ylim(0, 1)
     plt.xlabel(r"frequency ($2\pi c / a$)")

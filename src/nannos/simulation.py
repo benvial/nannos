@@ -99,7 +99,8 @@ class Simulation:
         self.is_solved = False
 
         self._layer_names = [l.name for l in self.layers]
-        if np.unique(self._layer_names).size != len(self._layer_names):
+
+        if not _unique(self._layer_names):
             raise ValueError("Layers must have different names")
 
     def _get_layer(self, id):
@@ -364,7 +365,7 @@ class Simulation:
                 )
             else:
                 uft = fft.fourier_transform(u)
-            ix = range(self.nh)
+            ix = np.arange(self.nh)
             jx, jy = np.meshgrid(ix, ix, indexing="ij")
             delta = self.harmonics[:, jx] - self.harmonics[:, jy]
             return uft[delta[0, :], delta[1, :]]
@@ -412,7 +413,7 @@ class Simulation:
             # Pmu = np.eye(self.nh * 2)
             Pmu = block([[mu * self.IdG, self.ZeroG], [self.ZeroG, mu * self.IdG]])
 
-            Qeps = self.omega ** 2 * Pmu - Keps
+            Qeps = self.omega**2 * Pmu - Keps
         else:
             epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
             mu_zz = mu[2, 2] if is_mu_anisotropic else mu
@@ -460,8 +461,8 @@ class Simulation:
 
             # Qeps = self.omega ** 2 * np.eye(self.nh * 2) - Keps
             # matrix = Peps @ Qeps - Kmu
-            Qeps = self.omega ** 2 * Pmu - Keps
-            matrix = self.omega ** 2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
+            Qeps = self.omega**2 * Pmu - Keps
+            matrix = self.omega**2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
 
             layer.matrix = matrix
             layer.Kmu = Kmu
@@ -584,18 +585,37 @@ def phasor(q, z):
     return np.exp(1j * q * z)
 
 
+# def _build_Kmatrix(u, Kx, Ky):
+#     return block(
+#         [
+#             [Kx @ u @ Kx, Kx @ u @ Ky],
+#             [Ky @ u @ Kx, Ky @ u @ Ky],
+#         ]
+#     )
+
+
 def _build_Kmatrix(u, Kx, Ky):
+    def matmuldiag(A, B):
+        return np.einsum("i,ik->ik", np.diag(A), B)
+
+    kxu = matmuldiag(Kx, u)
+    kyu = matmuldiag(Ky, u)
     return block(
         [
-            [Kx @ u @ Kx, Kx @ u @ Ky],
-            [Ky @ u @ Kx, Ky @ u @ Ky],
+            [matmuldiag(Kx.T, kxu.T).T, matmuldiag(Ky.T, kxu.T).T],
+            [matmuldiag(Kx.T, kyu.T).T, matmuldiag(Ky.T, kyu.T).T],
         ]
     )
 
 
 def _build_Mmatrix(layer):
     phi = layer.eigenvectors
-    a = layer.Qeps @ phi @ (np.diag(1 / layer.eigenvalues))
+
+    def matmuldiag(A, B):
+        return np.einsum("ik,k->ik", (A), B)
+
+    # a = layer.Qeps @ phi @ (np.diag(1 / layer.eigenvalues))
+    a = layer.Qeps @ matmuldiag(phi, 1 / layer.eigenvalues)
     return block([[a, -a], [phi, phi]])
 
 
@@ -625,3 +645,8 @@ def _inv2by2block(T, N):
             [-M[1][0] / detT, M[0][0] / detT],
         ]
     )
+
+
+def _unique(x):
+    seen = list()
+    return not any(i in seen or seen.append(i) for i in x)
