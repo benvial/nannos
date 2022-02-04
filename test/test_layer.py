@@ -38,7 +38,7 @@ def test_layer():
 def test_eig():
     i = 0
     vals, vects = [], []
-    for backend in ["autograd", "jax", "magma", "numpy"]:
+    for backend in ["autograd", "jax", "torch", "numpy"]:
         import nannos as nn
 
         nn.set_backend(backend)

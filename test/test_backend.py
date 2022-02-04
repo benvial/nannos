@@ -21,10 +21,10 @@ def test_backend():
     assert nn.numpy.__name__ == "jax.numpy"
     assert nn.get_backend() == "jax"
 
-    nn.set_backend("magma")
+    nn.set_backend("torch")
     assert nn.numpy.__name__ == "numpy"
-    if nn.has_skcuda():
-        assert nn.get_backend() == "magma"
+    if nn.has_torch():
+        assert nn.get_backend() == "torch"
 
     with pytest.raises(ValueError) as excinfo:
         nn.set_backend("fake")

@@ -67,7 +67,7 @@ class CircPolPlaneWave(PlaneWave):
 
         sign = +1 if orientation == "left" else -1
 
-        self.amplitude = (H.amplitude + sign * 1j * V.amplitude) / 2**0.5
+        self.amplitude = (H.amplitude + sign * 1j * V.amplitude) / 2 ** 0.5
 
 
 #

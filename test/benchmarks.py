@@ -31,7 +31,7 @@ def build_simu(nh, npts):
     x0 = np.linspace(0, 1.0, Nx)
     y0 = np.linspace(0, 1.0, Ny)
     x, y = np.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
     epsgrid[hole] = eps_hole
     lattice = nn.Lattice((L1, L2))
     sup = nn.Layer("Superstrate", epsilon=eps_sup)
@@ -50,7 +50,7 @@ NH = [50, 100, 200, 400, 800]
 
 NH = [800]
 
-npts = 2**9
+npts = 2 ** 9
 backend = "numpy"
 # backend = "jax"
 nn.set_backend(backend)

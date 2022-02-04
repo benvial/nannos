@@ -20,7 +20,7 @@ def _normalize(x, n):
 
 def _ft_filt(x, expo):
     with npo.errstate(divide="ignore"):
-        f = 1 / (x**expo)
+        f = 1 / (x ** expo)
     return np.where(x == 0.0, 0, f)
 
 
@@ -38,7 +38,7 @@ def get_tangent_field(grid, normalize=True, alt=False, rfilt=4, expo=0.5):
     fy = np.fft.fftfreq(Ny)
     Fx, Fy = np.meshgrid(fx, fy)
 
-    ghat = _ft_filt(Fx**2 + Fy**2, expo=expo)
+    ghat = _ft_filt(Fx ** 2 + Fy ** 2, expo=expo)
     Nhat = np.fft.fft2(N)
     Nstar = np.real(np.fft.ifft2(Nhat * ghat))
     if normalize:

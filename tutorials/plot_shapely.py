@@ -20,7 +20,7 @@ import shapely.geometry as sg
 
 from nannos.geometry import shape_mask
 
-N = 2**9
+N = 2 ** 9
 x = np.linspace(0, 1, N)
 y = np.linspace(0, 1, N)
 epsilon = np.ones((N, N))

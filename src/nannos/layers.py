@@ -103,7 +103,7 @@ class Layer:
 
         q = (
             np.array(
-                _epsilon * _mu * omega**2 - kx**2 - ky**2,
+                _epsilon * _mu * omega ** 2 - kx ** 2 - ky ** 2,
                 dtype=complex,
             )
             ** 0.5
@@ -153,7 +153,7 @@ class Layer:
             # eig_func = np.linalg.eig
 
             w, v = eig_func(matrix)
-            q = w**0.5
+            q = w ** 0.5
             q = np.where(np.imag(q) < 0.0, -q, q)
             self.eigenvalues, self.eigenvectors = q, v
         return self.eigenvalues, self.eigenvectors

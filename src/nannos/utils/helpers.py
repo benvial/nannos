@@ -37,7 +37,7 @@ def filter(x, rfilt):
         # First a 1-D  Gaussian
         # t = np.linspace(0, Nx-1, Nx)
         t = np.linspace(-Nx / 2, Nx / 2, Nx)
-        bump = np.exp(-(t**2) / rfilt**2)
+        bump = np.exp(-(t ** 2) / rfilt ** 2)
         bump /= np.trapz(bump)  # normalize the integral to 1
 
         # make a 2-D kernel out of it

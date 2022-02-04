@@ -8,14 +8,19 @@
 from .__about__ import __author__, __description__, __version__
 from .log import *
 
+HAS_CUDA = False
 
-def has_skcuda():
+
+def has_torch():
     try:
-        import sckuda
+        import torch
 
         return True
     except ModuleNotFoundError:
         return False
+
+
+HAS_TORCH = has_torch()
 
 
 def set_backend(backend):
@@ -24,7 +29,7 @@ def set_backend(backend):
     Parameters
     ----------
     backend : str
-        Either ``numpy``, ``autograd`` or ``jax``.
+        Either ``numpy``, ``autograd``, ``torch`` or ``jax``.
 
 
     """
@@ -32,7 +37,7 @@ def set_backend(backend):
     import importlib
     import sys
 
-    global MAGMA
+    global TORCH
     global JAX
     global AUTOGRAD
     if backend == "autograd":
@@ -43,7 +48,7 @@ def set_backend(backend):
         except:
             pass
         try:
-            del MAGMA
+            del TORCH
         except:
             pass
     elif backend == "jax":
@@ -54,12 +59,12 @@ def set_backend(backend):
         except:
             pass
         try:
-            del MAGMA
+            del TORCH
         except:
             pass
-    elif backend == "magma":
-        MAGMA = True
-        log.info("Setting magma backend")
+    elif backend == "torch":
+        TORCH = True
+        log.info("Setting torch backend")
 
         try:
             del JAX
@@ -77,13 +82,13 @@ def set_backend(backend):
                 del AUTOGRAD
             except:
                 try:
-                    del MAGMA
+                    del TORCH
                 except:
                     pass
         log.info("Setting numpy backend")
     else:
         raise ValueError(
-            f"Unknown backend '{backend}'. Please choose between 'numpy' 'jax' 'magma' and 'autograd'."
+            f"Unknown backend '{backend}'. Please choose between 'numpy', 'jax', 'torch' and 'autograd'."
         )
 
     import nannos
@@ -105,8 +110,8 @@ def get_backend():
             return "jax"
         except:
             try:
-                MAGMA
-                return "magma"
+                TORCH
+                return "torch"
             except:
                 return "numpy"
 
@@ -125,14 +130,17 @@ try:
 except:
     try:
 
-        MAGMA
-        if has_skcuda():
+        TORCH
+        if HAS_TORCH:
             import numpy
 
             grad = None
+            import torch
+
+            HAS_CUDA = torch.cuda.is_available()
         else:
 
-            log.info("scikit-cuda not found. Falling back to default backend")
+            log.info("torch not found. Falling back to default backend")
             set_backend("numpy")
 
     except:

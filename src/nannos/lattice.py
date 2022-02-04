@@ -102,7 +102,7 @@ def _parallelogramic_truncation(nh, Lk):
     jsort = np.argsort(Gl2)
     Gsorted = [g[jsort] for g in G]
 
-    nh = NGroot**2
+    nh = NGroot ** 2
     G = np.array(Gsorted, dtype=int)[:, :nh]
 
     return G, nh
@@ -117,7 +117,7 @@ def _circular_truncation(nh, Lk):
     circ_radius = np.sqrt(circ_area / pi) + u[0] + u[1]
 
     u_extent = [
-        1 + int(circ_radius / (q * np.sqrt(1.0 - udot**2 / (u[0] * u[1]) ** 2)))
+        1 + int(circ_radius / (q * np.sqrt(1.0 - udot ** 2 / (u[0] * u[1]) ** 2)))
         for q in u
     ]
 

@@ -6,16 +6,28 @@
 # See the documentation at nannos.gitlab.io
 
 
+from .. import HAS_CUDA, get_backend
 from .. import numpy as np
+
+_device = "cuda" if HAS_CUDA else "cpu"
+_BACKEND = get_backend()
+_fft2 = torch.fft if _BACKEND == "torch" else np.fft.fft2
+_ifft2 = torch.fft if _BACKEND == "torch" else np.fft.ifft2
+
+BACKEND = get_backend()
 
 
 def fourier_transform(u):
-    uft = np.fft.fft2(u)
+    if _BACKEND == "torch":
+        u = u.to(_device)
+    uft = _fft2(u)
     nx, ny = np.shape(uft)[:2]
     return uft / (nx * ny)
 
 
 def inverse_fourier_transform(uft, shape=None, axes=(-2, -1)):
-    u = np.fft.ifft2(uft, s=shape, axes=axes)
+    if _BACKEND == "torch":
+        u = u.to(_device)
+    u = _ifft2(uft, s=shape, axes=axes)
     nx, ny = np.shape(u)[:2]
     return u * (nx * ny)
