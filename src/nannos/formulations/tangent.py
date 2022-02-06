@@ -8,44 +8,42 @@
 
 import numpy as npo
 
-from .. import numpy as np
+from .. import backend as bk
 from ..utils import filter, norm
 
 
 def _normalize(x, n):
     with npo.errstate(invalid="ignore"):
         f = x / (n)
-    return np.where(n == 0.0, 0, f)
+    return bk.where(n == 0.0, 0.0 * x, f)
 
 
 def _ft_filt(x, expo):
     with npo.errstate(divide="ignore"):
-        f = 1 / (x ** expo)
-    return np.where(x == 0.0, 0, f)
+        f = 1 / (x**expo)
+    return bk.where(x == 0.0, 0.0 * x, f)
 
 
-def get_tangent_field(grid, normalize=True, alt=False, rfilt=4, expo=0.5):
-
+def get_tangent_field(grid, normalize=False, alt=False, rfilt=4, expo=0.5):
     Nx, Ny = grid.shape
     xf = filter(grid, rfilt)
-    v = np.gradient(grid)
-    vf = np.gradient(xf)
+    v = bk.gradient(grid)
+    vf = bk.gradient(xf)
     norma = norm(v)
-    N = np.array(v) * np.abs(np.array(vf))
-    N = _normalize(N, norma)
+    N = [bk.array(v[i]) * bk.abs(vf[i]) for i in range(2)]
+    N = [_normalize(N[i], norma) for i in range(2)]
+    fx = bk.fft.fftfreq(Nx)
+    fy = bk.fft.fftfreq(Ny)
+    Fx, Fy = bk.meshgrid(fx, fy, indexing="ij")
 
-    fx = np.fft.fftfreq(Nx)
-    fy = np.fft.fftfreq(Ny)
-    Fx, Fy = np.meshgrid(fx, fy)
-
-    ghat = _ft_filt(Fx ** 2 + Fy ** 2, expo=expo)
-    Nhat = np.fft.fft2(N)
-    Nstar = np.real(np.fft.ifft2(Nhat * ghat))
+    ghat = _ft_filt(Fx**2 + Fy**2, expo=expo)
+    Nhat = [bk.fft.fft2(N[i]) for i in range(2)]
+    Nstar = [bk.real(bk.fft.ifft2(Nhat[i] * ghat)) for i in range(2)]
     if normalize:
         norm_Nstar = norm(Nstar)
-        Nstar = _normalize(Nstar, norm_Nstar)
+        Nstar = [_normalize(Nstar[i], norm_Nstar) for i in range(2)]
 
     if alt:
-        return np.array([Nstar[1], Nstar[0]])
+        return [-Nstar[0], -Nstar[1]]
     else:
-        return np.array([-Nstar[1], Nstar[0]])
+        return [Nstar[0], Nstar[1]]

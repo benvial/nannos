@@ -123,6 +123,8 @@ try:
     config.update("jax_enable_x64", True)
     from jax import grad, numpy
 
+    backend = numpy
+
     # TODO: support jax since it is faster than autograd
     # jax does not support numpy.linalg.eig yet
     # for autodif wrt eigenvectors
@@ -133,9 +135,24 @@ except:
         TORCH
         if HAS_TORCH:
             import numpy
-
-            grad = None
             import torch
+
+            backend = torch
+
+            def _array(a, **kwargs):
+                if isinstance(a, backend.Tensor):
+                    return a
+                else:
+                    return backend.tensor(a, **kwargs)
+
+            backend.array = _array
+
+            def grad(f):
+                def df(x):
+                    _x = x.clone().detach().requires_grad_(True)
+                    return backend.autograd.grad(f(_x), _x, allow_unused=True)[0]
+
+                return df
 
             HAS_CUDA = torch.cuda.is_available()
         else:
@@ -147,10 +164,16 @@ except:
         try:
             AUTOGRAD
             from autograd import grad, numpy
+
+            backend = numpy
         except:
             import numpy
 
+            backend = numpy
             grad = None
+
+
+BACKEND = get_backend()
 
 
 from .constants import *

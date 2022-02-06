@@ -8,6 +8,7 @@
 import numpy as np
 import pytest
 
+from nannos import backend as bk
 from nannos.layers import Layer
 
 np.random.seed(84)
@@ -42,11 +43,14 @@ def test_eig():
         import nannos as nn
 
         nn.set_backend(backend)
+
+        matrix_eig_ = nn.backend.array(matrix_eig)
         l = nn.Layer("test", 1)
-        w, v = l.solve_eigenproblem(matrix_eig)
+        w, v = l.solve_eigenproblem(matrix_eig_)
+        # v = v / v[0, 0]
         vals.append(w)
         vects.append(v)
         if i > 0:
             assert np.allclose(w, vals[0])
-            # assert np.allclose(v,vects[0])
+            assert np.allclose(v, vects[0])
         i += 1

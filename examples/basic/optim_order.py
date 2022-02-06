@@ -39,8 +39,8 @@ theta = 0.0 * np.pi / 180
 phi = 0.0 * np.pi / 180
 psi = 0.0 * np.pi / 180
 
-Nx = 2 ** 7
-Ny = 2 ** 7
+Nx = 2**7
+Ny = 2**7
 
 eps_sup = 1.0
 eps_slab = 7.0

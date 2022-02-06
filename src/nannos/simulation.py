@@ -6,7 +6,7 @@
 # See the documentation at nannos.gitlab.io
 
 
-from . import numpy as np
+from . import backend as bk
 from .formulations import fft
 from .formulations.analytical import fourier_transform_circle
 from .formulations.jones import get_jones_field
@@ -58,9 +58,10 @@ class Simulation:
         self.harmonics, self.nh = self.lattice.get_harmonics(
             self.nh0, method=self.truncation
         )
-        self.omega = 2 * np.pi * self.excitation.frequency
-        self.k0para = np.array(self.excitation.wavevector[:2]) * np.sqrt(
-            self.layers[0].epsilon * self.layers[0].mu
+        self.omega = 2 * bk.pi * self.excitation.frequency
+        self.k0para = (
+            bk.array(self.excitation.wavevector[:2])
+            * (self.layers[0].epsilon * self.layers[0].mu) ** 0.5
         )
         r = self.lattice.reciprocal
         self.kx = (
@@ -73,12 +74,12 @@ class Simulation:
             + r[0, 1] * self.harmonics[0, :]
             + r[1, 1] * self.harmonics[1, :]
         )
-        self.Kx = np.diag(self.kx)
-        self.Ky = np.diag(self.ky)
-        self.IdG = np.eye(self.nh)
-        self.ZeroG = np.zeros_like(self.IdG)
+        self.Kx = bk.diag(self.kx)
+        self.Ky = bk.diag(self.ky)
+        self.IdG = bk.eye(self.nh, dtype=bk.complex128)
+        self.ZeroG = bk.zeros_like(self.IdG, dtype=bk.complex128)
 
-        self.a0 = np.zeros(2 * self.nh, dtype=complex)
+        self.a0 = bk.zeros(2 * self.nh, dtype=bk.complex128)
 
         # self.a0[0] = self.excitation.amplitude[0]
         # self.a0[self.nh] = self.excitation.amplitude[1]
@@ -92,9 +93,9 @@ class Simulation:
             else:
                 a0 = 0
             self.a0.append(a0)
-        self.a0 = np.array(self.a0)
+        self.a0 = bk.array(self.a0, dtype=bk.complex128)
 
-        self.bN = np.zeros(2 * self.nh, dtype=complex)
+        self.bN = bk.zeros(2 * self.nh, dtype=bk.complex128)
 
         self.is_solved = False
 
@@ -125,7 +126,7 @@ class Simulation:
             layer = self._build_matrix(layer)
             # layer.solve_eigenproblem(layer.matrix)
             if layer.is_uniform:
-                # layer.eigenvectors = np.eye(self.nh*2)
+                # layer.eigenvectors = bk.eye(self.nh*2)
                 layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
             else:
                 layer.solve_eigenproblem(layer.matrix)
@@ -151,10 +152,10 @@ class Simulation:
         if not self.is_solved:
             self.solve()
 
-        S11 = np.eye(2 * self.nh, dtype=complex)
-        S12 = np.zeros_like(S11)
-        S21 = np.zeros_like(S11)
-        S22 = np.eye(2 * self.nh, dtype=complex)
+        S11 = bk.eye(2 * self.nh, dtype=bk.complex128)
+        S12 = bk.zeros_like(S11)
+        S21 = bk.zeros_like(S11)
+        S22 = bk.eye(2 * self.nh, dtype=bk.complex128)
 
         if indices is None:
             n_interfaces = len(self.layers) - 1
@@ -166,13 +167,13 @@ class Simulation:
             layer, layer_next = self.layers[i], self.layers[i + 1]
             z = layer.thickness or 0
             z_next = layer_next.thickness or 0
-            f, f_next = np.diag(phasor(layer.eigenvalues, z)), np.diag(
+            f, f_next = bk.diag(phasor(layer.eigenvalues, z)), bk.diag(
                 phasor(layer_next.eigenvalues, z_next)
             )
             I_ = _build_Imatrix(layer, layer_next)
             I = [[get_block(I_, i, j, 2 * self.nh) for j in range(2)] for i in range(2)]
             A = I[0][0] - f @ S12 @ I[1][0]
-            B = np.linalg.inv(A)
+            B = bk.linalg.inv(A)
             S11 = B @ f @ S11
             S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
             S21 = S22 @ I[1][0] @ S11 + S21
@@ -187,12 +188,12 @@ class Simulation:
         if not self.is_solved:
             self.solve()
         q, phi = layer.eigenvalues, layer.eigenvectors
-        A = (layer.Qeps @ phi) @ np.diag(1 / (self.omega * q))
+        A = (layer.Qeps @ phi) @ bk.diag(1 / (self.omega * q))
         pa, pb = phi @ an, phi @ bn
         Aa, Ab = A @ an, A @ bn
-        cross_term = 0.5 * (np.conj(pb) * Aa - np.conj(Ab) * pa)
-        forward_xy = np.real(np.conj(Aa) * pa) + cross_term
-        backward_xy = -np.real(np.conj(Ab) * pb) + np.conj(cross_term)
+        cross_term = 0.5 * (bk.conj(pb) * Aa - bk.conj(Ab) * pa)
+        forward_xy = bk.real(bk.conj(Aa) * pa) + cross_term
+        backward_xy = -bk.real(bk.conj(Ab) * pb) + bk.conj(cross_term)
         forward = forward_xy[: self.nh] + forward_xy[self.nh :]
         backward = backward_xy[: self.nh] + backward_xy[self.nh :]
         return forward, backward
@@ -205,10 +206,13 @@ class Simulation:
 
         ai0, bi0 = self._get_amplitudes(layer_index, translate=False)
 
-        Z = [z] if np.isscalar(z) else z
+        # Z = [z] if bk.isscalar(z) else z
+        Z = z if hasattr(z, "__len__") else [z]
 
-        fields = []
-        for z_ in Z:
+        fields = bk.zeros((len(Z), 2, 3, self.nh), dtype=bk.complex128)
+
+        # fields = []
+        for iz, z_ in enumerate(Z):
             ai, bi = _translate_amplitudes(layer, z_, ai0, bi0)
 
             ht_fourier = layer.eigenvectors @ (ai + bi)
@@ -227,21 +231,27 @@ class Simulation:
             else:
                 ez = layer.eps_hat_inv @ ez
 
-            fields.append([[ex, ey, ez], [hx, hy, hz]])
+            fields[iz, 0, 0, :] = ex
+            fields[iz, 0, 1, :] = ey
+            fields[iz, 0, 2, :] = ez
+            fields[iz, 1, 0, :] = hx
+            fields[iz, 1, 1, :] = hy
+            fields[iz, 1, 2, :] = hz
+            # fields.append([e,h])
 
-        self.fields_fourier = np.array(fields)
+        self.fields_fourier = bk.array(fields)
         return self.fields_fourier
 
     def get_ifft_amplitudes(self, amplitudes, shape, axes=(0, 1)):
 
-        amplitudes = np.array(amplitudes)
+        amplitudes = bk.array(amplitudes)
         # print("amplitudes.shape", amplitudes.shape)
         if len(amplitudes.shape) == 1:
-            amplitudes = np.reshape(amplitudes, amplitudes.shape + (1,))
+            amplitudes = bk.reshape(amplitudes, amplitudes.shape + (1,))
 
         s = 0
         for i in range(self.nh):
-            f = np.zeros(shape + (amplitudes.shape[0],), dtype=complex)
+            f = bk.zeros(shape + (amplitudes.shape[0],), dtype=bk.complex128)
             # print("f.shape", f.shape)
             f[self.harmonics[0, i], self.harmonics[1, i], :] = 1.0
             a = amplitudes[:, i]
@@ -262,8 +272,8 @@ class Simulation:
         fe = fields_fourier[:, 0]
         fh = fields_fourier[:, 1]
 
-        E = np.array([self.get_ifft_amplitudes(fe[:, i, :], shape) for i in range(3)])
-        H = np.array([self.get_ifft_amplitudes(fh[:, i, :], shape) for i in range(3)])
+        E = bk.array([self.get_ifft_amplitudes(fe[:, i, :], shape) for i in range(3)])
+        H = bk.array([self.get_ifft_amplitudes(fh[:, i, :], shape) for i in range(3)])
         return E, H
 
     def diffraction_efficiencies(self, orders=False):
@@ -288,15 +298,15 @@ class Simulation:
         fwd_in, bwd_in = self.get_z_poynting_flux(self.layers[0], self.a0, b0)
         fwd_out, bwd_out = self.get_z_poynting_flux(self.layers[-1], aN, self.bN)
 
-        F0 = np.cos(self.excitation.theta) / np.sqrt(
+        F0 = bk.cos(self.excitation.theta) / bk.sqrt(
             self.layers[0].epsilon * self.layers[0].mu
         )
 
-        R = np.real(-bwd_in / F0)
-        T = np.real(fwd_out / F0)
+        R = bk.real(-bwd_in / F0)
+        T = bk.real(fwd_out / F0)
         if not orders:
-            R = np.sum(R)
-            T = np.sum(T)
+            R = bk.sum(R)
+            T = bk.sum(T)
         return R, T
 
     def get_z_stress_tensor_integral(self, layer_index, z=0):
@@ -321,22 +331,22 @@ class Simulation:
             dx = ex * layer.epsilon
             dy = ey * layer.epsilon
         else:
-            exy = np.hstack((-ey, ex))
+            exy = bk.hstack((-ey, ex))
             dxy = layer.eps_hat @ exy
             dx = dxy[self.nh :]
             dy = -dxy[: self.nh]
 
-        Tx = np.sum(ex * np.conj(dz) + hx * np.conj(hz), axis=-1).real
-        Ty = np.sum(ey * np.conj(dz) + hy * np.conj(hz), axis=-1).real
+        Tx = bk.sum(ex * bk.conj(dz) + hx * bk.conj(hz), axis=-1).real
+        Ty = bk.sum(ey * bk.conj(dz) + hy * bk.conj(hz), axis=-1).real
         Tz = (
             0.5
-            * np.sum(
-                ez * np.conj(dz)
-                + hz * np.conj(hz)
-                - ex * np.conj(dx)
-                - ey * np.conj(dy)
-                - hx * np.conj(hx)
-                - hy * np.conj(hy),
+            * bk.sum(
+                ez * bk.conj(dz)
+                + hz * bk.conj(hz)
+                - ex * bk.conj(dx)
+                - ey * bk.conj(dy)
+                - hx * bk.conj(hx)
+                - hy * bk.conj(hy),
                 axis=-1,
             ).real
         )
@@ -347,7 +357,7 @@ class Simulation:
             len(order) == 2
         except:
             raise ValueError("order must be a tuple of length 2")
-        return [k for k, i in enumerate(self.harmonics.T) if np.allclose(i, order)][0]
+        return [k for k, i in enumerate(self.harmonics.T) if bk.allclose(i, order)][0]
 
     def get_order(self, A, order):
         return A[self.get_order_index(order)]
@@ -365,8 +375,8 @@ class Simulation:
                 )
             else:
                 uft = fft.fourier_transform(u)
-            ix = np.arange(self.nh)
-            jx, jy = np.meshgrid(ix, ix, indexing="ij")
+            ix = bk.arange(self.nh)
+            jx, jy = bk.meshgrid(ix, ix, indexing="ij")
             delta = self.harmonics[:, jx] - self.harmonics[:, jy]
             return uft[delta[0, :], delta[1, :]]
 
@@ -389,10 +399,10 @@ class Simulation:
         else:
             epsilon = layer.patterns[0].epsilon
             mu = layer.patterns[0].mu
-        is_mu_anisotropic = np.shape(mu)[:2] == (3, 3)
-        is_epsilon_anisotropic = np.shape(epsilon)[:2] == (3, 3)
+        is_mu_anisotropic = mu.shape[:2] == (3, 3)
+        is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
         if layer.is_uniform:
-            I = np.eye(self.nh)
+            I = bk.eye(self.nh)
             if is_epsilon_anisotropic:
                 _epsilon = block(
                     [
@@ -410,10 +420,10 @@ class Simulation:
             else:
                 _mu = mu
             Keps = _build_Kmatrix(1 / epsilon * self.IdG, Ky, -Kx)
-            # Pmu = np.eye(self.nh * 2)
+            # Pmu = bk.eye(self.nh * 2)
             Pmu = block([[mu * self.IdG, self.ZeroG], [self.ZeroG, mu * self.IdG]])
 
-            Qeps = self.omega ** 2 * Pmu - Keps
+            Qeps = self.omega**2 * Pmu - Keps
         else:
             epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
             mu_zz = mu[2, 2] if is_mu_anisotropic else mu
@@ -422,8 +432,8 @@ class Simulation:
             eps_hat = self._get_toeplitz_matrix(epsilon_zz)
             # eps_hat = self._get_toeplitz_matrix(epsilon_zz,ana=False)
             mu_hat = self.IdG  # self._get_toeplitz_matrix(mu_zz)
-            eps_hat_inv = np.linalg.inv(eps_hat)
-            mu_hat_inv = np.linalg.inv(mu_hat)
+            eps_hat_inv = bk.linalg.inv(eps_hat)
+            mu_hat_inv = bk.linalg.inv(mu_hat)
             Keps = _build_Kmatrix(eps_hat_inv, Ky, -Kx)
             Kmu = _build_Kmatrix(mu_hat_inv, Kx, Ky)
 
@@ -443,6 +453,7 @@ class Simulation:
                 Peps = self._get_Peps(epsilon, eps_para_hat, J, direct=False)
             elif self.formulation == "tangent":
                 t = get_tangent_field(epsilon_zz)
+                t = t / bk.max(norm(t))
                 Peps = self._get_Peps(epsilon, eps_para_hat, t)
             else:
                 raise ValueError(
@@ -459,10 +470,10 @@ class Simulation:
             else:
                 Pmu = block([[mu_hat, self.ZeroG], [self.ZeroG, mu_hat]])
 
-            # Qeps = self.omega ** 2 * np.eye(self.nh * 2) - Keps
+            # Qeps = self.omega ** 2 * bk.eye(self.nh * 2) - Keps
             # matrix = Peps @ Qeps - Kmu
-            Qeps = self.omega ** 2 * Pmu - Keps
-            matrix = self.omega ** 2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
+            Qeps = self.omega**2 * Pmu - Keps
+            matrix = self.omega**2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
 
             layer.matrix = matrix
             layer.Kmu = Kmu
@@ -496,9 +507,9 @@ class Simulation:
         n_interfaces = len(self.layers) - 1
         S = self.get_S_matrix(indices=(0, layer_index))
         P = self.get_S_matrix(indices=(layer_index, n_interfaces))
-        q = np.linalg.inv(np.eye(self.nh * 2) - np.dot(S[0][1], P[1][0]))
-        ai = np.dot(q, np.dot(S[0][0], self.a0))
-        bi = np.dot(P[1][0], ai)
+        q = bk.linalg.inv(bk.eye(self.nh * 2) - bk.matmul(S[0][1], P[1][0]))
+        ai = bk.matmul(q, bk.matmul(S[0][0], self.a0))
+        bi = bk.matmul(P[1][0], ai)
         return ai, bi
 
     def _solve_ext(self):
@@ -510,23 +521,23 @@ class Simulation:
 
     def _get_Peps(self, epsilon, eps_hat, t, direct=False):
 
-        is_epsilon_anisotropic = np.shape(epsilon)[:2] == (3, 3)
+        is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
         if is_epsilon_anisotropic:
             N = epsilon.shape[2]
             eb = block(epsilon[:2, :2])
             nu = _inv2by2block(eb, N)
-            # nu = np.linalg.inv(epsilon[2,2])
-            nu1 = np.array(_block2list(nu, N))
+            # nu = bk.linalg.inv(epsilon[2,2])
+            nu1 = bk.array(_block2list(nu, N))
             nuhat = self._get_toeplitz_matrix(nu1, transverse=True)
 
-            nuhat_inv = _block2list(np.linalg.inv(block(nuhat)), self.nh)
+            nuhat_inv = _block2list(bk.linalg.inv(block(nuhat)), self.nh)
 
         else:
             N = epsilon.shape[0]
             nuhat = self._get_toeplitz_matrix(1 / epsilon)
-            nuhat_inv = np.linalg.inv((nuhat))
+            nuhat_inv = bk.linalg.inv((nuhat))
         if direct:
-            T = block([[t[1], np.conj(t[0])], [-t[0], np.conj(t[1])]])
+            T = block([[t[1], bk.conj(t[0])], [-t[0], bk.conj(t[1])]])
             invT = _inv2by2block(T, N)
             if is_epsilon_anisotropic:
                 Q = block(
@@ -554,11 +565,11 @@ class Simulation:
             Peps = That @ Q @ invThat
         else:
             norm_t = norm(t)
-            nt2 = np.abs(norm_t) ** 2
-            Pxx = t[0] ** 2 / nt2
-            Pyy = t[1] ** 2 / nt2
-            Pxy = t[0] * np.conj(t[1]) / nt2
-            Pyx = t[1] * np.conj(t[0]) / nt2
+            nt2 = bk.abs(norm_t) ** 2
+            Pxx = t[0] * bk.conj(t[0]) / nt2
+            Pyy = t[1] * bk.conj(t[1]) / nt2
+            Pxy = t[0] * bk.conj(t[1]) / nt2
+            Pyx = t[1] * bk.conj(t[0]) / nt2
             Pxx_hat = self._get_toeplitz_matrix(Pxx)
             Pyy_hat = self._get_toeplitz_matrix(Pyy)
             Pxy_hat = self._get_toeplitz_matrix(Pxy)
@@ -582,7 +593,7 @@ class Simulation:
 
 
 def phasor(q, z):
-    return np.exp(1j * q * z)
+    return bk.exp(1j * q * z)
 
 
 # def _build_Kmatrix(u, Kx, Ky):
@@ -596,7 +607,7 @@ def phasor(q, z):
 
 def _build_Kmatrix(u, Kx, Ky):
     def matmuldiag(A, B):
-        return np.einsum("i,ik->ik", np.diag(A), B)
+        return bk.einsum("i,ik->ik", bk.diag(A), B)
 
     kxu = matmuldiag(Kx, u)
     kyu = matmuldiag(Ky, u)
@@ -612,9 +623,9 @@ def _build_Mmatrix(layer):
     phi = layer.eigenvectors
 
     def matmuldiag(A, B):
-        return np.einsum("ik,k->ik", (A), B)
+        return bk.einsum("ik,k->ik", (A), B)
 
-    # a = layer.Qeps @ phi @ (np.diag(1 / layer.eigenvalues))
+    # a = layer.Qeps @ phi @ (bk.diag(1 / layer.eigenvalues))
     a = layer.Qeps @ matmuldiag(phi, 1 / layer.eigenvalues)
     return block([[a, -a], [phi, phi]])
 
@@ -622,7 +633,7 @@ def _build_Mmatrix(layer):
 def _build_Imatrix(layer1, layer2):
     a1 = _build_Mmatrix(layer1)
     a2 = _build_Mmatrix(layer2)
-    return np.linalg.inv(a1) @ a2
+    return bk.linalg.inv(a1) @ a2
 
 
 def _translate_amplitudes(layer, z, ai, bi):

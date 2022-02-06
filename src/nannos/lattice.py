@@ -6,7 +6,7 @@
 # See the documentation at nannos.gitlab.io
 
 
-from . import numpy as np
+from . import backend as bk
 from .constants import pi
 
 __all__ = ["Lattice"]
@@ -29,7 +29,7 @@ class Lattice:
     @property
     def area(self):
         v = self.basis_vectors
-        return np.linalg.norm(np.cross(v[0], v[1]))
+        return bk.linalg.norm(bk.cross(v[0], v[1]))
 
     @property
     def matrix(self):
@@ -41,7 +41,7 @@ class Lattice:
             Matrix containing the lattice vectors (L1,L2).
 
         """
-        return np.array(self.basis_vectors).T
+        return bk.array(self.basis_vectors, dtype=bk.float64).T
 
     @property
     def reciprocal(self):
@@ -53,7 +53,7 @@ class Lattice:
             Matrix containing the lattice vectors (K1,K2) in reciprocal space.
 
         """
-        return 2 * pi * np.linalg.inv(self.matrix).T
+        return 2 * pi * bk.linalg.inv(self.matrix).T
 
     def get_harmonics(self, nh, method="circular"):
         """Short summary.
@@ -85,48 +85,48 @@ class Lattice:
 
 
 def _parallelogramic_truncation(nh, Lk):
-    u = [np.linalg.norm(l) for l in Lk]
-    udot = np.dot(Lk[0], Lk[1])
+    u = [bk.linalg.norm(l) for l in Lk]
+    udot = bk.dot(Lk[0], Lk[1])
 
-    NGroot = int(np.sqrt(nh))
-    if np.mod(NGroot, 2) == 0:
+    NGroot = int(bk.sqrt(nh))
+    if bk.mod(NGroot, 2) == 0:
         NGroot -= 1
 
     M = NGroot // 2
 
     xG = range(-M, NGroot - M)
-    G = np.meshgrid(xG, xG, indexing="ij")
+    G = bk.meshgrid(xG, xG, indexing="ij")
     G = [g.flatten() for g in G]
 
     Gl2 = G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot
-    jsort = np.argsort(Gl2)
+    jsort = bk.argsort(Gl2)
     Gsorted = [g[jsort] for g in G]
 
-    nh = NGroot ** 2
-    G = np.array(Gsorted, dtype=int)[:, :nh]
+    nh = NGroot**2
+    G = bk.array(Gsorted)[:, :nh]
 
     return G, nh
 
 
 def _circular_truncation(nh, Lk):
-    u = [np.linalg.norm(l) for l in Lk]
-    udot = np.dot(Lk[0], Lk[1])
+    u = [bk.linalg.norm(l) for l in Lk]
+    udot = bk.dot(Lk[0], Lk[1])
     ucross = Lk[0][0] * Lk[1][1] - Lk[0][1] * Lk[1][0]
 
-    circ_area = nh * np.abs(ucross)
-    circ_radius = np.sqrt(circ_area / pi) + u[0] + u[1]
+    circ_area = nh * bk.abs(ucross)
+    circ_radius = bk.sqrt(circ_area / pi) + u[0] + u[1]
 
     u_extent = [
-        1 + int(circ_radius / (q * np.sqrt(1.0 - udot ** 2 / (u[0] * u[1]) ** 2)))
+        1 + int(circ_radius / (q * bk.sqrt(1.0 - udot**2 / (u[0] * u[1]) ** 2)))
         for q in u
     ]
 
-    xG, yG = [np.arange(-q, q + 1) for q in u_extent]
-    G = np.meshgrid(xG, yG, indexing="ij")
+    xG, yG = [bk.arange(-q, q + 1) for q in u_extent]
+    G = bk.meshgrid(xG, yG, indexing="ij")
     G = [g.flatten() for g in G]
 
     Gl2 = G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot
-    jsort = np.argsort(Gl2)
+    jsort = bk.argsort(Gl2)
     Gsorted = [g[jsort] for g in G]
     Gl2 = Gl2[jsort]
 
@@ -135,11 +135,11 @@ def _circular_truncation(nh, Lk):
         nGtmp = nh
 
     tol = 1e-10 * max(u[0] ** 2, u[1] ** 2)
-    for i in np.arange(nGtmp - 1, -1, -1):
-        if np.abs(Gl2[i] - Gl2[i - 1]) > tol:
+    for i in bk.arange(nGtmp - 1, -1, -1):
+        if bk.abs(Gl2[i] - Gl2[i - 1]) > tol:
             break
     nh = i
 
-    G = np.array(Gsorted, dtype=int)[:, :nh]
+    G = bk.vstack(Gsorted)[:, :nh]
 
     return G, nh

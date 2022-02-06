@@ -8,10 +8,13 @@
 
 __all__ = ["Layer", "Pattern"]
 
+
 from copy import copy
 
+# from . import numpy as bk
+from . import BACKEND
+from . import backend as bk
 from . import get_backend
-from . import numpy as np
 from .simulation import block
 
 
@@ -38,8 +41,8 @@ class Layer:
                 raise ValueError("thickness must be positive.")
         self.name = name
         self.thickness = thickness
-        self.epsilon = epsilon
-        self.mu = mu
+        self.epsilon = bk.array(epsilon, dtype=bk.complex128)
+        self.mu = bk.array(mu, dtype=bk.complex128)
         self.iscopy = False
         self.original = self
         self.patterns = []
@@ -76,16 +79,16 @@ class Layer:
         epsilon = self.epsilon
         mu = self.mu
 
-        is_mu_anisotropic = np.shape(mu)[:2] == (3, 3)
-        is_epsilon_anisotropic = np.shape(epsilon)[:2] == (3, 3)
+        is_mu_anisotropic = mu.shape[:2] == (3, 3)
+        is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
 
         if is_mu_anisotropic or is_epsilon_anisotropic:
             # TODO: anisotropic uniform layer
             raise NotImplementedError("Uniform layer material must be isotropic")
 
-        IdG = np.eye(2 * nh)
+        IdG = bk.eye(2 * nh)
 
-        I = np.eye(nh)
+        I = bk.eye(nh)
         if is_epsilon_anisotropic:
             _epsilon = block(
                 [
@@ -102,15 +105,15 @@ class Layer:
             _mu = mu
 
         q = (
-            np.array(
-                _epsilon * _mu * omega ** 2 - kx ** 2 - ky ** 2,
-                dtype=complex,
+            bk.array(
+                _epsilon * _mu * omega**2 - kx**2 - ky**2,
+                dtype=bk.complex128,
             )
             ** 0.5
         )
-        q = np.where(np.imag(q) < 0.0, -q, q)
-        self.eigenvalues = np.concatenate((q, q))
-        self.eigenvectors = np.eye(2 * len(kx))
+        q = bk.where(bk.imag(q) < 0.0, -q, q)
+        self.eigenvalues = bk.hstack((q, q))
+        self.eigenvectors = bk.eye(2 * len(kx), dtype=bk.complex128)
         return self.eigenvalues, self.eigenvectors
 
     def solve_eigenproblem(self, matrix):
@@ -134,27 +137,25 @@ class Layer:
             )
 
         else:
-            # FIXME: This gets slow because of the implementation
-            # workaround to compute eigenvalues with jax
-            # TODO: implement custom autodiff rules for the evp with jax
-            backend = get_backend()
-            if backend == "jax":
-                from ._jax_eig_workaround import eig_jax
+            # # TODO: implement custom autodiff rules for the evp with jax
+            # if BACKEND == "jax":
+            #     # from ._jax_eig_workaround import eig_jax
+            #     eig_func = bk.linalg.eig
+            # elif BACKEND == "torch":
+            #     from . import torch
+            #
+            #     def eig_func(u):
+            #         u = torch.tensor(u)#.to(_device)
+            #         return torch.linalg.eig(u)
+            #
+            # else:
+            #     eig_func = bk.linalg.eig
 
-                eig_func = eig_jax
-            elif backend == "magma":
-                from ._magma import eig
-
-                eig_func = eig
-
-            else:
-                eig_func = np.linalg.eig
-
-            # eig_func = np.linalg.eig
+            eig_func = bk.linalg.eig
 
             w, v = eig_func(matrix)
-            q = w ** 0.5
-            q = np.where(np.imag(q) < 0.0, -q, q)
+            q = w**0.5
+            q = bk.where(bk.imag(q) < 0.0, -q, q)
             self.eigenvalues, self.eigenvectors = q, v
         return self.eigenvalues, self.eigenvectors
 
@@ -221,26 +222,5 @@ class Pattern:
     def __init__(self, epsilon=1, mu=1, name="pattern", grid=None):
         self.name = name
         self.grid = grid
-        self.epsilon = epsilon
-        self.mu = mu
-
-
-#
-#
-#
-# def eig2by2(M):
-#     tr = M[0, 0] + M[1,1]
-#     det = M[0, 0] * M[1,1] - M[1, 0] + M[0,1]
-#     l0 = 0.5 * (tr - (tr ** 2 - 4 * det ) ** 0.5)
-#     l1 = 0.5 * (tr + (tr ** 2 - 4 * det ) ** 0.5)
-#     v0 = [-M[0, 1], M[0, 0] - l0]
-#     v1 = [M[1, 1] - l1, -M[1, 0]]
-#
-#     eigenvalues = np.array([l0, l1])
-#     # eigenvectors = np.array([v0, v1])
-#     if  M[0, 0] - l0 == 0 or  M[1, 1] - l1 ==0:
-#         eigenvectors = np.eye(2)
-#     else:
-#         eigenvectors = np.array([np.array(v)/(v[0]**2 + v[1]**2)**0.5 for v in [v0, v1]]).T
-#
-#     return eigenvalues, eigenvectors
+        self.epsilon = bk.array(epsilon, dtype=bk.complex128)
+        self.mu = bk.array(mu, dtype=bk.complex128)

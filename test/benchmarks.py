@@ -31,7 +31,7 @@ def build_simu(nh, npts):
     x0 = np.linspace(0, 1.0, Nx)
     y0 = np.linspace(0, 1.0, Ny)
     x, y = np.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
     epsgrid[hole] = eps_hole
     lattice = nn.Lattice((L1, L2))
     sup = nn.Layer("Superstrate", epsilon=eps_sup)
@@ -48,9 +48,9 @@ def build_simu(nh, npts):
 
 NH = [50, 100, 200, 400, 800]
 
-NH = [800]
+NH = [7]
 
-npts = 2 ** 9
+npts = 2**9
 backend = "numpy"
 # backend = "jax"
 nn.set_backend(backend)
@@ -75,6 +75,25 @@ for nh in NH:
     t = nn.toc(t)
 
     # R, T = sim.diffraction_efficiencies()
+
+
+import matplotlib.pyplot as plt
+
+#
+# mat -= np.diag(mat)
+mat = mat[:5, :5]
+
+math = np.conj(mat.T)
+
+plt.ion()
+plt.close("all")
+fig, ax = plt.subplots(1, 2)
+ax[0].imshow(mat.real)
+ax[1].imshow(mat.imag)
+fig, ax = plt.subplots(1, 2)
+ax[0].imshow(math.real)
+ax[1].imshow(math.imag)
+
 
 #
 # from nannos.utils import block

@@ -6,23 +6,25 @@
 # See the documentation at nannos.gitlab.io
 
 
-from .. import numpy as np
+from .. import backend as bk
+from .. import get_backend
 
 
 def next_power_of_2(x):
-    return 1 if x == 0 else int(2 ** np.ceil(np.log2(x)))
+    return 1 if x == 0 else int(2 ** bk.ceil(bk.log2(x)))
 
 
 def norm(v):
     ## avoid division by 0
-    eps = np.finfo(float).eps
-    return np.sqrt(eps + np.power(v[0], 2) + np.power(v[1], 2))
+    eps = bk.finfo(float).eps
+    # return bk.sqrt(eps + bk.power(v[0], 2) + bk.power(v[1], 2))
+    return bk.sqrt(eps + v[0] * bk.conj(v[0]) + v[1] * bk.conj(v[1]))
 
 
 def block(a):
-    l1 = np.hstack([a[0][0], a[0][1]])
-    l2 = np.hstack([a[1][0], a[1][1]])
-    return np.vstack([l1, l2])
+    l1 = bk.hstack([a[0][0], a[0][1]])
+    l2 = bk.hstack([a[1][0], a[1][1]])
+    return bk.vstack([l1, l2])
 
 
 def get_block(M, i, j, n):
@@ -35,17 +37,31 @@ def filter(x, rfilt):
     else:
         Nx = x.shape[0]
         # First a 1-D  Gaussian
-        # t = np.linspace(0, Nx-1, Nx)
-        t = np.linspace(-Nx / 2, Nx / 2, Nx)
-        bump = np.exp(-(t ** 2) / rfilt ** 2)
-        bump /= np.trapz(bump)  # normalize the integral to 1
+        # t = bk.linspace(0, Nx-1, Nx)
+        t = bk.linspace(-Nx / 2, Nx / 2, Nx)
+        bump = bk.exp(-(t**2) / rfilt**2)
+        bump /= bk.trapz(bump)  # normalize the integral to 1
 
         # make a 2-D kernel out of it
-        kernel = bump[:, np.newaxis] * bump[np.newaxis, :]
-        kernel_ft = np.fft.fft2(kernel, s=x.shape[:2], axes=(0, 1))
+        kernel = bump[:, None] * bump[None, :]
+
+        BACKEND = get_backend()
+
+        if BACKEND == "torch":
+
+            kernel_ft = bk.fft.fft2(kernel, s=x.shape[:2], dim=(0, 1))
+            img_ft = bk.fft.fft2(x, dim=(0, 1))
+        else:
+
+            kernel_ft = bk.fft.fft2(kernel, s=x.shape[:2], axes=(0, 1))
+            img_ft = bk.fft.fft2(x, axes=(0, 1))
 
         # convolve
-        img_ft = np.fft.fft2(x, axes=(0, 1))
         img2_ft = kernel_ft * img_ft
-        out = np.real(np.fft.ifft2(img2_ft, axes=(0, 1)))
-        return np.fft.fftshift(out)
+
+        if BACKEND == "torch":
+            out = bk.real(bk.fft.ifft2(img2_ft, dim=(0, 1)))
+        else:
+            out = bk.real(bk.fft.ifft2(img2_ft, axes=(0, 1)))
+
+        return bk.fft.fftshift(out)
