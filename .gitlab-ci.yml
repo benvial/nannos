@@ -22,8 +22,8 @@ before_script:
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels conda-forge
   - conda create --prefix .cache/conda/nannos python=3.9
-  - conda install pytorch magma cudatoolkit=11.3 -c pytorch
   - source activate .cache/conda/nannos
+  - conda install pytorch magma cudatoolkit=11.3 -c pytorch
   - python -V  # Print out python version for debugging
 
 
