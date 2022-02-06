@@ -52,7 +52,6 @@ sub = Layer("Substrate", epsilon=1, mu=1)
 ids = np.ones((Nx, Ny), dtype=float)
 zs = np.zeros_like(ids)
 
-
 eps = eps_pattern, eps_hole
 mu = mu_pattern, mu_hole
 

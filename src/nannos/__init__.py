@@ -139,11 +139,15 @@ except:
 
             backend = torch
 
+            HAS_CUDA = torch.cuda.is_available()
+
+            _device = "cuda" if HAS_CUDA else "cpu"
+
             def _array(a, **kwargs):
                 if isinstance(a, backend.Tensor):
-                    return a
+                    return a.to(_device)
                 else:
-                    return backend.tensor(a, **kwargs)
+                    return backend.tensor(a, **kwargs).to(_device)
 
             backend.array = _array
 
@@ -154,7 +158,6 @@ except:
 
                 return df
 
-            HAS_CUDA = torch.cuda.is_available()
         else:
 
             log.info("torch not found. Falling back to default backend")

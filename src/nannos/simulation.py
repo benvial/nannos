@@ -5,15 +5,17 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
+__all__ = ["Simulation"]
 
 from . import backend as bk
+from . import get_backend
 from .formulations import fft
 from .formulations.analytical import fourier_transform_circle
 from .formulations.jones import get_jones_field
 from .formulations.tangent import get_tangent_field
 from .utils import block, get_block, norm
 
-__all__ = ["Simulation"]
+_BACKEND = get_backend()
 
 
 class Simulation:
@@ -211,7 +213,6 @@ class Simulation:
 
         fields = bk.zeros((len(Z), 2, 3, self.nh), dtype=bk.complex128)
 
-        # fields = []
         for iz, z_ in enumerate(Z):
             ai, bi = _translate_amplitudes(layer, z_, ai0, bi0)
 
@@ -231,13 +232,12 @@ class Simulation:
             else:
                 ez = layer.eps_hat_inv @ ez
 
-            fields[iz, 0, 0, :] = ex
-            fields[iz, 0, 1, :] = ey
-            fields[iz, 0, 2, :] = ez
-            fields[iz, 1, 0, :] = hx
-            fields[iz, 1, 1, :] = hy
-            fields[iz, 1, 2, :] = hz
-            # fields.append([e,h])
+            _set_idx(fields, [iz, 0, 0], ex)
+            _set_idx(fields, [iz, 0, 1], ey)
+            _set_idx(fields, [iz, 0, 2], ez)
+            _set_idx(fields, [iz, 1, 0], hx)
+            _set_idx(fields, [iz, 1, 1], hy)
+            _set_idx(fields, [iz, 1, 2], hz)
 
         self.fields_fourier = bk.array(fields)
         return self.fields_fourier
@@ -453,7 +453,7 @@ class Simulation:
                 Peps = self._get_Peps(epsilon, eps_para_hat, J, direct=False)
             elif self.formulation == "tangent":
                 t = get_tangent_field(epsilon_zz)
-                t = t / bk.max(norm(t))
+                t = [t[i] / bk.max(norm(t)) for i in range(2)]
                 Peps = self._get_Peps(epsilon, eps_para_hat, t)
             else:
                 raise ValueError(
@@ -661,3 +661,11 @@ def _inv2by2block(T, N):
 def _unique(x):
     seen = list()
     return not any(i in seen or seen.append(i) for i in x)
+
+
+def _set_idx(mat, idx, val):
+    if _BACKEND == "jax":
+        mat = mat.at[tuple(idx)].set(val)
+    else:
+        idx += [None]
+        mat[tuple(idx)] = val
