@@ -8,11 +8,13 @@
 
 from scipy.fftpack import fft2 as _fft2_scipy
 from scipy.fftpack import ifft2 as _ifft2_scipy
-from torch.fft import fft2 as _fft2_torch
-from torch.fft import ifft2 as _ifft2_torch
 
-from .. import BACKEND
+from .. import BACKEND, HAS_TORCH
 from .. import backend as bk
+
+if HAS_TORCH:
+    from torch.fft import fft2 as _fft2_torch
+    from torch.fft import ifft2 as _ifft2_torch
 
 
 def fourier_transform(u, s=None, axes=(-2, -1)):

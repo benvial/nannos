@@ -22,6 +22,34 @@ def has_torch():
 HAS_TORCH = has_torch()
 
 
+def _has_cuda():
+    try:
+        import torch
+
+        return torch.cuda.is_available()
+    except ModuleNotFoundError:
+        return False
+
+
+HAS_CUDA = _has_cuda()
+
+
+_nannos_device = "cpu"
+
+
+def use_gpu():
+    global _nannos_device
+    if not HAS_TORCH:
+        _nannos_device = "cpu"
+        log.info("pytorch not found. Cannot use GPU.")
+    elif not HAS_CUDA:
+        _nannos_device = "cpu"
+        log.info("cuda not found. Cannot use GPU.")
+    else:
+        _nannos_device = "cuda"
+        log.info("Using GPU.")
+
+
 def _delvar(VAR):
     if VAR in globals():
         del globals()[VAR]
@@ -133,15 +161,11 @@ elif "_TORCH" in globals():
 
         backend = torch
 
-        HAS_CUDA = torch.cuda.is_available()
-
-        _device = "cuda" if HAS_CUDA else "cpu"
-
         def _array(a, **kwargs):
             if isinstance(a, backend.Tensor):
-                return a.to(_device)
+                return a.to(_nannos_device)
             else:
-                return backend.tensor(a, **kwargs).to(_device)
+                return backend.tensor(a, **kwargs).to(_nannos_device)
 
         backend.array = _array
 

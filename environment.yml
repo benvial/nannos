@@ -1,8 +1,9 @@
 name: nannos
 channels:
   - conda-forge
+  - pytorch
 dependencies:
-  - python>=3.6
+  - python=3.9
   - pip
   - numpy
   - scipy
@@ -15,6 +16,9 @@ dependencies:
   - jax
   - jaxlib
   - nlopt
+  - pytorch
+  - magma
+  - cudatoolkit=11.3
   - pip:
     - autograd-latest
     - git+https://gitlab.com/nannos/nannos.git
