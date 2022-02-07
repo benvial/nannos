@@ -7,15 +7,12 @@
 
 __all__ = ["Simulation"]
 
+from . import BACKEND
 from . import backend as bk
-from . import get_backend
 from .formulations import fft
-from .formulations.analytical import fourier_transform_circle
 from .formulations.jones import get_jones_field
 from .formulations.tangent import get_tangent_field
 from .utils import block, get_block, norm
-
-_BACKEND = get_backend()
 
 
 class Simulation:
@@ -361,13 +358,7 @@ class Simulation:
                 [self._get_toeplitz_matrix(u[i, j]) for j in range(2)] for i in range(2)
             ]
         else:
-            if self.formulation == "analytical":
-                # TODO: analytical FT
-                raise NotImplementedError(
-                    "Analytical formulation not currently available."
-                )
-            else:
-                uft = fft.fourier_transform(u)
+            uft = fft.fourier_transform(u)
             ix = bk.arange(self.nh)
             jx, jy = bk.meshgrid(ix, ix, indexing="ij")
             delta = self.harmonics[:, jx] - self.harmonics[:, jy]
@@ -659,7 +650,7 @@ def _unique(x):
 
 
 def _set_idx(mat, idx, val):
-    if _BACKEND == "jax":
+    if BACKEND == "jax":
         mat = mat.at[tuple(idx)].set(val)
     else:
         idx += [None]

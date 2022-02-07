@@ -94,7 +94,7 @@ def _parallelogramic_truncation(nh, Lk):
 
     M = NGroot // 2
 
-    xG = range(-M, NGroot - M)
+    xG = bk.array(bk.arange(-M, NGroot - M))
     G = bk.meshgrid(xG, xG, indexing="ij")
     G = bk.array([g.flatten() for g in G])
 
