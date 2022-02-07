@@ -95,9 +95,12 @@ def test_simulations(formulation, backend, device):
     NH = [100, 200, 400, 600, 800, 1000]
     NH_real = []
     TIMES = []
+    TIMES_ALL = []
 
     for nh in NH:
         print(f"number of harmonics = {nh}")
+
+        TIMES_NH = []
         for ifreq, freq in enumerate(frequencies):
             pw = nn.PlaneWave(
                 frequency=freq,
@@ -114,17 +117,18 @@ def test_simulations(formulation, backend, device):
             R, T = sim.diffraction_efficiencies()
             t1 = nn.toc(t0)
             if ifreq > 0:
-                TIMES.append(t1)
-        npo.mean(TIMES)
+                TIMES_NH.append(t1)
+
+        TIMES.append(sum(TIMES_NH) / len(TIMES_NH))
+        TIMES_ALL.append(TIMES_NH)
 
         NH_real.append(sim.nh)
     B = R + T
 
-    import numpy as npo
-
     npo.savez(
         f"benchmark_{backend}_{device}.npz",
-        times=npo.mean(TIMES),
+        times=TIMES,
+        times_all=TIMES_ALL,
         real_nh=NH_real,
         nh=NH,
     )
