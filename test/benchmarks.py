@@ -8,8 +8,12 @@
 
 import pytest
 
-formulations = ["original", "tangent", "jones"]
-backends = ["numpy", "scipy", "autograd", "jax", "torch"]
+# formulations = ["original", "tangent", "jones"]
+# backends = ["numpy", "scipy", "autograd", "jax", "torch"]
+
+
+formulations = ["original"]
+backends = ["jax", "torch"]
 devices = ["cpu", "gpu"]
 
 
