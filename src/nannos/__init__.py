@@ -175,8 +175,6 @@ elif "_TORCH" in globals():
         import numpy
         import torch
 
-        print(_nannos_device)
-
         backend = torch
 
         def _array(a, **kwargs):
