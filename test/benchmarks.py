@@ -27,6 +27,14 @@ def test_simulations(formulation, backend, device):
     nn.set_backend(backend)
     if device == "gpu":
         nn.use_gpu()
+    print(nn._nannos_device)
+    if nn.BACKEND == "torch":
+        device = nn.backend.device(nn._nannos_device)
+        print(device.type)
+    elif nn.BACKEND == "jax":
+        import jax
+
+        print(jax.default_backend())
 
     nh = 51
     L1 = [1.0, 0]
