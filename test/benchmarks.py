@@ -6,7 +6,14 @@
 # See the documentation at nannos.gitlab.io
 
 
+import sys
+
 import pytest
+
+try:
+    threads = sys.argv[1]
+except:
+    threads = 1
 
 devices = ["cpu", "gpu"]
 formulations = ["original", "tangent", "jones"]
@@ -17,7 +24,6 @@ formulations = ["original"]
 # devices = ["gpu"]
 # backends = ["torch"]
 # formulations = [ "jones"]
-#
 
 
 @pytest.mark.parametrize("formulation", formulations)
@@ -43,7 +49,6 @@ def test_simulations(formulation, backend, device):
 
         print(jax.default_backend())
 
-    nh = 101
     L1 = [1.0, 0]
     L2 = [0, 1.0]
     Nx = 2**9
@@ -82,15 +87,17 @@ def test_simulations(formulation, backend, device):
     st.add_pattern(pattern)
 
     truncation = "circular"
-    frequencies = [1.1, 1.2]
 
-    NH = [50, 100, 200, 400, 800]
+    nfreq = 11
+    frequencies = np.ones(nfreq) * 1.1
+
+    NH = [100, 200, 400, 600, 800, 1000]
     NH_real = []
     TIMES = []
 
     for nh in NH:
         print(f"number of harmonics = {nh}")
-        for freq in frequencies:
+        for ifreq, freq in enumerate(frequencies):
             pw = nn.PlaneWave(
                 frequency=freq,
             )
@@ -105,22 +112,30 @@ def test_simulations(formulation, backend, device):
             )
             R, T = sim.diffraction_efficiencies()
             t1 = nn.toc(t0)
-            NH_real.append(sim.nh)
-            TIMES.append(t1)
+            if ifreq > 0:
+                TIMES.append(t1)
+        npo.mean(TIMES)
+
+        NH_real.append(sim.nh)
     B = R + T
 
     import numpy as npo
 
-    npo.savez(f"benchmark_{backend}_{device}.npz", times=TIMES, real_nh=NH_real, nh=NH)
-
-    print("T = ", T)
-    print("R = ", R)
-    print("R + T = ", B)
-    assert nn.backend.allclose(
-        B, nn.backend.array(1.0, dtype=nn.backend.float64), atol=5e-3
+    npo.savez(
+        f"{threads}/benchmark_{backend}_{device}.npz",
+        times=npo.mean(TIMES),
+        real_nh=NH_real,
+        nh=NH,
     )
 
-    a, b = sim._get_amplitudes(1, z=0.1)
-    field_fourier = sim.get_field_fourier(1, z=0.1)
+    # print("T = ", T)
+    # print("R = ", R)
+    # print("R + T = ", B)
+    # assert nn.backend.allclose(
+    #     B, nn.backend.array(1.0, dtype=nn.backend.float64), atol=5e-3
+    # )
+    #
+    # a, b = sim._get_amplitudes(1, z=0.1)
+    # field_fourier = sim.get_field_fourier(1, z=0.1)
 
-    return R, T, sim
+    # return R, T, sim
