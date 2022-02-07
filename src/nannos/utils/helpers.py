@@ -22,8 +22,8 @@ def norm(v):
 
 
 def block(a):
-    l1 = bk.hstack([a[0][0], a[0][1]])
-    l2 = bk.hstack([a[1][0], a[1][1]])
+    l1 = bk.array(bk.hstack([a[0][0], a[0][1]]))
+    l2 = bk.array(bk.hstack([a[1][0], a[1][1]]))
     return bk.vstack([l1, l2])
 
 
@@ -38,7 +38,7 @@ def filter(x, rfilt):
         Nx = x.shape[0]
         # First a 1-D  Gaussian
         # t = bk.linspace(0, Nx-1, Nx)
-        t = bk.linspace(-Nx / 2, Nx / 2, Nx)
+        t = bk.array(bk.linspace(-Nx / 2, Nx / 2, Nx))
         bump = bk.exp(-(t**2) / rfilt**2)
         bump /= bk.trapz(bump)  # normalize the integral to 1
 

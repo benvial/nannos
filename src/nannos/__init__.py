@@ -41,13 +41,11 @@ HAS_CUDA = _has_cuda()
 
 _nannos_device = "cpu"
 
-BACKEND = "numpy"
-
 
 def use_gpu():
     global _nannos_device
 
-    if BACKEND not in ["jax", "torch"]:
+    if BACKEND not in ["torch"]:
         log.info(f"Cannot use GPU with {BACKEND} backend.")
 
     if not HAS_TORCH:
@@ -162,11 +160,14 @@ elif "_JAX" in globals():
     from jax.config import config
 
     config.update("jax_enable_x64", True)
+    config.update("jax_platform_name", "cpu")
 
-    if _nannos_device == "cpu":
-        config.update("jax_platform_name", "cpu")
-    else:
-        config.update("jax_platform_name", "gpu")
+    # TODO: jax eig not implemented on GPU
+    # see https://github.com/google/jax/issues/1259
+    # if _nannos_device == "cpu":
+    #     config.update("jax_platform_name", "cpu")
+    # else:
+    #     config.update("jax_platform_name", "gpu")
     from jax import grad, numpy
 
     backend = numpy
@@ -175,13 +176,15 @@ elif "_TORCH" in globals():
         import numpy
         import torch
 
+        # torch.set_default_tensor_type(torch.cuda.FloatTensor)
+
         backend = torch
 
         def _array(a, **kwargs):
             if isinstance(a, backend.Tensor):
-                return a.to(_nannos_device)
+                return a.to(torch.device(_nannos_device))
             else:
-                return backend.tensor(a, **kwargs).to(_nannos_device)
+                return backend.tensor(a, **kwargs).to(torch.device(_nannos_device))
 
         backend.array = _array
 
@@ -201,7 +204,7 @@ else:
     backend = numpy
 
 # TODO: support jax since it is faster than autograd
-# jax does not support numpy.linalg.eig
+# jax does not support eig
 # for autodif wrt eigenvectors yet.
 # see: https://github.com/google/jax/issues/2748
 

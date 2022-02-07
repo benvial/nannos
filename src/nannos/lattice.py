@@ -85,7 +85,7 @@ class Lattice:
 
 
 def _parallelogramic_truncation(nh, Lk):
-    u = [bk.linalg.norm(l) for l in Lk]
+    u = bk.array([bk.linalg.norm(l) for l in Lk])
     udot = bk.dot(Lk[0], Lk[1])
 
     NGroot = int(bk.sqrt(nh))
@@ -96,11 +96,11 @@ def _parallelogramic_truncation(nh, Lk):
 
     xG = range(-M, NGroot - M)
     G = bk.meshgrid(xG, xG, indexing="ij")
-    G = [g.flatten() for g in G]
+    G = bk.array([g.flatten() for g in G])
 
     Gl2 = G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot
     jsort = bk.argsort(Gl2)
-    Gsorted = [g[jsort] for g in G]
+    Gsorted = bk.array([g[jsort] for g in G])
 
     nh = NGroot**2
     G = bk.array(Gsorted)[:, :nh]
@@ -109,23 +109,28 @@ def _parallelogramic_truncation(nh, Lk):
 
 
 def _circular_truncation(nh, Lk):
-    u = [bk.linalg.norm(l) for l in Lk]
+    u = bk.array([bk.linalg.norm(l) for l in Lk])
     udot = bk.dot(Lk[0], Lk[1])
-    ucross = Lk[0][0] * Lk[1][1] - Lk[0][1] * Lk[1][0]
+    ucross = bk.array(Lk[0][0] * Lk[1][1] - Lk[0][1] * Lk[1][0])
 
     circ_area = nh * bk.abs(ucross)
     circ_radius = bk.sqrt(circ_area / pi) + u[0] + u[1]
 
-    u_extent = [
-        1 + int(circ_radius / (q * bk.sqrt(1.0 - udot**2 / (u[0] * u[1]) ** 2)))
-        for q in u
-    ]
-
-    xG, yG = [bk.arange(-q, q + 1) for q in u_extent]
+    u_extent = bk.array(
+        [
+            1 + int(circ_radius / (q * bk.sqrt(1.0 - udot**2 / (u[0] * u[1]) ** 2)))
+            for q in u
+        ]
+    )
+    xG, yG = [bk.array(bk.arange(-q, q + 1)) for q in u_extent]
     G = bk.meshgrid(xG, yG, indexing="ij")
     G = [g.flatten() for g in G]
 
-    Gl2 = G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot
+    # print(u[])get_device()
+
+    Gl2 = bk.array(
+        G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot
+    )
     jsort = bk.argsort(Gl2)
     Gsorted = [g[jsort] for g in G]
     Gl2 = Gl2[jsort]

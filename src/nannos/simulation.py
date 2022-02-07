@@ -78,8 +78,8 @@ class Simulation:
         )
         self.Kx = bk.diag(self.kx)
         self.Ky = bk.diag(self.ky)
-        self.IdG = bk.eye(self.nh, dtype=bk.complex128)
-        self.ZeroG = bk.zeros_like(self.IdG, dtype=bk.complex128)
+        self.IdG = bk.array(bk.eye(self.nh, dtype=bk.complex128))
+        self.ZeroG = bk.array(bk.zeros_like(self.IdG, dtype=bk.complex128))
 
         self.a0 = bk.zeros(2 * self.nh, dtype=bk.complex128)
 
@@ -97,7 +97,7 @@ class Simulation:
             self.a0.append(a0)
         self.a0 = bk.array(self.a0, dtype=bk.complex128)
 
-        self.bN = bk.zeros(2 * self.nh, dtype=bk.complex128)
+        self.bN = bk.array(bk.zeros(2 * self.nh, dtype=bk.complex128))
 
         self.is_solved = False
 
@@ -154,10 +154,10 @@ class Simulation:
         if not self.is_solved:
             self.solve()
 
-        S11 = bk.eye(2 * self.nh, dtype=bk.complex128)
+        S11 = bk.array(bk.eye(2 * self.nh, dtype=bk.complex128))
         S12 = bk.zeros_like(S11)
         S21 = bk.zeros_like(S11)
-        S22 = bk.eye(2 * self.nh, dtype=bk.complex128)
+        S22 = bk.array(bk.eye(2 * self.nh, dtype=bk.complex128))
 
         if indices is None:
             n_interfaces = len(self.layers) - 1
@@ -189,8 +189,8 @@ class Simulation:
     def get_z_poynting_flux(self, layer, an, bn):
         if not self.is_solved:
             self.solve()
-        q, phi = layer.eigenvalues, layer.eigenvectors
-        A = (layer.Qeps @ phi) @ bk.diag(1 / (self.omega * q))
+        q, phi = layer.eigenvalues, bk.array(layer.eigenvectors)
+        A = layer.Qeps @ phi @ bk.diag(1 / (self.omega * q))
         pa, pb = phi @ an, phi @ bn
         Aa, Ab = A @ an, A @ bn
         cross_term = 0.5 * (bk.conj(pb) * Aa - bk.conj(Ab) * pa)
@@ -205,9 +205,7 @@ class Simulation:
             self.solve()
 
         layer, layer_index = self._get_layer(layer_index)
-
         ai0, bi0 = self._get_amplitudes(layer_index, translate=False)
-
         # Z = [z] if bk.isscalar(z) else z
         Z = z if hasattr(z, "__len__") else [z]
 
@@ -245,22 +243,17 @@ class Simulation:
     def get_ifft_amplitudes(self, amplitudes, shape, axes=(0, 1)):
 
         amplitudes = bk.array(amplitudes)
-        # print("amplitudes.shape", amplitudes.shape)
         if len(amplitudes.shape) == 1:
             amplitudes = bk.reshape(amplitudes, amplitudes.shape + (1,))
 
         s = 0
         for i in range(self.nh):
             f = bk.zeros(shape + (amplitudes.shape[0],), dtype=bk.complex128)
-            # print("f.shape", f.shape)
             f[self.harmonics[0, i], self.harmonics[1, i], :] = 1.0
             a = amplitudes[:, i]
-            # print("a.shape", a.shape)
             s += a * f
 
-        # print("s.shape", s.shape)
         ft = fft.inverse_fourier_transform(s, axes=axes)
-        # print("ft.shape", ft.shape)
         return ft
 
     def get_field_grid(self, layer_index, z=0, shape=None):
@@ -402,7 +395,8 @@ class Simulation:
         is_mu_anisotropic = mu.shape[:2] == (3, 3)
         is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
         if layer.is_uniform:
-            I = bk.eye(self.nh)
+
+            I = self.IdG
             if is_epsilon_anisotropic:
                 _epsilon = block(
                     [
@@ -419,6 +413,7 @@ class Simulation:
                 )
             else:
                 _mu = mu
+
             Keps = _build_Kmatrix(1 / epsilon * self.IdG, Ky, -Kx)
             # Pmu = bk.eye(self.nh * 2)
             Pmu = block([[mu * self.IdG, self.ZeroG], [self.ZeroG, mu * self.IdG]])
@@ -507,7 +502,7 @@ class Simulation:
         n_interfaces = len(self.layers) - 1
         S = self.get_S_matrix(indices=(0, layer_index))
         P = self.get_S_matrix(indices=(layer_index, n_interfaces))
-        q = bk.linalg.inv(bk.eye(self.nh * 2) - bk.matmul(S[0][1], P[1][0]))
+        q = bk.linalg.inv(bk.array(bk.eye(self.nh * 2)) - bk.matmul(S[0][1], P[1][0]))
         ai = bk.matmul(q, bk.matmul(S[0][0], self.a0))
         bi = bk.matmul(P[1][0], ai)
         return ai, bi
@@ -607,7 +602,7 @@ def phasor(q, z):
 
 def _build_Kmatrix(u, Kx, Ky):
     def matmuldiag(A, B):
-        return bk.einsum("i,ik->ik", bk.diag(A), B)
+        return bk.einsum("i,ik->ik", bk.array(bk.diag(A)), B)
 
     kxu = matmuldiag(Kx, u)
     kyu = matmuldiag(Ky, u)
@@ -623,7 +618,7 @@ def _build_Mmatrix(layer):
     phi = layer.eigenvectors
 
     def matmuldiag(A, B):
-        return bk.einsum("ik,k->ik", (A), B)
+        return bk.einsum("ik,k->ik", bk.array(A), B)
 
     # a = layer.Qeps @ phi @ (bk.diag(1 / layer.eigenvalues))
     a = layer.Qeps @ matmuldiag(phi, 1 / layer.eigenvalues)

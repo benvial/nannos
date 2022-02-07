@@ -16,13 +16,13 @@ from .fft import fourier_transform, inverse_fourier_transform
 def _normalize(x, n):
     with npo.errstate(invalid="ignore"):
         f = x / (n)
-    return bk.where(n == 0.0, 0.0 * x, f)
+    return bk.array(bk.where(n == 0.0, 0.0 * x, f))
 
 
 def _ft_filt(x, expo):
     with npo.errstate(divide="ignore"):
         f = 1 / (x**expo)
-    return bk.where(x == 0.0, 0.0 * x, f)
+    return bk.array(bk.where(x == 0.0, 0.0 * x, f))
 
 
 def get_tangent_field(grid, normalize=False, alt=False, rfilt=4, expo=0.5):
