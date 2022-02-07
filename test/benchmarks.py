@@ -12,7 +12,7 @@ devices = ["cpu", "gpu"]
 formulations = ["original", "tangent", "jones"]
 backends = ["numpy", "scipy", "autograd", "jax", "torch"]
 
-# formulations = ["original"]
+formulations = ["original"]
 # backends = ["torch"]
 # devices = ["gpu"]
 # backends = ["torch"]
@@ -81,25 +81,38 @@ def test_simulations(formulation, backend, device):
     st = nn.Layer("Structured", h)
     st.add_pattern(pattern)
 
-    pw = nn.PlaneWave(
-        frequency=1.1,
-    )
+    truncation = "circular"
+    frequencies = [1.1, 1.2]
 
-    for i in range(2):
-        t0 = nn.tic()
-        sim = nn.Simulation(
-            lattice,
-            [sup, st, sub],
-            pw,
-            nh,
-            formulation=formulation,
-            truncation="parallelogrammic",
-        )
-        R, T = sim.diffraction_efficiencies()
-        nn.toc(t0)
+    NH = [50, 100, 200, 400, 800]
+    NH_real = []
+    TIMES = []
+
+    for nh in NH:
+        print(f"number of harmonics = {nh}")
+        for freq in frequencies:
+            pw = nn.PlaneWave(
+                frequency=freq,
+            )
+            t0 = nn.tic()
+            sim = nn.Simulation(
+                lattice,
+                [sup, st, sub],
+                pw,
+                nh,
+                formulation=formulation,
+                truncation=truncation,
+            )
+            R, T = sim.diffraction_efficiencies()
+            t1 = nn.toc(t0)
+            NH_real.append(sim.nh)
+            TIMES.append(t1)
     B = R + T
 
-    print(">>> formulation = ", formulation)
+    import numpy as npo
+
+    npo.savez(f"benchmark_{backend}_{device}.npz", times=TIMES, real_nh=NH_real, nh=NH)
+
     print("T = ", T)
     print("R = ", R)
     print("R + T = ", B)

@@ -88,22 +88,23 @@ def _parallelogramic_truncation(nh, Lk):
     u = bk.array([bk.linalg.norm(l) for l in Lk])
     udot = bk.dot(Lk[0], Lk[1])
 
-    NGroot = int(bk.sqrt(nh))
-    if bk.mod(NGroot, 2) == 0:
+    NGroot = int((nh) ** 0.5)
+    if NGroot % 2 == 0:
         NGroot -= 1
 
     M = NGroot // 2
 
     xG = bk.array(bk.arange(-M, NGroot - M))
     G = bk.meshgrid(xG, xG, indexing="ij")
-    G = bk.array([g.flatten() for g in G])
+    G = [g.flatten() for g in G]
 
     Gl2 = G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot
     jsort = bk.argsort(Gl2)
-    Gsorted = bk.array([g[jsort] for g in G])
+    Gsorted = [g[jsort] for g in G]
 
     nh = NGroot**2
-    G = bk.array(Gsorted)[:, :nh]
+
+    G = bk.vstack(Gsorted)[:, :nh]
 
     return G, nh
 
