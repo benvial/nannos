@@ -9,6 +9,12 @@ from .__about__ import __author__, __description__, __version__
 from .log import *
 
 
+def print_info():
+    print(f"nannos v{__version__}")
+    print(__description__)
+    print(f"author: {__author__}")
+
+
 def has_torch():
     try:
         import torch
@@ -18,7 +24,6 @@ def has_torch():
         return False
 
 
-# HAS_CUDA = False
 HAS_TORCH = has_torch()
 
 
@@ -36,9 +41,15 @@ HAS_CUDA = _has_cuda()
 
 _nannos_device = "cpu"
 
+BACKEND = "numpy"
+
 
 def use_gpu():
     global _nannos_device
+
+    if BACKEND not in ["jax", "torch"]:
+        log.info(f"Cannot use GPU with {BACKEND} backend.")
+
     if not HAS_TORCH:
         _nannos_device = "cpu"
         log.info("pytorch not found. Cannot use GPU.")
@@ -151,6 +162,11 @@ elif "_JAX" in globals():
     from jax.config import config
 
     config.update("jax_enable_x64", True)
+
+    if _nannos_device == "cpu":
+        config.update("jax_platform_name", "cpu")
+    else:
+        config.update("jax_platform_name", "gpu")
     from jax import grad, numpy
 
     backend = numpy
@@ -158,6 +174,8 @@ elif "_TORCH" in globals():
     if HAS_TORCH:
         import numpy
         import torch
+
+        print(_nannos_device)
 
         backend = torch
 
@@ -177,7 +195,7 @@ elif "_TORCH" in globals():
             return df
 
     else:
-        log.info("pytorch not found. Falling back to default backend.")
+        log.info("pytorch not found. Falling back to default numpy backend.")
         set_backend("numpy")
 else:
     import numpy
