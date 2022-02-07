@@ -8,6 +8,7 @@
 
 import sys
 
+import numpy as npo
 import pytest
 
 try:
@@ -122,7 +123,7 @@ def test_simulations(formulation, backend, device):
     import numpy as npo
 
     npo.savez(
-        f"{threads}/benchmark_{backend}_{device}.npz",
+        f"benchmark_{backend}_{device}.npz",
         times=npo.mean(TIMES),
         real_nh=NH_real,
         nh=NH,
