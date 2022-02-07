@@ -11,10 +11,7 @@ __all__ = ["Layer", "Pattern"]
 
 from copy import copy
 
-# from . import numpy as bk
-from . import BACKEND
 from . import backend as bk
-from . import get_backend
 from .simulation import block
 
 
@@ -150,7 +147,6 @@ class Layer:
             #
             # else:
             #     eig_func = bk.linalg.eig
-
             eig_func = bk.linalg.eig
 
             w, v = eig_func(matrix)

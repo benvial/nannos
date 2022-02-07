@@ -8,8 +8,6 @@
 from .__about__ import __author__, __description__, __version__
 from .log import *
 
-HAS_CUDA = False
-
 
 def has_torch():
     try:
@@ -20,7 +18,13 @@ def has_torch():
         return False
 
 
+# HAS_CUDA = False
 HAS_TORCH = has_torch()
+
+
+def _delvar(VAR):
+    if VAR in globals():
+        del globals()[VAR]
 
 
 def set_backend(backend):
@@ -29,7 +33,7 @@ def set_backend(backend):
     Parameters
     ----------
     backend : str
-        Either ``numpy``, ``autograd``, ``torch`` or ``jax``.
+        Either ``numpy``, ``scipy``, ``autograd``, ``torch`` or ``jax``.
 
 
     """
@@ -37,58 +41,45 @@ def set_backend(backend):
     import importlib
     import sys
 
-    global TORCH
-    global JAX
-    global AUTOGRAD
+    global _NUMPY
+    global _SCIPY
+    global _AUTOGRAD
+    global _JAX
+    global _TORCH
     if backend == "autograd":
-        AUTOGRAD = True
         log.info("Setting autograd backend")
-        try:
-            del JAX
-        except:
-            pass
-        try:
-            del TORCH
-        except:
-            pass
+        _AUTOGRAD = True
+        _delvar("_JAX")
+        _delvar("_TORCH")
+        _delvar("_SCIPY")
+    elif backend == "scipy":
+        log.info("Setting scipy backend")
+        _SCIPY = True
+        _delvar("_JAX")
+        _delvar("_TORCH")
+        _delvar("_AUTOGRAD")
     elif backend == "jax":
-        JAX = True
         log.info("Setting jax backend")
-        try:
-            del AUTOGRAD
-        except:
-            pass
-        try:
-            del TORCH
-        except:
-            pass
+        _JAX = True
+        _delvar("_SCIPY")
+        _delvar("_TORCH")
+        _delvar("_AUTOGRAD")
     elif backend == "torch":
-        TORCH = True
+        _TORCH = True
         log.info("Setting torch backend")
-
-        try:
-            del JAX
-        except:
-            pass
-        try:
-            del AUTOGRAD
-        except:
-            pass
+        _delvar("_SCIPY")
+        _delvar("_JAX")
+        _delvar("_AUTOGRAD")
     elif backend == "numpy":
-        try:
-            del JAX
-        except:
-            try:
-                del AUTOGRAD
-            except:
-                try:
-                    del TORCH
-                except:
-                    pass
+        _NUMPY = True
         log.info("Setting numpy backend")
+        _delvar("_SCIPY")
+        _delvar("_JAX")
+        _delvar("_AUTOGRAD")
+        _delvar("_TORCH")
     else:
         raise ValueError(
-            f"Unknown backend '{backend}'. Please choose between 'numpy', 'jax', 'torch' and 'autograd'."
+            f"Unknown backend '{backend}'. Please choose between 'numpy', 'scipy', 'jax', 'torch' and 'autograd'."
         )
 
     import nannos
@@ -101,83 +92,80 @@ def set_backend(backend):
 
 
 def get_backend():
-    try:
-        AUTOGRAD
+
+    if "_SCIPY" in globals():
+        return "scipy"
+    elif "_AUTOGRAD" in globals():
         return "autograd"
-    except:
-        try:
-            JAX
-            return "jax"
-        except:
-            try:
-                TORCH
-                return "torch"
-            except:
-                return "numpy"
+    elif "_JAX" in globals():
+        return "jax"
+    elif "_TORCH" in globals():
+        return "torch"
+    else:
+        return "numpy"
 
 
-try:
-    JAX
+def grad(f):
+    raise NotImplementedError(f"grad is not implemented for {BACKEND} backend.")
+
+
+if "_SCIPY" in globals():
+
+    import numpy
+
+    backend = numpy
+elif "_AUTOGRAD" in globals():
+    from autograd import grad, numpy
+
+    backend = numpy
+elif "_JAX" in globals():
+    _JAX
     from jax.config import config
 
     config.update("jax_enable_x64", True)
     from jax import grad, numpy
 
     backend = numpy
+elif "_TORCH" in globals():
+    if HAS_TORCH:
+        import numpy
+        import torch
 
-    # TODO: support jax since it is faster than autograd
-    # jax does not support numpy.linalg.eig yet
-    # for autodif wrt eigenvectors
-    # see: https://github.com/google/jax/issues/2748
-except:
-    try:
+        backend = torch
 
-        TORCH
-        if HAS_TORCH:
-            import numpy
-            import torch
+        HAS_CUDA = torch.cuda.is_available()
 
-            backend = torch
+        _device = "cuda" if HAS_CUDA else "cpu"
 
-            HAS_CUDA = torch.cuda.is_available()
+        def _array(a, **kwargs):
+            if isinstance(a, backend.Tensor):
+                return a.to(_device)
+            else:
+                return backend.tensor(a, **kwargs).to(_device)
 
-            _device = "cuda" if HAS_CUDA else "cpu"
+        backend.array = _array
 
-            def _array(a, **kwargs):
-                if isinstance(a, backend.Tensor):
-                    return a.to(_device)
-                else:
-                    return backend.tensor(a, **kwargs).to(_device)
+        def grad(f):
+            def df(x):
+                _x = x.clone().detach().requires_grad_(True)
+                return backend.autograd.grad(f(_x), _x, allow_unused=True)[0]
 
-            backend.array = _array
+            return df
 
-            def grad(f):
-                def df(x):
-                    _x = x.clone().detach().requires_grad_(True)
-                    return backend.autograd.grad(f(_x), _x, allow_unused=True)[0]
+    else:
+        log.info("pytorch not found. Falling back to default backend.")
+        set_backend("numpy")
+else:
+    import numpy
 
-                return df
+    backend = numpy
 
-        else:
-
-            log.info("torch not found. Falling back to default backend")
-            set_backend("numpy")
-
-    except:
-        try:
-            AUTOGRAD
-            from autograd import grad, numpy
-
-            backend = numpy
-        except:
-            import numpy
-
-            backend = numpy
-            grad = None
-
+# TODO: support jax since it is faster than autograd
+# jax does not support numpy.linalg.eig
+# for autodif wrt eigenvectors yet.
+# see: https://github.com/google/jax/issues/2748
 
 BACKEND = get_backend()
-
 
 from .constants import *
 from .excitation import *

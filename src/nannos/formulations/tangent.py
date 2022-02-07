@@ -10,6 +10,7 @@ import numpy as npo
 
 from .. import backend as bk
 from ..utils import filter, norm
+from .fft import fourier_transform, inverse_fourier_transform
 
 
 def _normalize(x, n):
@@ -35,10 +36,9 @@ def get_tangent_field(grid, normalize=False, alt=False, rfilt=4, expo=0.5):
     fx = bk.fft.fftfreq(Nx)
     fy = bk.fft.fftfreq(Ny)
     Fx, Fy = bk.meshgrid(fx, fy, indexing="ij")
-
-    ghat = _ft_filt(Fx**2 + Fy**2, expo=expo)
-    Nhat = [bk.fft.fft2(N[i]) for i in range(2)]
-    Nstar = [bk.real(bk.fft.ifft2(Nhat[i] * ghat)) for i in range(2)]
+    ghat = _ft_filt(Fx**2 + Fy**2, expo=expo) * Nx * Ny
+    Nhat = [fourier_transform(N[i]) for i in range(2)]
+    Nstar = [(inverse_fourier_transform(Nhat[i] * ghat)) for i in range(2)]
     if normalize:
         norm_Nstar = norm(Nstar)
         Nstar = [_normalize(Nstar[i], norm_Nstar) for i in range(2)]

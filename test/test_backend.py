@@ -14,6 +14,12 @@ def test_backend():
     assert nn.get_backend() == "numpy"
     assert nn.BACKEND == "numpy"
 
+    nn.set_backend("scipy")
+    assert nn.numpy.__name__ == "numpy"
+    assert nn.backend.__name__ == "numpy"
+    assert nn.get_backend() == "scipy"
+    assert nn.BACKEND == "scipy"
+
     nn.set_backend("autograd")
     assert nn.numpy.__name__ == "autograd.numpy"
     assert nn.backend.__name__ == "autograd.numpy"
@@ -44,22 +50,12 @@ def test_backend():
 
 
 formulations = ["original", "tangent", "jones"]
-backends = ["numpy", "autograd", "jax", "torch"]
+backends = ["numpy", "scipy", "autograd", "jax", "torch"]
 
 
-# @pytest.mark.parametrize("freq", [0.7, 1.1])
-# @pytest.mark.parametrize("theta", [0, 30])
-# @pytest.mark.parametrize("phi", [0, 30])
-# @pytest.mark.parametrize("psi", [0, 30])
-
-
-@pytest.mark.parametrize("freq", [0.7])
-@pytest.mark.parametrize("theta", [0])
-@pytest.mark.parametrize("phi", [0])
-@pytest.mark.parametrize("psi", [0])
 @pytest.mark.parametrize("formulation", formulations)
 @pytest.mark.parametrize("backend", backends)
-def test_simulations(freq, theta, phi, psi, formulation, backend):
+def test_simulations(formulation, backend):
 
     import nannos as nn
 
@@ -102,13 +98,14 @@ def test_simulations(freq, theta, phi, psi, formulation, backend):
     st.add_pattern(pattern)
 
     pw = nn.PlaneWave(
-        frequency=freq,
-        angles=(theta * nn.pi / 180, phi * nn.pi / 180, psi * nn.pi / 180),
+        frequency=1.1,
     )
 
-    sim = nn.Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
-
-    R, T = sim.diffraction_efficiencies()
+    for i in range(1):
+        t0 = nn.tic()
+        sim = nn.Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
+        R, T = sim.diffraction_efficiencies()
+        nn.toc(t0)
     B = R + T
 
     print(">>> formulation = ", formulation)
