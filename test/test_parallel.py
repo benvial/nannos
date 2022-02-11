@@ -14,7 +14,7 @@ import nannos as nn
 from nannos import numpy as np
 
 np.random.seed(1984)
-Nx = Ny = 2**5
+Nx = Ny = 2 ** 5
 
 x = np.random.rand(Nx * Ny)
 

@@ -107,3 +107,6 @@ doc/biblio
 # include test data directory
 !tests/data/
 !tests/data/*
+
+# include benchmarks results
+!examples/benchmarks/*
