@@ -20,7 +20,7 @@ except:
 try:
     nfreq = int(sys.argv[2])
 except:
-    nfreq = 1
+    nfreq = 2
 
 
 os.environ["OMP_NUM_THREADS"] = f"{threads}"
