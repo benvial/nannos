@@ -105,7 +105,7 @@ def test_simulations(formulation, backend, device):
 
     truncation = "circular"
 
-    nfreq = 11
+    # nfreq = 11
     frequencies = nn.backend.ones(nfreq) * 1.1
 
     NH = [100, 200, 400, 600, 800, 1000]
