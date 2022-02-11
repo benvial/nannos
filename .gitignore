@@ -109,4 +109,4 @@ doc/biblio
 !tests/data/*
 
 # include benchmarks results
-!examples/benchmarks/*
+!examples/benchmarks/*/*.npz
