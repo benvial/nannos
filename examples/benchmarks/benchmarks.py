@@ -13,12 +13,12 @@ import numpy as npo
 import pytest
 
 try:
-    threads = sys.argv[1]
+    threads = int(sys.argv[1])
 except:
     threads = 1
 
 try:
-    nfreq = sys.argv[2]
+    nfreq = int(sys.argv[2])
 except:
     nfreq = 1
 
