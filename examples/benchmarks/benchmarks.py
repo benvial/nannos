@@ -23,16 +23,16 @@ except:
     nfreq = 1
 
 
-os.environ["OMP_NUM_THREADS"] = f"{nt}"
-os.environ["BLAS_NUM_THREADS"] = f"{nt}"
-os.environ["OPENBLAS_NUM_THREADS"] = f"{nt}"
-os.environ["MKL_NUM_THREADS"] = f"{nt}"
-os.environ["VECLIB_MAXIMUM_THREADS"] = f"{nt}"
-os.environ["NUMEXPR_NUM_THREADS"] = f"{nt}"
+os.environ["OMP_NUM_THREADS"] = f"{threads}"
+os.environ["BLAS_NUM_THREADS"] = f"{threads}"
+os.environ["OPENBLAS_NUM_THREADS"] = f"{threads}"
+os.environ["MKL_NUM_THREADS"] = f"{threads}"
+os.environ["VECLIB_MAXIMUM_THREADS"] = f"{threads}"
+os.environ["NUMEXPR_NUM_THREADS"] = f"{threads}"
 # Limit ourselves to single-threaded jax/xla operations to avoid thrashing. See
 # https://github.com/google/jax/issues/743.
 os.environ["XLA_FLAGS"] = (
-    f"--xla_cpu_multi_thread_eigen=false " f"intra_op_parallelism_threads={nt}"
+    f"--xla_cpu_multi_thread_eigen=false " f"intra_op_parallelism_threads={threads}"
 )
 
 
