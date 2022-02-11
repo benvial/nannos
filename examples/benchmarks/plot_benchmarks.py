@@ -103,12 +103,51 @@ for num_threads in threads:
 
 
 ##############################################################################
+# Time vs. number of threads
+# -----------------------------
+
+
+for inh in range(len(NH)):
+    plt.figure(figsize=figsize)
+    i = 0
+    for device in devices:
+        for backend in backends:
+            t_threads = []
+            for num_threads in threads:
+                if not (
+                    device == "gpu" and backend in ["numpy", "scipy", "autograd", "jax"]
+                ):
+                    arch = bench_threads[num_threads][backend][device]
+                    t = arch["times"]
+                    # t = np.array(t)
+                    t_threads.append(t)
+            if t_threads != []:
+                t_threads = np.array(t_threads)
+                plt.plot(
+                    threads,
+                    t_threads[:, inh],
+                    f"-{markers[i]}",
+                    c=colors[i],
+                    label=f"{backend} {device}",
+                )
+                i += 1
+    plt.xticks(threads)
+
+    plt.legend(ncol=2)
+    # plt.yscale("log")
+    # plt.xscale("log")
+    plt.xlabel("number of threads")
+    plt.ylabel("time (s)")
+    plt.title(f"backends comparison {NH[inh]} harmonics")
+    plt.tight_layout()
+
+
+##############################################################################
 # Speedup vs. number of threads
 # -----------------------------
 
 
 for inh in range(len(NH)):
-    bench_threads_speed = dict()
     plt.figure(figsize=figsize)
     i = 1
     for device in devices:

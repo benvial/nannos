@@ -64,8 +64,8 @@ def test_simulations(formulation, backend):
     nh = 51
     L1 = [1.0, 0]
     L2 = [0, 1.0]
-    Nx = 2 ** 9
-    Ny = 2 ** 9
+    Nx = 2**9
+    Ny = 2**9
 
     eps_pattern = 4.0 + 0j
     eps_hole = 1.0
@@ -78,7 +78,7 @@ def test_simulations(formulation, backend):
     x0 = nn.backend.linspace(0, 1.0, Nx)
     y0 = nn.backend.linspace(0, 1.0, Ny)
     x, y = nn.backend.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
 
     lattice = nn.Lattice((L1, L2))
     sup = nn.Layer("Superstrate", epsilon=1, mu=1)

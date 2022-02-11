@@ -6,6 +6,7 @@
 # See the documentation at nannos.gitlab.io
 
 
+import os
 import sys
 
 import numpy as npo
@@ -16,15 +17,30 @@ try:
 except:
     threads = 1
 
+try:
+    nfreq = sys.argv[2]
+except:
+    nfreq = 1
+
+
+os.environ["OMP_NUM_THREADS"] = f"{nt}"
+os.environ["BLAS_NUM_THREADS"] = f"{nt}"
+os.environ["OPENBLAS_NUM_THREADS"] = f"{nt}"
+os.environ["MKL_NUM_THREADS"] = f"{nt}"
+os.environ["VECLIB_MAXIMUM_THREADS"] = f"{nt}"
+os.environ["NUMEXPR_NUM_THREADS"] = f"{nt}"
+# Limit ourselves to single-threaded jax/xla operations to avoid thrashing. See
+# https://github.com/google/jax/issues/743.
+os.environ["XLA_FLAGS"] = (
+    f"--xla_cpu_multi_thread_eigen=false " f"intra_op_parallelism_threads={nt}"
+)
+
+
 devices = ["cpu", "gpu"]
 formulations = ["original", "tangent", "jones"]
 backends = ["numpy", "scipy", "autograd", "jax", "torch"]
 
 formulations = ["original"]
-# backends = ["torch"]
-# devices = ["gpu"]
-# backends = ["torch"]
-# formulations = [ "jones"]
 
 
 @pytest.mark.parametrize("formulation", formulations)
@@ -52,8 +68,8 @@ def test_simulations(formulation, backend, device):
 
     L1 = [1.0, 0]
     L2 = [0, 1.0]
-    Nx = 2 ** 9
-    Ny = 2 ** 9
+    Nx = 2**9
+    Ny = 2**9
 
     eps_pattern = 4.0 + 0j
     eps_hole = 1.0
@@ -66,7 +82,7 @@ def test_simulations(formulation, backend, device):
     x0 = nn.backend.linspace(0, 1.0, Nx)
     y0 = nn.backend.linspace(0, 1.0, Ny)
     x, y = nn.backend.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
     hole = nn.backend.array(hole)
 
     lattice = nn.Lattice((L1, L2))

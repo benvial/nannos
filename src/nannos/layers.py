@@ -103,7 +103,7 @@ class Layer:
 
         q = (
             bk.array(
-                _epsilon * _mu * omega ** 2 - kx ** 2 - ky ** 2,
+                _epsilon * _mu * omega**2 - kx**2 - ky**2,
                 dtype=bk.complex128,
             )
             ** 0.5
@@ -150,7 +150,7 @@ class Layer:
             eig_func = bk.linalg.eig
 
             w, v = eig_func(matrix)
-            q = w ** 0.5
+            q = w**0.5
             q = bk.where(bk.imag(q) < 0.0, -q, q)
             self.eigenvalues, self.eigenvectors = q, v
         return self.eigenvalues, self.eigenvectors
