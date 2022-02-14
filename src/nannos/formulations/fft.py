@@ -37,3 +37,10 @@ def inverse_fourier_transform(uft, s=None, axes=(-2, -1)):
         u = bk.fft.ifft2(uft, s=s, axes=axes)
     nx, ny = u.shape[:2]
     return u * (nx * ny)
+
+
+if BACKEND == "jax":
+    from jax import jit
+
+    fourier_transform = jit(fourier_transform)
+    inverse_fourier_transform = jit(inverse_fourier_transform)

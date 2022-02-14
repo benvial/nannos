@@ -11,6 +11,7 @@ __all__ = ["Layer", "Pattern"]
 
 from copy import copy
 
+from . import BACKEND
 from . import backend as bk
 from .simulation import block
 
@@ -103,7 +104,7 @@ class Layer:
 
         q = (
             bk.array(
-                _epsilon * _mu * omega ** 2 - kx ** 2 - ky ** 2,
+                _epsilon * _mu * omega**2 - kx**2 - ky**2,
                 dtype=bk.complex128,
             )
             ** 0.5
@@ -149,8 +150,13 @@ class Layer:
             #     eig_func = bk.linalg.eig
             eig_func = bk.linalg.eig
 
+            if BACKEND == "jax":
+                from jax import jit
+
+                eig_func = jit(eig_func)
+
             w, v = eig_func(matrix)
-            q = w ** 0.5
+            q = w**0.5
             q = bk.where(bk.imag(q) < 0.0, -q, q)
             self.eigenvalues, self.eigenvectors = q, v
         return self.eigenvalues, self.eigenvectors

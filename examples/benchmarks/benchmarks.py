@@ -10,7 +10,6 @@ import os
 import sys
 
 import numpy as npo
-import pytest
 
 try:
     threads = int(sys.argv[1])
@@ -23,49 +22,38 @@ except:
     nfreq = 2
 
 
-os.environ["OMP_NUM_THREADS"] = f"{threads}"
-os.environ["BLAS_NUM_THREADS"] = f"{threads}"
-os.environ["OPENBLAS_NUM_THREADS"] = f"{threads}"
-os.environ["MKL_NUM_THREADS"] = f"{threads}"
-os.environ["VECLIB_MAXIMUM_THREADS"] = f"{threads}"
-os.environ["NUMEXPR_NUM_THREADS"] = f"{threads}"
-# Limit ourselves to single-threaded jax/xla operations to avoid thrashing. See
-# https://github.com/google/jax/issues/743.
-os.environ["XLA_FLAGS"] = (
-    f"--xla_cpu_multi_thread_eigen=false " f"intra_op_parallelism_threads={threads}"
-)
-
-
 devices = ["cpu", "gpu"]
-formulations = ["original", "tangent", "jones"]
 backends = ["numpy", "scipy", "autograd", "jax", "torch"]
 
-formulations = ["original"]
 
-
-@pytest.mark.parametrize("formulation", formulations)
-@pytest.mark.parametrize("backend", backends)
-@pytest.mark.parametrize("device", devices)
-def test_simulations(formulation, backend, device):
+def test_simulations(backend, device):
+    print("--------------------------")
+    print(f"{backend} {device}")
+    print("--------------------------")
+    formulation = "original"
     import nannos as nn
 
     if backend in ["numpy", "scipy", "autograd", "jax"] and device == "gpu":
         return
-    if backend == "torch" and (not nn.HAS_TORCH or not nn.HAS_CUDA):
-        return
+    if backend == "torch":
+        if not nn.HAS_TORCH:
+            return
+        if not nn.HAS_CUDA and device == "gpu":
+            return
 
     nn.set_backend(backend)
     if device == "gpu":
         nn.use_gpu()
     if nn.BACKEND == "torch":
         device = nn.backend.device(nn._nannos_device)
+
     elif nn.BACKEND == "jax":
         import jax
 
     L1 = [1.0, 0]
     L2 = [0, 1.0]
-    Nx = 2 ** 9
-    Ny = 2 ** 9
+    Nx = 2**9
+    Ny = 2**9
 
     eps_pattern = 4.0 + 0j
     eps_hole = 1.0
@@ -78,7 +66,7 @@ def test_simulations(formulation, backend, device):
     x0 = nn.backend.linspace(0, 1.0, Nx)
     y0 = nn.backend.linspace(0, 1.0, Ny)
     x, y = nn.backend.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
     hole = nn.backend.array(hole)
 
     lattice = nn.Lattice((L1, L2))
@@ -135,6 +123,7 @@ def test_simulations(formulation, backend, device):
         TIMES_ALL.append(TIMES_NH)
 
         NH_real.append(sim.nh)
+    B = R + T
 
     npo.savez(
         f"benchmark_{backend}_{device}.npz",
@@ -143,3 +132,13 @@ def test_simulations(formulation, backend, device):
         real_nh=NH_real,
         nh=NH,
     )
+
+
+if __name__ == "__main__":
+    for device in devices:
+        for backend in backends:
+            test_simulations(backend, device)
+
+    # test_simulations("numpy", "cpu")
+    # test_simulations("torch", "cpu")
+    # test_simulations("jax", "cpu")

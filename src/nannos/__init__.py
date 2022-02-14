@@ -203,7 +203,7 @@ else:
 
     backend = numpy
 
-# TODO: support jax since it is faster than autograd
+# TODO: support jax properly (is it faster than autograd? use jit?)
 # jax does not support eig
 # for autodif wrt eigenvectors yet.
 # see: https://github.com/google/jax/issues/2748
