@@ -57,19 +57,15 @@ def test_simulations(formulation, backend, device):
     nn.set_backend(backend)
     if device == "gpu":
         nn.use_gpu()
-    print(nn._nannos_device)
     if nn.BACKEND == "torch":
         device = nn.backend.device(nn._nannos_device)
-        print(device.type)
     elif nn.BACKEND == "jax":
         import jax
 
-        print(jax.default_backend())
-
     L1 = [1.0, 0]
     L2 = [0, 1.0]
-    Nx = 2**9
-    Ny = 2**9
+    Nx = 2 ** 9
+    Ny = 2 ** 9
 
     eps_pattern = 4.0 + 0j
     eps_hole = 1.0
@@ -82,7 +78,7 @@ def test_simulations(formulation, backend, device):
     x0 = nn.backend.linspace(0, 1.0, Nx)
     y0 = nn.backend.linspace(0, 1.0, Ny)
     x, y = nn.backend.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
     hole = nn.backend.array(hole)
 
     lattice = nn.Lattice((L1, L2))
@@ -139,7 +135,6 @@ def test_simulations(formulation, backend, device):
         TIMES_ALL.append(TIMES_NH)
 
         NH_real.append(sim.nh)
-    B = R + T
 
     npo.savez(
         f"benchmark_{backend}_{device}.npz",
@@ -148,15 +143,3 @@ def test_simulations(formulation, backend, device):
         real_nh=NH_real,
         nh=NH,
     )
-
-    # print("T = ", T)
-    # print("R = ", R)
-    # print("R + T = ", B)
-    # assert nn.backend.allclose(
-    #     B, nn.backend.array(1.0, dtype=nn.backend.float64), atol=5e-3
-    # )
-    #
-    # a, b = sim._get_amplitudes(1, z=0.1)
-    # field_fourier = sim.get_field_fourier(1, z=0.1)
-
-    # return R, T, sim

@@ -77,7 +77,7 @@ class TopologyOptimizer:
             print(f"global iteration {iopt}")
             print("-----------------------")
 
-            proj_level = 2**iopt
+            proj_level = 2 ** iopt
             args = list(self.args)
             args[1] = proj_level
             args = tuple(args)

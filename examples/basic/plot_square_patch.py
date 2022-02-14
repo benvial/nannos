@@ -32,7 +32,7 @@ plt.ion()
 eps_quartz = 2.132
 eps_active = 3.97
 
-N = 2**7
+N = 2 ** 7
 period = 0.68
 l_patch = 0.8 * period
 x = np.linspace(-period / 2, period / 2, N)

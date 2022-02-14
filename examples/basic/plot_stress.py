@@ -43,7 +43,7 @@ def epsilon_Al(wli):
     f = h * c / e / wli * 1e6
     f_p = 15
     gamma = 0.1
-    return 1 - f_p**2 / (f * (f + 1j * gamma))
+    return 1 - f_p ** 2 / (f * (f + 1j * gamma))
 
 
 wls = np.linspace(wl[0], wl[-1], 500)
@@ -166,7 +166,7 @@ angle = np.linspace(0, np.pi / 2 * 0.99, 500)
 plt.figure()
 for eps_sup, eps_sub in zip([8, 9, 10, 10], [9, 9, 9, 9 + 0.1j]):
     pressure = (
-        simulation_angle(eps_sup, eps_sub, angle) * 3.5e9 / (c / eps_sup.real**0.5)
+        simulation_angle(eps_sup, eps_sub, angle) * 3.5e9 / (c / eps_sup.real ** 0.5)
     )
     if np.imag(eps_sub) == 0:
         label = f"{eps_sup} | 1 | {eps_sub}"
