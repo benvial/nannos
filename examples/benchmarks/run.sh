@@ -1,12 +1,13 @@
 #!/bin/bash
 
 
-module load miniconda
-source activate nannos
+# module load miniconda
+conda activate nannos
 export MPLBACKEND=Agg
 export PYTHONUNBUFFERED=TRUE
 
 echo $CONDA_PREFIX
+echo $(which python)
 
 for THREADS in 1 2 4 8 16
 do

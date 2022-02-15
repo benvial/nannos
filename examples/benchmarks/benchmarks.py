@@ -139,6 +139,7 @@ if __name__ == "__main__":
         for backend in backends:
             test_simulations(backend, device)
 
+    # test_simulations("torch", "gpu")
     # test_simulations("numpy", "cpu")
     # test_simulations("torch", "cpu")
     # test_simulations("jax", "cpu")

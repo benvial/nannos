@@ -24,7 +24,7 @@ def fourier_transform(u, s=None, axes=(-2, -1)):
         uft = _fft2_torch(u, s=s, dim=axes)
     else:
         uft = bk.fft.fft2(u, s=s, axes=axes)
-    nx, ny = uft.shape[:2]
+    nx, ny = uft.shape[-2:]
     return uft / (nx * ny)
 
 
@@ -35,7 +35,7 @@ def inverse_fourier_transform(uft, s=None, axes=(-2, -1)):
         u = _ifft2_torch(uft, s=s, dim=axes)
     else:
         u = bk.fft.ifft2(uft, s=s, axes=axes)
-    nx, ny = u.shape[:2]
+    nx, ny = u.shape[-2:]
     return u * (nx * ny)
 
 
