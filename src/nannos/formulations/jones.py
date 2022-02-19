@@ -14,12 +14,10 @@ from ..utils import norm
 def get_jones_field(t):
     norm_t = norm(t)
     n = [-t[1], t[0]]
-    theta_J = bk.arccos(t[0] / norm_t)
-    phi_J = pi / 8 * (1 + bk.cos(pi * norm_t))
+    theta = bk.arccos(t[0] / norm_t)
+    phi = pi / 8 * (1 + bk.cos(pi * norm_t))
+    expo = bk.exp(1j * theta)
     J = [
-        bk.exp(1j * theta_J)
-        / norm_t
-        * (t[i] * bk.cos(phi_J) + 1j * n[i] * bk.sin(phi_J))
-        for i in range(2)
+        expo / norm_t * (t[i] * bk.cos(phi) + 1j * n[i] * bk.sin(phi)) for i in range(2)
     ]
     return J

@@ -13,6 +13,9 @@ from copy import copy
 
 from . import BACKEND
 from . import backend as bk
+from . import jit
+from .formulations.jones import get_jones_field
+from .formulations.tangent import get_tangent_field
 from .simulation import block
 
 
@@ -33,7 +36,15 @@ class Layer:
 
     """
 
-    def __init__(self, name="layer", thickness=0, epsilon=1, mu=1):
+    def __init__(
+        self,
+        name="layer",
+        thickness=0,
+        epsilon=1,
+        mu=1,
+        tangent_field=None,
+        tangent_field_type="fft",
+    ):
         if thickness is not None:
             if thickness < 0:
                 raise ValueError("thickness must be positive.")
@@ -41,6 +52,8 @@ class Layer:
         self.thickness = thickness
         self.epsilon = bk.array(epsilon, dtype=bk.complex128)
         self.mu = bk.array(mu, dtype=bk.complex128)
+        self.tangent_field = tangent_field
+        self.tangent_field_type = tangent_field_type
         self.iscopy = False
         self.original = self
         self.patterns = []
@@ -148,12 +161,7 @@ class Layer:
             #
             # else:
             #     eig_func = bk.linalg.eig
-            eig_func = bk.linalg.eig
-
-            if BACKEND == "jax":
-                from jax import jit
-
-                eig_func = jit(eig_func)
+            eig_func = jit(bk.linalg.eig)
 
             w, v = eig_func(matrix)
             q = w**0.5
@@ -201,6 +209,29 @@ class Layer:
 
         """
         return len(self.patterns) == 0
+
+    def get_tangent_field(self, harmonics, normalize=False):
+        if self.is_uniform:
+            return None
+        else:
+            if self.tangent_field is not None:
+                return self.tangent_field
+            else:
+                epsilon = self.patterns[0].epsilon
+                is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
+                epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
+                return get_tangent_field(
+                    epsilon_zz,
+                    harmonics,
+                    normalize=normalize,
+                    type=self.tangent_field_type,
+                )
+
+    def get_jones_field(self, t):
+        if self.is_uniform:
+            return None
+        else:
+            return get_jones_field(t)
 
 
 class Pattern:

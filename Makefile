@@ -31,6 +31,9 @@ TEST_ARGS=-n auto #--dist loadscope
 endif
 
 
+
+
+
 message = @make -s printmessage RULE=${1}
 
 printmessage: 
@@ -257,13 +260,36 @@ cleantest:
 	$(call message,${@})
 	@rm -rf .coverage* htmlcov coverage.xml
 
+
+
+	
+
+define runtest
+		@echo 
+		@echo "-----------------------------------------------------------------------------"
+		@echo "-----------------------    testing $(1) backend    --------------------------"
+		@echo "-----------------------------------------------------------------------------"
+		@echo 
+		@export MPLBACKEND=agg && export NANNOS_BACKEND=$(1) && \
+		pytest ./test/basic \
+		--cov=src/$(PROJECT_NAME) --cov-append --cov-report term \
+		--durations=0 $(TEST_ARGS)
+endef
+
+
 ## Run the test suite
 test: cleantest
 	$(call message,${@})
-	@export MPLBACKEND=agg &&  pytest ./test \
+	$(call	runtest,numpy)
+	$(call	runtest,scipy)
+	$(call	runtest,autograd)
+	$(call	runtest,jax)
+	$(call	runtest,torch)
+	@export MPLBACKEND=agg && export NANNOS_BACKEND=numpy && pytest ./test/bk \
 	--cov=src/$(PROJECT_NAME) --cov-append --cov-report term \
 	--cov-report html --cov-report xml --durations=0 $(TEST_ARGS)
-
+	
+	
 ## Run the test suite (parallel)
 testpara: cleantest
 	$(call message,${@})

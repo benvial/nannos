@@ -5,16 +5,26 @@
 
 
 import nlopt
-from autograd import grad
+import numpy as npo
 from scipy.optimize import minimize
 
-from . import numpy as np
-from .utils import filter
+from . import backend as bk
+from . import grad
+from .utils import apply_filter
+
+
+def simp(x, eps_min, eps_max, p=1):
+    return (eps_max - eps_min) * x**p + eps_min
 
 
 def project(x, beta=1, thres=0.5):
-    return ((np.tanh(thres * beta)) + np.tanh(beta * (x - thres))) / (
-        np.tanh(thres * beta) + (np.tanh((1 - thres) * beta))
+    x = bk.array(x)
+
+    def tanh(z):
+        return bk.tanh(bk.array(z))
+
+    return ((tanh(thres * beta)) + tanh(beta * (x - thres))) / (
+        tanh(thres * beta) + (tanh((1 - thres) * beta))
     )
 
 
@@ -72,19 +82,20 @@ class TopologyOptimizer:
         print(f"Topology optimization with {self.nvar} variables")
         print("#################################################")
         print("")
-        x0 = self.x0
+        x0 = npo.array(self.x0)
         for iopt in range(*self.threshold):
             print(f"global iteration {iopt}")
             print("-----------------------")
 
             proj_level = 2**iopt
             args = list(self.args)
-            args[1] = proj_level
+            args[0] = proj_level
             args = tuple(args)
             if self.method == "scipy":
 
                 def fun_scipy(x, *args):
-                    y = fun(x, *args)
+                    x = bk.array(x, dtype=bk.float64)
+                    y = self.fun(x, *args)
                     print(f"current value = {y}")
                     if self.callback is not None:
                         self.callback(x, y, *args)
@@ -116,15 +127,19 @@ class TopologyOptimizer:
             else:
 
                 def fun_nlopt(x, gradn):
-                    gradn[:] = self.grad_fun(x, *args)
+                    x = bk.array(x, dtype=bk.float64)
                     y = self.fun(x, *args)
+                    if gradn.size > 0:
+                        dy = self.grad_fun(x, *args)
+                        gradn[:] = npo.array(dy, dtype=npo.float64)
                     print(f"current value = {y}")
                     if self.callback is not None:
                         self.callback(x, y, *args)
-                    return y
+                    out = npo.float(y)
+                    return out
 
-                lb = np.zeros(self.nvar, dtype=float)
-                ub = np.ones(self.nvar, dtype=float)
+                lb = npo.zeros(self.nvar, dtype=npo.float64)
+                ub = npo.ones(self.nvar, dtype=npo.float64)
 
                 opt = nlopt.opt(nlopt.LD_MMA, self.nvar)
                 opt.set_lower_bounds(lb)

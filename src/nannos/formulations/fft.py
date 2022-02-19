@@ -11,6 +11,7 @@ from scipy.fftpack import ifft2 as _ifft2_scipy
 
 from .. import BACKEND, HAS_TORCH
 from .. import backend as bk
+from .. import jit
 
 if HAS_TORCH:
     from torch.fft import fft2 as _fft2_torch
@@ -39,8 +40,5 @@ def inverse_fourier_transform(uft, s=None, axes=(-2, -1)):
     return u * (nx * ny)
 
 
-if BACKEND == "jax":
-    from jax import jit
-
-    fourier_transform = jit(fourier_transform)
-    inverse_fourier_transform = jit(inverse_fourier_transform)
+fourier_transform = jit(fourier_transform, static_argnums=(1, 2))
+inverse_fourier_transform = jit(inverse_fourier_transform, static_argnums=(1, 2))

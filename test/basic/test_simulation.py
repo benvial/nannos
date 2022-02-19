@@ -6,82 +6,53 @@
 # See the documentation at nannos.gitlab.io
 
 
-# from nannos import numpy as np
-import numpy as np
+import numpy as npo
 import pytest
 
-from nannos import Lattice, Layer, Pattern, PlaneWave, Simulation, pi, set_backend
+import nannos as nn
 
-# set_backend("torch")
-# set_backend("autograd")
+pi = npo.pi
+
+np = nn.backend
 
 nh = 51
 L1 = [1.0, 0]
 L2 = [0, 1.0]
-freq = 1.1
-theta = 30.0 * pi / 180
-phi = 30.0 * pi / 180
-psi = 30.0 * pi / 180
-
-
-pw = PlaneWave(
-    frequency=freq, angles=(theta * pi / 180, phi * pi / 180, psi * pi / 180)
-)
-
-Nx = 2**9
-Ny = 2**9
-
+Nx = 2**8
+Ny = 2**8
 eps_pattern = 4.0
 eps_hole = 1.0
 mu_pattern = 1.0
 mu_hole = 1.0
-
 h = 2
 
-radius = 0.25
-x0 = np.linspace(0, 1.0, Nx)
-y0 = np.linspace(0, 1.0, Ny)
-x, y = np.meshgrid(x0, y0, indexing="ij")
-hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
-
-lattice = Lattice((L1, L2))
-sup = Layer("Superstrate", epsilon=1, mu=1)
-sub = Layer("Substrate", epsilon=1, mu=1)
+lattice = nn.Lattice((L1, L2))
+sup = nn.Layer("Superstrate", epsilon=1, mu=1)
+sub = nn.Layer("Substrate", epsilon=1, mu=1)
 
 
-ids = np.ones((Nx, Ny), dtype=float)
-zs = np.zeros_like(ids)
+def build_pattern(anisotropic=False):
+    radius = 0.25
+    x0 = np.linspace(0, 1.0, Nx)
+    y0 = np.linspace(0, 1.0, Ny)
+    x, y = np.meshgrid(x0, y0, indexing="ij")
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
 
-eps = eps_pattern, eps_hole
-mu = mu_pattern, mu_hole
-
-
-def build_pattern(eps, mu, anisotropic=False):
-    eps_pattern, eps_hole = eps
-    mu_pattern, mu_hole = mu
+    ids = np.ones((Nx, Ny), dtype=np.complex128)
+    zs = np.zeros_like(ids)
 
     if anisotropic:
-        exx = ids * eps_pattern
-        eyy = ids * eps_pattern * 3
-        ezz = ids * eps_pattern * 1
-        exx[hole] = eps_hole
-        eyy[hole] = eps_hole
-        ezz[hole] = eps_hole
+        exx = np.where(hole, ids * eps_hole, ids * eps_pattern)
+        eyy = np.where(hole, ids * eps_hole, ids * eps_pattern * 1)
+        ezz = np.where(hole, ids * eps_hole, ids * eps_pattern * 2)
         epsgrid = np.array([[exx, zs, zs], [zs, eyy, zs], [zs, zs, ezz]])
-
-        mxx = ids * mu_pattern
-        myy = ids * mu_pattern
-        mzz = ids * mu_pattern
-        mxx[hole] = mu_hole
-        myy[hole] = mu_hole
-        mzz[hole] = mu_hole
+        mxx = np.where(hole, ids * mu_hole, ids * mu_pattern)
+        myy = np.where(hole, ids * mu_hole, ids * mu_pattern)
+        mzz = np.where(hole, ids * mu_hole, ids * mu_pattern)
         mugrid = np.array([[mxx, zs, zs], [zs, mxx, zs], [zs, zs, mzz]])
     else:
-        epsgrid = ids * eps_pattern
-        epsgrid[hole] = eps_hole
-        mugrid = ids * mu_pattern
-        mugrid[hole] = mu_hole
-
+        epsgrid = np.where(hole, ids * eps_hole, ids * eps_pattern)
+        mugrid = np.where(hole, ids * mu_hole, ids * mu_pattern)
     return epsgrid, mugrid
 
 
@@ -90,7 +61,7 @@ def build_pattern(eps, mu, anisotropic=False):
 @pytest.mark.parametrize("phi", [0, 30])
 @pytest.mark.parametrize("psi", [0, 30])
 def test_uniform(freq, theta, phi, psi):
-    pw = PlaneWave(
+    pw = nn.PlaneWave(
         frequency=freq, angles=(theta * pi / 180, phi * pi / 180, psi * pi / 180)
     )
     # eps = np.diag([2, 3, 4])
@@ -100,14 +71,14 @@ def test_uniform(freq, theta, phi, psi):
     eps_sup, eps_sub = 1.0, 1.0
     mu_sup, mu_sub = 1, 1
 
-    sup = Layer("Superstrate", epsilon=eps_sup, mu=mu_sup)
-    sub = Layer("Substrate", epsilon=eps_sub, mu=mu_sub)
+    sup = nn.Layer("Superstrate", epsilon=eps_sup, mu=mu_sup)
+    sub = nn.Layer("Substrate", epsilon=eps_sub, mu=mu_sub)
 
-    un = Layer("Uniform", h, epsilon=eps, mu=mu)
-    sim = Simulation(lattice, [sup, un, sub], pw, nh=5)
+    un = nn.Layer("Uniform", h, epsilon=eps, mu=mu)
+    sim = nn.Simulation(lattice, [sup, un, sub], pw, nh=5)
     R, T = sim.diffraction_efficiencies()
     B = R + T
-    assert np.allclose(B, 1)
+    assert npo.allclose(B, 1)
 
     # sup = Layer("Superstrate", epsilon=mu_sup, mu=eps_sup)
     # sub = Layer("Substrate", epsilon=mu_sub, mu=eps_sub)
@@ -115,22 +86,22 @@ def test_uniform(freq, theta, phi, psi):
     # un = Layer("Uniform", h, epsilon=mu, mu=eps)
     # sim = Simulation(lattice, [sup, un, sub], pw, nh)
     # Rdual, Tdual = sim.diffraction_efficiencies()
-    # assert np.allclose(Rdual + Tdual, 1)
+    # assert npo.allclose(Rdual + Tdual, 1)
     #
     # print(R)
     # print(Rdual)
     # print(T)
     # print(Tdual)
     #
-    # assert np.allclose(R, Rdual, rtol=1e-3)
-    # assert np.allclose(T, Tdual, rtol=1e-3)
+    # assert npo.allclose(R, Rdual, rtol=1e-3)
+    # assert npo.allclose(T, Tdual, rtol=1e-3)
 
 
 def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
-    pattern = Pattern(epsgrid, mugrid)
-    st = Layer("Structured", h)
+    pattern = nn.Pattern(epsgrid, mugrid)
+    st = nn.Layer("Structured", h)
     st.add_pattern(pattern)
-    sim = Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
+    sim = nn.Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
     return sim
 
 
@@ -143,11 +114,11 @@ formulations = ["original", "tangent", "jones"]
 @pytest.mark.parametrize("psi", [0, 30])
 @pytest.mark.parametrize("formulation", formulations)
 def test_fft(freq, theta, phi, psi, formulation):
-    pw = PlaneWave(
+    pw = nn.PlaneWave(
         frequency=freq, angles=(theta * pi / 180, phi * pi / 180, psi * pi / 180)
     )
 
-    epsgrid, mugrid = build_pattern(eps, mu, anisotropic=False)
+    epsgrid, mugrid = build_pattern(anisotropic=False)
     sim = hole_array(epsgrid, mugrid, pw, formulation=formulation)
     R, T = sim.diffraction_efficiencies()
     B = R + T
@@ -156,7 +127,7 @@ def test_fft(freq, theta, phi, psi, formulation):
     print("T = ", T)
     print("R = ", R)
     print("R + T = ", B)
-    assert np.allclose(B, 1, atol=1e-1)
+    assert npo.allclose(B, 1, atol=1e-1)
 
     a, b = sim._get_amplitudes(1, z=0.1)
     field_fourier = sim.get_field_fourier(1, z=0.1)
@@ -165,15 +136,15 @@ def test_fft(freq, theta, phi, psi, formulation):
     # simu_aniso = hole_array(epsgrid, mugrid, pw, formulation=formulation)
     # Raniso, Taniso = simu_aniso.diffraction_efficiencies()
     # Baniso = Raniso + Taniso
-    # # assert np.allclose(Baniso, 1,atol=1e-3)
+    # # assert npo.allclose(Baniso, 1,atol=1e-3)
     #
     # print(">>> formulation (anisotropic)= ", formulation)
     # print("T = ", Taniso)
     # print("R = ", Raniso)
     # print("R + T = ", Baniso)
-    # assert np.allclose(Baniso, 1,atol=1e-1)
-    # assert np.allclose(R, Raniso)
-    # assert np.allclose(T, Taniso)
+    # assert npo.allclose(Baniso, 1,atol=1e-1)
+    # assert npo.allclose(R, Raniso)
+    # assert npo.allclose(T, Taniso)
     return R, T, sim
 
 

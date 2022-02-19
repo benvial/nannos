@@ -5,21 +5,25 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
-
 import time
 
-import pytest
+import numpy as npo
 
 import nannos as nn
 from nannos import numpy as np
 
-np.random.seed(1984)
-Nx = Ny = 2**5
-
-x = np.random.rand(Nx * Ny)
+print("##########")
+print(nn.BACKEND)
+print("##########")
 
 
 def test_para():
+
+    npo.random.seed(1984)
+    Nx = Ny = 2**5
+
+    x = npo.random.rand(Nx * Ny)
+
     res = []
     timing = []
     F = [1.1, 1.2, 1.3, 1.4]
@@ -50,4 +54,4 @@ def test_para():
 
     print(f"speedup = {speedup}")
 
-    assert np.allclose(res[0], res[1])
+    assert npo.allclose(res[0], res[1])

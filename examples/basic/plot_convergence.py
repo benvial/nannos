@@ -65,11 +65,14 @@ def checkerboard(nh, formulation):
 # of retained harmonics:
 
 NH = [100, 200, 300, 400, 600]
-formulations = ["original", "tangent", "jones"]
+formulations = ["original", "tangent", "jones", "pol"]
 nhs = {f: [] for f in formulations}
 ts = {f: [] for f in formulations}
 
 for nh in NH:
+    print("============================")
+    print("number of harmonics = ", nh)
+    print("============================")
     for formulation in formulations:
         Ri, Ti, t, sim = checkerboard(nh, formulation=formulation)
         R = np.sum(Ri)
@@ -90,11 +93,12 @@ for nh in NH:
 # Plot the results:
 
 
-markers = {"original": "^", "tangent": "o", "jones": "s"}
+markers = {"original": "^", "tangent": "o", "jones": "s", "pol": "^"}
 colors = {
     "original": "#d4b533",
     "tangent": "#d46333",
     "jones": "#3395d4",
+    "pol": "#54aa71",
 }
 
 for formulation in formulations:

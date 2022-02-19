@@ -7,6 +7,7 @@
 
 
 from .. import backend as bk
+from .. import jit
 from ..formulations.fft import fourier_transform, inverse_fourier_transform
 
 
@@ -18,7 +19,12 @@ def norm(v):
     ## avoid division by 0
     eps = bk.finfo(float).eps
     # return bk.sqrt(eps + bk.power(v[0], 2) + bk.power(v[1], 2))
-    return bk.sqrt(eps + v[0] * bk.conj(v[0]) + v[1] * bk.conj(v[1])).real
+    out = bk.array(
+        0j + bk.sqrt(eps + v[0] * bk.conj(v[0]) + v[1] * bk.conj(v[1])),
+        dtype=bk.complex128,
+    )
+
+    return bk.real(out)
 
 
 def block(a):
@@ -31,7 +37,7 @@ def get_block(M, i, j, n):
     return M[i * n : (i + 1) * n, j * n : (j + 1) * n]
 
 
-def filter(x, rfilt):
+def _apply_filter(x, rfilt):
     if rfilt == 0:
         return x
     else:
@@ -53,4 +59,7 @@ def filter(x, rfilt):
 
         out = bk.real(inverse_fourier_transform(img2_ft, axes=(0, 1)))
 
-        return bk.fft.fftshift(out)
+        return bk.fft.fftshift(out) * (Nx**2)
+
+
+apply_filter = jit(_apply_filter, static_argnums=(1))

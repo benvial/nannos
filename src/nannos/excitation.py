@@ -26,7 +26,7 @@ class PlaneWave:
     """
 
     def __init__(self, frequency=1, angles=(0, 0, 0)):
-        self.frequency = frequency
+        self.frequency = bk.array(frequency)
         self.angles = bk.array(angles, dtype=bk.float64)
         self.theta = bk.array(angles[0], dtype=bk.float64)
         self.phi = bk.array(angles[1], dtype=bk.float64)

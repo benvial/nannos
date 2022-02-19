@@ -9,10 +9,11 @@ __all__ = ["Simulation"]
 
 from . import BACKEND
 from . import backend as bk
+from . import jit
 from .formulations import fft
-from .formulations.jones import get_jones_field
-from .formulations.tangent import get_tangent_field
 from .utils import block, get_block, norm
+
+_inv_function = bk.linalg.inv
 
 
 class Simulation:
@@ -30,7 +31,7 @@ class Simulation:
         Number of Fourier harmonics (the default is ``100``).
     formulation : str
         Formulation type.  (the default is ``'original'``).
-        Available formulations are ``'original'``, ``'tangent'`` and ``'jones'``.
+        Available formulations are ``'original'``, ``'tangent'``, ``'jones'`` and ``'pol'``.
     truncation : str
         Truncation method.  (the default is ``'circular'``).
         Available methods are ``'circular'`` and ``'parallelogrammic'``.
@@ -79,9 +80,6 @@ class Simulation:
         self.ZeroG = bk.array(bk.zeros_like(self.IdG, dtype=bk.complex128))
 
         self.a0 = bk.zeros(2 * self.nh, dtype=bk.complex128)
-
-        # self.a0[0] = self.excitation.amplitude[0]
-        # self.a0[self.nh] = self.excitation.amplitude[1]
 
         self.a0 = []
         for i in range(self.nh * 2):
@@ -172,7 +170,7 @@ class Simulation:
             I_ = _build_Imatrix(layer, layer_next)
             I = [[get_block(I_, i, j, 2 * self.nh) for j in range(2)] for i in range(2)]
             A = I[0][0] - f @ S12 @ I[1][0]
-            B = bk.linalg.inv(A)
+            B = _inv_function(A)
             S11 = B @ f @ S11
             S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
             S21 = S22 @ I[1][0] @ S11 + S21
@@ -347,7 +345,9 @@ class Simulation:
             len(order) == 2
         except:
             raise ValueError("order must be a tuple of length 2")
-        return [k for k, i in enumerate(self.harmonics.T) if bk.allclose(i, order)][0]
+        return [
+            k for k, i in enumerate(self.harmonics.T) if bk.allclose(i, bk.array(order))
+        ][0]
 
     def get_order(self, A, order):
         return A[self.get_order_index(order)]
@@ -418,8 +418,8 @@ class Simulation:
             eps_hat = self._get_toeplitz_matrix(epsilon_zz)
             # eps_hat = self._get_toeplitz_matrix(epsilon_zz,ana=False)
             mu_hat = self.IdG  # self._get_toeplitz_matrix(mu_zz)
-            eps_hat_inv = bk.linalg.inv(eps_hat)
-            mu_hat_inv = bk.linalg.inv(mu_hat)
+            eps_hat_inv = _inv_function(eps_hat)
+            mu_hat_inv = _inv_function(mu_hat)
             Keps = _build_Kmatrix(eps_hat_inv, Ky, -Kx)
             Kmu = _build_Kmatrix(mu_hat_inv, Kx, Ky)
 
@@ -427,25 +427,24 @@ class Simulation:
                 eps_para_hat = self._get_toeplitz_matrix(epsilon, transverse=True)
             else:
                 eps_para_hat = [[eps_hat, self.ZeroG], [self.ZeroG, eps_hat]]
-
             if self.formulation == "original":
                 Peps = block(eps_para_hat)
-            elif self.formulation == "jones":
-                t = get_tangent_field(epsilon_zz, normalize=True)
-                # norm_t = norm(t)
-                # t /= norm_t.max()
-                J = get_jones_field(t)
-                # J /= norm(J).max()
-                Peps = self._get_Peps(epsilon, eps_para_hat, J, direct=False)
             elif self.formulation == "tangent":
-                t = get_tangent_field(epsilon_zz)
+                t = layer.get_tangent_field(self.harmonics, normalize=True)
+                Peps = self._get_Peps(epsilon, eps_para_hat, t, direct=False)
+            elif self.formulation == "jones":
+                t = layer.get_tangent_field(self.harmonics, normalize=False)
                 t = [t[i] / bk.max(norm(t)) for i in range(2)]
-                Peps = self._get_Peps(epsilon, eps_para_hat, t)
+                J = layer.get_jones_field(t)
+                Peps = self._get_Peps(epsilon, eps_para_hat, J, direct=False)
+            elif self.formulation == "pol":
+                t = layer.get_tangent_field(self.harmonics, normalize=False)
+                t = [t[i] / bk.max(norm(t)) for i in range(2)]
+                Peps = self._get_Peps(epsilon, eps_para_hat, t, direct=False)
             else:
                 raise ValueError(
-                    f"Unknown formulation {self.formulation}. Please choose between 'original', 'tangent' or 'jones'"
+                    f"Unknown formulation {self.formulation}. Please choose between 'original', 'tangent', 'jones' or 'pol'"
                 )
-
             if is_mu_anisotropic:
                 mu_para_hat = [
                     [self._get_toeplitz_matrix(mu[i, j]) for j in range(2)]
@@ -493,7 +492,7 @@ class Simulation:
         n_interfaces = len(self.layers) - 1
         S = self.get_S_matrix(indices=(0, layer_index))
         P = self.get_S_matrix(indices=(layer_index, n_interfaces))
-        q = bk.linalg.inv(bk.array(bk.eye(self.nh * 2)) - bk.matmul(S[0][1], P[1][0]))
+        q = _inv_function(bk.array(bk.eye(self.nh * 2)) - bk.matmul(S[0][1], P[1][0]))
         ai = bk.matmul(q, bk.matmul(S[0][0], self.a0))
         bi = bk.matmul(P[1][0], ai)
         return ai, bi
@@ -512,19 +511,21 @@ class Simulation:
             N = epsilon.shape[2]
             eb = block(epsilon[:2, :2])
             nu = _inv2by2block(eb, N)
-            # nu = bk.linalg.inv(epsilon[2,2])
+            # nu = _inv_function(epsilon[2,2])
             nu1 = bk.array(_block2list(nu, N))
             nuhat = self._get_toeplitz_matrix(nu1, transverse=True)
 
-            nuhat_inv = _block2list(bk.linalg.inv(block(nuhat)), self.nh)
+            nuhat_inv = _block2list(_inv_function(block(nuhat)), self.nh)
 
         else:
             N = epsilon.shape[0]
             nuhat = self._get_toeplitz_matrix(1 / epsilon)
-            nuhat_inv = bk.linalg.inv((nuhat))
+            nuhat_inv = _inv_function((nuhat))
         if direct:
+
             T = block([[t[1], bk.conj(t[0])], [-t[0], bk.conj(t[1])]])
             invT = _inv2by2block(T, N)
+            # invT = _inv_function(T)
             if is_epsilon_anisotropic:
                 Q = block(
                     [[eps_hat[0][0], nuhat_inv[0][1]], [eps_hat[1][0], nuhat_inv[1][1]]]
@@ -619,7 +620,7 @@ def _build_Mmatrix(layer):
 def _build_Imatrix(layer1, layer2):
     a1 = _build_Mmatrix(layer1)
     a2 = _build_Mmatrix(layer2)
-    return bk.linalg.inv(a1) @ a2
+    return _inv_function(a1) @ a2
 
 
 def _translate_amplitudes(layer, z, ai, bi):

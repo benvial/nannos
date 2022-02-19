@@ -1,0 +1,556 @@
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 100;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHtv4kjgoGqM7E_CfNYwHo.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 200;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHsv4kjgoGqM7E_CfP04Vop.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHsv4kjgoGqM7E_CfOQ4lop.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHrv4kjgoGqM7E_Ccs8.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHsv4kjgoGqM7E_CfPI41op.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHsv4kjgoGqM7E_CfPk5Fop.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHsv4kjgoGqM7E_CfOA5Vop.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHsv4kjgoGqM7E_CfOc5lop.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHsv4kjgoGqM7E_CfO451op.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHrv4kjgoGqM7E3b8s8.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHqv4kjgoGqM7E3w-oc4A.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHqv4kjgoGqM7E3p-kc4A.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHpv4kjgoGqM7EPCw.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHqv4kjgoGqM7E3_-gc4A.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHqv4kjgoGqM7E30-8c4A.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHqv4kjgoGqM7E3t-4c4A.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHqv4kjgoGqM7E3q-0c4A.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/barlow/v11/7cHqv4kjgoGqM7E3j-wc4A.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Cousine';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/cousine/v22/d6lKkaiiRdih4SpP_SEvyQ.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Cousine';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/cousine/v22/d6lPkaiiRdih4SpP_SEXdTvM1w.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Cousine';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/cousine/v22/d6lIkaiiRdih4SpPzSM.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Cousine';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/cousine/v22/d6lNkaiiRdih4SpP9Z8K6T4.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 100;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u-w4BMUTPHjxsIPy-v.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u_w4BMUTPHjxsI9w2PHA.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u8w4BMUTPHjxswWw.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u_w4BMUTPHjxsI5wqPHA.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u_w4BMUTPHjxsI3wiPHA.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u8w4BMUTPHh30wWw.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u9w4BMUTPHh7USew8.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6uyw4BMUTPHvxk.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u9w4BMUTPHh6UVew8.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/lato/v22/S6u9w4BMUTPHh50Xew8.ttf) format('truetype');
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: 'Cousine', "Courier New", monospace;
+  background-color: #f5f5f5;
+}
+pre a {
+  color: #333347;
+}
+pre {
+  display: block;
+  padding: 12px;
+  margin: 0 0 10px;
+  line-height: 1.42857143;
+  word-break: break-all;
+  word-wrap: break-word;
+  color: #333347;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 0px;
+}
+span.pre {
+  background-color: #f5f5f5;
+}
+.docutils.literal.notranslate {
+  color: #b85936;
+}
+.highlight .hll {
+  background-color: #f5f5f5;
+}
+.highlight {
+  background: #f5f5f5;
+}
+.highlight .c {
+  color: #bab1a8;
+  font-style: italic;
+}
+/* Comment */
+.highlight .err {
+  border: 1px solid #FF0000;
+}
+/* Error */
+.highlight .k {
+  color: #125c87;
+  font-weight: bold;
+}
+/* Keyword */
+.highlight .o {
+  color: #333347;
+}
+/* Operator */
+.highlight .ch {
+  color: #bab1a8;
+  font-style: italic;
+}
+/* Comment.Hashbang */
+.highlight .cm {
+  color: #bab1a8;
+  font-style: italic;
+}
+/* Comment.Multiline */
+.highlight .cp {
+  color: #125c87;
+}
+/* Comment.Preproc */
+.highlight .cpf {
+  color: #bab1a8;
+  font-style: italic;
+}
+/* Comment.PreprocFile */
+.highlight .c1 {
+  color: #bab1a8;
+  font-style: italic;
+}
+/* Comment.Single */
+.highlight .cs {
+  color: #bab1a8;
+  background-color: #fff0f0;
+}
+/* Comment.Special */
+.highlight .gd {
+  color: #A00000;
+}
+/* Generic.Deleted */
+.highlight .ge {
+  font-style: italic;
+}
+/* Generic.Emph */
+.highlight .gr {
+  color: #FF0000;
+}
+/* Generic.Error */
+.highlight .gh {
+  color: #8c749f;
+  font-weight: bold;
+}
+/* Generic.Heading */
+.highlight .gi {
+  color: #d95671;
+}
+/* Generic.Inserted */
+.highlight .go {
+  color: #333333;
+}
+/* Generic.Output */
+.highlight .gp {
+  color: #c65d09;
+  font-weight: bold;
+}
+/* Generic.Prompt */
+.highlight .gs {
+  font-weight: bold;
+}
+/* Generic.Strong */
+.highlight .gu {
+  color: #800080;
+  font-weight: bold;
+}
+/* Generic.Subheading */
+.highlight .gt {
+  color: #8c749f;
+}
+/* Generic.Traceback */
+.highlight .kc {
+  color: #125c87;
+  font-weight: bold;
+}
+/* Keyword.Constant */
+.highlight .kd {
+  color: #125c87;
+  font-weight: bold;
+}
+/* Keyword.Declaration */
+.highlight .kn {
+  color: #125c87;
+  font-weight: bold;
+}
+/* Keyword.Namespace */
+.highlight .kp {
+  color: #125c87;
+}
+/* Keyword.Pseudo */
+.highlight .kr {
+  color: #125c87;
+  font-weight: bold;
+}
+/* Keyword.Reserved */
+.highlight .kt {
+  color: #902000;
+}
+/* Keyword.Type */
+.highlight .m {
+  color: #d95671;
+}
+/* Literal.Number */
+.highlight .s {
+  color: #d7a44c;
+}
+/* Literal.String */
+.highlight .na {
+  color: #d7a44c;
+}
+/* Name.Attribute */
+.highlight .nb {
+  color: #259fa3;
+}
+/* Name.Builtin */
+.highlight .nc {
+  color: #d7a44c;
+  font-weight: bold;
+}
+/* Name.Class */
+.highlight .no {
+  color: #60add5;
+}
+/* Name.Constant */
+.highlight .nd {
+  color: #595f88;
+  font-weight: bold;
+}
+/* Name.Decorator */
+.highlight .ni {
+  color: #d7a44c;
+  font-weight: bold;
+}
+/* Name.Entity */
+.highlight .ne {
+  color: #d24c4c;
+}
+/* Name.Exception */
+.highlight .nf {
+  color: #4c8575;
+}
+/* Name.Function */
+.highlight .nl {
+  color: #002070;
+  font-weight: bold;
+}
+/* Name.Label */
+.highlight .nn {
+  color: #d7a44c;
+  font-weight: bold;
+}
+/* Name.Namespace */
+.highlight .nt {
+  color: #062873;
+  font-weight: bold;
+}
+/* Name.Tag */
+.highlight .nv {
+  color: #bb60d5;
+}
+/* Name.Variable */
+.highlight .ow {
+  color: #125c87;
+  font-weight: bold;
+}
+/* Operator.Word */
+.highlight .w {
+  color: #bbbbbb;
+}
+/* Text.Whitespace */
+.highlight .mb {
+  color: #d95671;
+}
+/* Literal.Number.Bin */
+.highlight .mf {
+  color: #d95671;
+}
+/* Literal.Number.Float */
+.highlight .mh {
+  color: #d95671;
+}
+/* Literal.Number.Hex */
+.highlight .mi {
+  color: #d95671;
+}
+/* Literal.Number.Integer */
+.highlight .mo {
+  color: #d95671;
+}
+/* Literal.Number.Oct */
+.highlight .sa {
+  color: #d7a44c;
+}
+/* Literal.String.Affix */
+.highlight .sb {
+  color: #d7a44c;
+}
+/* Literal.String.Backtick */
+.highlight .sc {
+  color: #d7a44c;
+}
+/* Literal.String.Char */
+.highlight .dl {
+  color: #d7a44c;
+}
+/* Literal.String.Delimiter */
+.highlight .sd {
+  color: #817268;
+  font-style: italic;
+}
+/* Literal.String.Doc */
+.highlight .s2 {
+  color: #d7a44c;
+}
+/* Literal.String.Double */
+.highlight .se {
+  color: #d7a44c;
+  font-weight: bold;
+}
+/* Literal.String.Escape */
+.highlight .sh {
+  color: #d7a44c;
+}
+/* Literal.String.Heredoc */
+.highlight .si {
+  color: #70a0d0;
+  font-style: italic;
+}
+/* Literal.String.Interpol */
+.highlight .sx {
+  color: #d7a44c;
+}
+/* Literal.String.Other */
+.highlight .sr {
+  color: #235388;
+}
+/* Literal.String.Regex */
+.highlight .s1 {
+  color: #d7a44c;
+}
+/* Literal.String.Single */
+.highlight .ss {
+  color: #517918;
+}
+/* Literal.String.Symbol */
+.highlight .bp {
+  color: #4e6c6c;
+}
+/* Name.Builtin.Pseudo */
+.highlight .fm {
+  color: #06287e;
+}
+/* Name.Function.Magic */
+.highlight .vc {
+  color: #bb60d5;
+}
+/* Name.Variable.Class */
+.highlight .vg {
+  color: #bb60d5;
+}
+/* Name.Variable.Global */
+.highlight .vi {
+  color: #bb60d5;
+}
+/* Name.Variable.Instance */
+.highlight .vm {
+  color: #bb60d5;
+}
+/* Name.Variable.Magic */
+.highlight .il {
+  color: #d95671;
+}
+/* Literal.Number.Integer.Long */
+.viewcode-link,
+.viewcode-back {
+  float: right;
+  font-size: 75%;
+  padding: 3px;
+}

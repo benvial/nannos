@@ -23,7 +23,7 @@ Documentation
 Welcome! This is the documentation for ``nannos`` v |release|, last updated on |today|.
 
 ``nannos`` is a `Python <http://python.org/>`_ package that solves Maxwell's equations 
-in bi-periodic multilayer stacks using the Fourier modal method.
+in bi-periodic multilayer stacks using the Fourier Modal Method (FMM).
 
 .. image:: _assets/landing.png
    :width: 80%
@@ -37,8 +37,9 @@ Features
 * Computation of transmitted and reflected efficiencies for the 
   various diffraction orders.
 * Calculation of the electromagnetic field in the structure.
-* Automatic differentiation with the ``autograd`` package, enabling 
-  inverse design of metasurfaces.
+* Various FMM formulations.
+* Automatic differentiation enabling inverse design of metasurfaces.
+* GPU acceleration.
 
 
 .. toctree::

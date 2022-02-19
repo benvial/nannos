@@ -5,14 +5,21 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
+import os
+
 from .__about__ import __author__, __description__, __version__
+from .__about__ import data as _data
 from .log import *
+
+available_backends = ["numpy", "scipy", "autograd", "jax", "torch"]
 
 
 def print_info():
     print(f"nannos v{__version__}")
+    print("=============")
     print(__description__)
-    print(f"author: {__author__}")
+    print(f"Author: {__author__}")
+    print(f"Licence: {_data['License']}")
 
 
 def has_torch():
@@ -24,9 +31,6 @@ def has_torch():
         return False
 
 
-HAS_TORCH = has_torch()
-
-
 def _has_cuda():
     try:
         import torch
@@ -36,8 +40,8 @@ def _has_cuda():
         return False
 
 
+HAS_TORCH = has_torch()
 HAS_CUDA = _has_cuda()
-
 
 _nannos_device = "cpu"
 
@@ -57,6 +61,15 @@ def use_gpu():
     else:
         _nannos_device = "cuda"
         log.info("Using GPU.")
+
+
+def jit(fun, **kwargs):
+    if BACKEND == "jax":
+        from jax import jit
+
+        return jit(fun, **kwargs)
+    else:
+        return fun
 
 
 def _delvar(VAR):
@@ -83,6 +96,22 @@ def set_backend(backend):
     global _AUTOGRAD
     global _JAX
     global _TORCH
+    global _FORCE_BACKEND
+
+    _FORCE_BACKEND = 1
+
+    if backend == get_backend():
+        return
+    #
+    # _backend_env_var = os.environ.get("NANNOS_BACKEND")
+    # if _backend_env_var is not None:
+    #     if _backend_env_var in available_backends:
+    #         if backend != _backend_env_var:
+    #             # _delvar("_FORCE_BACKEND")
+    #             pass
+    #         else:
+    #             backend = _backend_env_var
+
     if backend == "autograd":
         log.info("Setting autograd backend")
         _AUTOGRAD = True
@@ -156,7 +185,7 @@ elif "_AUTOGRAD" in globals():
 
     backend = numpy
 elif "_JAX" in globals():
-    _JAX
+
     from jax.config import config
 
     config.update("jax_enable_x64", True)
@@ -189,9 +218,12 @@ elif "_TORCH" in globals():
         backend.array = _array
 
         def grad(f):
-            def df(x):
+            def df(x, *args, **kwargs):
+                x = backend.array(x, dtype=bk.float64)
                 _x = x.clone().detach().requires_grad_(True)
-                return backend.autograd.grad(f(_x), _x, allow_unused=True)[0]
+                return backend.autograd.grad(
+                    f(_x, *args, **kwargs), _x, allow_unused=True
+                )[0]
 
             return df
 
@@ -203,12 +235,20 @@ else:
 
     backend = numpy
 
+
 # TODO: support jax properly (is it faster than autograd? use jit?)
 # jax does not support eig
 # for autodif wrt eigenvectors yet.
 # see: https://github.com/google/jax/issues/2748
 
 BACKEND = get_backend()
+
+_backend_env_var = os.environ.get("NANNOS_BACKEND")
+
+if _backend_env_var in available_backends and _backend_env_var is not None:
+    if BACKEND != _backend_env_var and not "_FORCE_BACKEND" in globals():
+        log.info(f"Found environment variable NANNOS_BACKEND={_backend_env_var}")
+        set_backend(_backend_env_var)
 
 from .constants import *
 from .excitation import *
