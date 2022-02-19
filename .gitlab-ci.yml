@@ -2,28 +2,16 @@
 image: continuumio/miniconda3:latest
 
 
-# Change pip's cache directory to be inside the project directory since we can
-# only cache local items.
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   TERM: xterm
 
-# Pip's cache doesn't store the python packages
-# https://pip.pypa.io/en/stable/reference/pip_install/#caching
-#
-# If you want to also cache the installed packages, you have to install
-# them in a virtualenv and cache it as well.
-cache:
-  paths:
-    - .cache/pip
-    - .cache/conda
-
 before_script:
+  ## install os tools
+  - apt-get update -q && apt-get install -q -y --no-install-recommends make
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels conda-forge
-  - conda create --prefix .cache/conda/nannos python=3.9
-  - source activate .cache/conda/nannos
-  - conda install pytorch magma cudatoolkit=11.3 -c pytorch
+  - conda env create -f environment.yml
+  - source activate nannos
   - python -V  # Print out python version for debugging
 
 
@@ -36,7 +24,6 @@ before_script:
   
 
 badge:
-  # stage: badge
   script:
     - echo "collecting stats for badges"
     - commits=`git rev-list --all --count`
@@ -50,18 +37,16 @@ badge:
         - logobadge.json
 
 staging:
-  # stage: trigdoc
   trigger: nannos/nannos.gitlab.io
   only:
     - master
 
 
 test:
-  # stage: test
   script:
-    - pip install -e .
-    - pip install -r dev/requirements.txt
-    - export MPLBACKEND=agg && pytest ./test --cov=src/nannos --cov-append --cov-report term --cov-report html --cov-report xml --durations=0
+    - make install
+    - make dev
+    - make test
     - coverage xml
   artifacts:
     reports:
@@ -69,12 +54,11 @@ test:
   only:
     - master
 
-# send-snapshot:
-##   stage: zenodo
-#   script:
-#     - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
-#     - pip install gitlab2zenodo
-#     - git archive --format zip --output ${CI_COMMIT_TAG#v}.zip ${CI_COMMIT_TAG}
-#     - g2z-send -p -m .zenodo.json ${CI_COMMIT_TAG#v}.zip
-#   only:
-#     - tags
+send-snapshot:
+  script:
+    - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
+    - pip install gitlab2zenodo
+    - git archive --format zip --output ${CI_COMMIT_TAG#v}.zip ${CI_COMMIT_TAG}
+    - g2z-send -p -m .zenodo.json ${CI_COMMIT_TAG#v}.zip
+  only:
+    - tags

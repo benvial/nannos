@@ -16,6 +16,7 @@ dependencies:
   - jax
   - jaxlib
   - nlopt
+  - matplotlib-base
   - pytorch
   - magma
   - cudatoolkit=11.3
