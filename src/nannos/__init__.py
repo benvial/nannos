@@ -188,8 +188,8 @@ elif "_JAX" in globals():
 
     from jax.config import config
 
-    config.update("jax_enable_x64", True)
     config.update("jax_platform_name", "cpu")
+    config.update("jax_enable_x64", True)
 
     # TODO: jax eig not implemented on GPU
     # see https://github.com/google/jax/issues/1259

@@ -13,8 +13,6 @@ dependencies:
   - colorlog
   - psutil
   - ipython
-  - jax
-  - jaxlib
   - nlopt
   - matplotlib-base
   - pytorch
