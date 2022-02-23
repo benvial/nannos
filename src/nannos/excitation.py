@@ -57,18 +57,19 @@ class PlaneWave:
         self.amplitude = bk.array([cx, cy, cz])
 
 
-class CircPolPlaneWave(PlaneWave):
-    def __init__(self, frequency=1, angles=(0, 0, 0), orientation="right"):
-        super().__init__(frequency, angles)
-        angles_rotated = bk.copy(angles).astype(float)
-        angles_rotated[-1] += bk.pi / 2
-
-        H = PlaneWave(frequency, angles)
-        V = PlaneWave(frequency, angles_rotated)
-
-        sign = +1 if orientation == "left" else -1
-
-        self.amplitude = (H.amplitude + sign * 1j * V.amplitude) / 2**0.5
+#
+# class CircPolPlaneWave(PlaneWave):
+#     def __init__(self, frequency=1, angles=(0, 0, 0), orientation="right"):
+#         super().__init__(frequency, angles)
+#         angles_rotated = bk.copy(angles).astype(float)
+#         angles_rotated[-1] += bk.pi / 2
+#
+#         H = PlaneWave(frequency, angles)
+#         V = PlaneWave(frequency, angles_rotated)
+#
+#         sign = +1 if orientation == "left" else -1
+#
+#         self.amplitude = (H.amplitude + sign * 1j * V.amplitude) / 2**0.5
 
 
 #

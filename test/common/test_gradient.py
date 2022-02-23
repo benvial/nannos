@@ -15,15 +15,18 @@ Nx = Ny = 16
 xlist = [random.random() for _ in range(Nx * Ny)]
 
 formulations = ["original"]
+no_grad_backends = ["numpy", "scipy", "jax"]
 
 
 @pytest.mark.parametrize("formulation", formulations)
 def test_grad(formulation):
+
     res = dict()
     dres = dict()
     import nannos as nn
 
-    backends = ["autograd"]
+    backends = no_grad_backends + ["autograd"]
+
     if nn.HAS_TORCH:
         backends.append("torch")
     for backend in backends:
@@ -51,27 +54,34 @@ def test_grad(formulation):
 
             return R
 
-        x = nn.backend.array(xlist, dtype=nn.backend.float64)
-        y = f(x)
-        res[backend] = y
+        if backend in no_grad_backends:
+            with pytest.raises(NotImplementedError) as excinfo:
+                nn.grad(f)
+            assert "grad is not implemented" in str(excinfo.value)
 
-        def first_finite_differences(f, x):
-            eps = 1e-2
-            return nn.backend.array(
-                [
-                    (f(x + eps * v) - f(x - eps * v)) / (2 * eps)
-                    for v in nn.backend.eye(len(x))
-                ],
-            )
+        else:
 
-        dy = nn.grad(f)(x)
-        dres[backend] = dy
+            x = nn.backend.array(xlist, dtype=nn.backend.float64)
+            y = f(x)
+            res[backend] = y
 
-        dy_fd = first_finite_differences(f, x)
-        err = nn.backend.linalg.norm(dy - dy_fd)
-        print(y)
-        print(err)
+            def first_finite_differences(f, x):
+                eps = 1e-2
+                return nn.backend.array(
+                    [
+                        (f(x + eps * v) - f(x - eps * v)) / (2 * eps)
+                        for v in nn.backend.eye(len(x))
+                    ],
+                )
 
-        assert nn.backend.allclose(dy, dy_fd, atol=1e-7)
+            dy = nn.grad(f)(x)
+            dres[backend] = dy
 
-    # nn.set_backend("numpy")
+            dy_fd = first_finite_differences(f, x)
+            err = nn.backend.linalg.norm(dy - dy_fd)
+            print(y)
+            print(err)
+
+            assert nn.backend.allclose(dy, dy_fd, atol=1e-7)
+
+        # nn.set_backend("numpy")

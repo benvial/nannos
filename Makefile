@@ -276,18 +276,49 @@ define runtest
 		--durations=0 $(TEST_ARGS)
 endef
 
-
-## Run the test suite
-test: cleantest
+## Run the test suite with numpy backend only
+test-numpy:
 	$(call message,${@})
 	$(call	runtest,numpy)
+
+
+## Run the test suite with scipy backend only
+test-scipy:
+	$(call message,${@})
 	$(call	runtest,scipy)
+
+
+## Run the test suite with autograd backend only
+test-autograd:
+	$(call message,${@})
 	$(call	runtest,autograd)
+	
+
+## Run the test suite with jax backend only
+test-jax:
+	$(call message,${@})
 	$(call	runtest,jax)
+	
+
+## Run the test suite with torch backend only
+test-torch:
+	$(call message,${@})
 	$(call	runtest,torch)
-	@export MPLBACKEND=agg && export NANNOS_BACKEND=numpy && pytest ./test/bk \
+
+## Run tests with different backends
+test-allbk: test-numpy test-scipy test-autograd test-jax test-torch
+	$(call message,${@})
+
+## Run the commmon tests
+test-common:
+	$(call message,${@})
+	@export MPLBACKEND=agg && export NANNOS_BACKEND=numpy && pytest ./test/common \
 	--cov=src/$(PROJECT_NAME) --cov-append --cov-report term \
 	--cov-report html --cov-report xml --durations=0 $(TEST_ARGS)
+
+## Run the test suite
+test: cleantest test-allbk test-common
+	$(call message,${@})
 	
 	
 ## Run the test suite (parallel)

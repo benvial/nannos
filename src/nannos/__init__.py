@@ -46,21 +46,28 @@ HAS_CUDA = _has_cuda()
 _nannos_device = "cpu"
 
 
-def use_gpu():
+def use_gpu(boolean):
     global _nannos_device
 
-    if BACKEND not in ["torch"]:
-        log.info(f"Cannot use GPU with {BACKEND} backend.")
-
-    if not HAS_TORCH:
-        _nannos_device = "cpu"
-        log.info("pytorch not found. Cannot use GPU.")
-    elif not HAS_CUDA:
-        _nannos_device = "cpu"
-        log.info("cuda not found. Cannot use GPU.")
-    else:
+    if boolean:
         _nannos_device = "cuda"
         log.info("Using GPU.")
+
+        if BACKEND not in ["torch"]:
+            log.info(f"Cannot use GPU with {BACKEND} backend.")
+
+        if not HAS_TORCH:
+            _nannos_device = "cpu"
+            log.info("pytorch not found. Cannot use GPU.")
+        elif not HAS_CUDA:
+            _nannos_device = "cpu"
+            log.info("cuda not found. Cannot use GPU.")
+        else:
+            _nannos_device = "cuda"
+            log.info("Using GPU.")
+    else:
+        _nannos_device = "cpu"
+        log.info("Using CPU.")
 
 
 def jit(fun, **kwargs):
@@ -193,11 +200,18 @@ elif "_JAX" in globals():
 
     # TODO: jax eig not implemented on GPU
     # see https://github.com/google/jax/issues/1259
+
+    # TODO: support jax properly (is it faster than autograd? use jit?)
+    # jax does not support eig
+    # for autodif wrt eigenvectors yet.
+    # see: https://github.com/google/jax/issues/2748
+
     # if _nannos_device == "cpu":
     #     config.update("jax_platform_name", "cpu")
     # else:
     #     config.update("jax_platform_name", "gpu")
-    from jax import grad, numpy
+    # from jax import grad, numpy
+    from jax import numpy
 
     backend = numpy
 elif "_TORCH" in globals():
@@ -235,11 +249,6 @@ else:
 
     backend = numpy
 
-
-# TODO: support jax properly (is it faster than autograd? use jit?)
-# jax does not support eig
-# for autodif wrt eigenvectors yet.
-# see: https://github.com/google/jax/issues/2748
 
 BACKEND = get_backend()
 

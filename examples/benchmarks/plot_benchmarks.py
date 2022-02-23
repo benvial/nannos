@@ -75,7 +75,7 @@ for num_threads in threads:
 
 ##############################################################################
 # Speedup vs. number of harmonics
-# ------------------------------
+# -----------------------------------
 
 for num_threads in threads:
     plt.figure(figsize=figsize)

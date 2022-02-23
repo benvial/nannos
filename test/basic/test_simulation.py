@@ -18,8 +18,8 @@ np = nn.backend
 nh = 51
 L1 = [1.0, 0]
 L2 = [0, 1.0]
-Nx = 2**8
-Ny = 2**8
+Nx = 2 ** 5
+Ny = 2 ** 5
 eps_pattern = 4.0
 eps_hole = 1.0
 mu_pattern = 1.0
@@ -36,7 +36,7 @@ def build_pattern(anisotropic=False):
     x0 = np.linspace(0, 1.0, Nx)
     y0 = np.linspace(0, 1.0, Ny)
     x, y = np.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
 
     ids = np.ones((Nx, Ny), dtype=np.complex128)
     zs = np.zeros_like(ids)
@@ -105,7 +105,7 @@ def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
     return sim
 
 
-formulations = ["original", "tangent", "jones"]
+formulations = ["original", "tangent", "jones", "pol"]
 
 
 @pytest.mark.parametrize("freq", [0.7, 1.1])
@@ -131,6 +131,9 @@ def test_fft(freq, theta, phi, psi, formulation):
 
     a, b = sim._get_amplitudes(1, z=0.1)
     field_fourier = sim.get_field_fourier(1, z=0.1)
+
+    sim.get_field_grid(1)
+    sim.get_z_stress_tensor_integral(1)
 
     # epsgrid, mugrid = build_pattern(eps, mu, anisotropic=True)
     # simu_aniso = hole_array(epsgrid, mugrid, pw, formulation=formulation)

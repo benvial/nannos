@@ -5,17 +5,11 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from nannos import adaptive_sampler
 
-plt.ion()
-plt.clf()
-
 x = np.linspace(1, 3, 40)
-
-import time
 
 
 def bumps(x):
@@ -25,13 +19,17 @@ def bumps(x):
 
 
 def f(x):
-    print(x)
-    # time.sleep(0.1)
     return bumps(x), bumps(x) * np.sin(2 * np.pi * x)
 
 
-all_x, all_y = adaptive_sampler(f, x, parallel=True, n_jobs=8)
+def test_all():
 
-plt.clf()
-plt.ylim(-10, 110)
-plt.plot(all_x, all_y, "-")
+    all_x, all_y = adaptive_sampler(bumps, x)
+    all_x_para, all_y_para = adaptive_sampler(bumps, x, parallel=True, n_jobs=2)
+    assert np.allclose(all_x, all_x_para)
+    assert np.allclose(all_y, all_y_para)
+
+    all_x, all_y = adaptive_sampler(f, x)
+    all_x_para, all_y_para = adaptive_sampler(f, x, parallel=True, n_jobs=2)
+    assert np.allclose(all_x, all_x_para)
+    assert np.allclose(all_y, all_y_para)

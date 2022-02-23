@@ -18,11 +18,11 @@
   :alt: Code style: black
 
 
-.. image:: https://img.shields.io/badge/license-GPLv3-blue?color=5faa9c&logo=open-access&logoColor=white&style=for-the-badge
+.. image:: https://img.shields.io/badge/license-GPLv3-blue?color=dd7d54&logo=open-access&logoColor=dd7d54&style=for-the-badge
   :target: https://gitlab.com/nannos/nannos/-/blob/master/LICENCE.txt
   :alt: license 
   
-
+  
 
 ----------------------
 
@@ -42,10 +42,11 @@
 .. .. image:: https://img.shields.io/codeclimate/maintainability/benvial/nannos?logo=code-climate&style=for-the-badge   
 ..    :target: https://codeclimate.com/github/benvial/nannos
 ..    :alt: Code Climate maintainability
-.. 
-.. .. image:: https://img.shields.io/badge/DOI-10.5281/zenodo.4938573-5fadad?logo=google-scholar&logoColor=ffffff&style=for-the-badge
-..  :target: https://doi.org/10.5281/zenodo.4938573
-.. 
+
+
+.. image:: https://img.shields.io/badge/DOI-10.5281/zenodo.6174578-dd7d54?logo=google-scholar&logoColor=dd7d54&style=for-the-badge
+ :target: https://doi.org/10.5281/zenodo.6174578
+
 
 .. ------------------------------------------------------------------------------------------
 .. 

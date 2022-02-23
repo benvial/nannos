@@ -244,7 +244,8 @@ class Simulation:
         s = 0
         for i in range(self.nh):
             f = bk.zeros(shape + (amplitudes.shape[0],), dtype=bk.complex128)
-            f[self.harmonics[0, i], self.harmonics[1, i], :] = 1.0
+            _set_idx(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
+            # f[self.harmonics[0, i], self.harmonics[1, i], :] = 1.0
             a = amplitudes[:, i]
             s += a * f
 
@@ -260,8 +261,8 @@ class Simulation:
         fe = fields_fourier[:, 0]
         fh = fields_fourier[:, 1]
 
-        E = bk.array([self.get_ifft_amplitudes(fe[:, i, :], shape) for i in range(3)])
-        H = bk.array([self.get_ifft_amplitudes(fh[:, i, :], shape) for i in range(3)])
+        E = bk.vstack([self.get_ifft_amplitudes(fe[:, i, :], shape) for i in range(3)])
+        H = bk.vstack([self.get_ifft_amplitudes(fh[:, i, :], shape) for i in range(3)])
         return E, H
 
     def diffraction_efficiencies(self, orders=False):
@@ -320,7 +321,11 @@ class Simulation:
             dy = ey * layer.epsilon
         else:
             exy = bk.hstack((-ey, ex))
-            dxy = layer.eps_hat @ exy
+
+            # FIXME: anisotropy here?
+            # dxy = layer.eps_hat @ exy
+            _eps_hat = block([[layer.eps_hat, self.ZeroG], [self.ZeroG, layer.eps_hat]])
+            dxy = _eps_hat @ exy
             dx = dxy[self.nh :]
             dy = -dxy[: self.nh]
 
@@ -409,7 +414,7 @@ class Simulation:
             # Pmu = bk.eye(self.nh * 2)
             Pmu = block([[mu * self.IdG, self.ZeroG], [self.ZeroG, mu * self.IdG]])
 
-            Qeps = self.omega**2 * Pmu - Keps
+            Qeps = self.omega ** 2 * Pmu - Keps
         else:
             epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
             mu_zz = mu[2, 2] if is_mu_anisotropic else mu
@@ -457,8 +462,8 @@ class Simulation:
 
             # Qeps = self.omega ** 2 * bk.eye(self.nh * 2) - Keps
             # matrix = Peps @ Qeps - Kmu
-            Qeps = self.omega**2 * Pmu - Keps
-            matrix = self.omega**2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
+            Qeps = self.omega ** 2 * Pmu - Keps
+            matrix = self.omega ** 2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
 
             layer.matrix = matrix
             layer.Kmu = Kmu

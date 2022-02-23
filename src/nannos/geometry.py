@@ -14,7 +14,7 @@ __all__ = ["shape_mask", "outline_to_mask"]
 
 from shapely.geometry import Polygon
 
-from . import numpy as np
+from . import backend as bk
 
 # from https://gist.github.com/perrette/a78f99b76aed54b6babf3597e0b331f8
 
@@ -42,8 +42,8 @@ def outline_to_mask(line, x, y):
     import matplotlib.path as mplp
 
     mpath = mplp.Path(line)
-    X, Y = np.meshgrid(x, y)
-    points = np.array((X.flatten(), Y.flatten())).T
+    X, Y = bk.meshgrid(x, y, indexing="ij")
+    points = bk.vstack((X.flatten(), Y.flatten())).T
     mask = mpath.contains_points(points).reshape(X.shape)
     return mask
 
@@ -82,7 +82,7 @@ def shape_mask(shp, x, y, m=None):
     rect = _bbox_to_rect(_grid_bbox(x, y))
 
     if m is None:
-        m = np.zeros((y.size, x.size), dtype=bool)
+        m = bk.zeros((len(y), len(x)), dtype=bk.bool)
 
     if not shp.intersects(rect):
         m[:] = False
