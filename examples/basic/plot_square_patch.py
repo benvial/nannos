@@ -32,7 +32,7 @@ plt.ion()
 eps_quartz = 2.132
 eps_active = 3.97
 
-N = 2 ** 7
+N = 2**7
 period = 0.68
 l_patch = 0.8 * period
 x = np.linspace(-period / 2, period / 2, N)
@@ -85,6 +85,7 @@ freqsev = np.linspace(1, 2.6, 101)
 fev_adapted, transmission = nn.adaptive_sampler(
     compute_transmission, freqsev, max_bend=10, max_x_rel=0.001, max_df=0.005
 )
+
 
 #########################################################################
 # Figure 4 from :cite:p:`Tikhodeev2002`.

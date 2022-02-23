@@ -16,14 +16,16 @@ def test_notorch(monkeypatch):
 
     nannos.set_backend("torch")
 
-    nannos.use_gpu()
+    nannos.use_gpu(True)
+    nannos.use_gpu(False)
 
 
 def test_gpu(monkeypatch):
     import nannos
 
     nannos.set_backend("torch")
-    nannos.use_gpu()
+    nannos.use_gpu(True)
+    nannos.use_gpu(False)
 
 
 def test_backend():

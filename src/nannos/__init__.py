@@ -50,17 +50,13 @@ def use_gpu(boolean):
     global _nannos_device
 
     if boolean:
-        _nannos_device = "cuda"
-        log.info("Using GPU.")
 
         if BACKEND not in ["torch"]:
             log.info(f"Cannot use GPU with {BACKEND} backend.")
 
         if not HAS_TORCH:
-            _nannos_device = "cpu"
             log.info("pytorch not found. Cannot use GPU.")
         elif not HAS_CUDA:
-            _nannos_device = "cpu"
             log.info("cuda not found. Cannot use GPU.")
         else:
             _nannos_device = "cuda"
