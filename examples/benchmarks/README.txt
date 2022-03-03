@@ -1,4 +1,4 @@
 Benchmarks
 ----------
 
-Comparing the performances of varipus backends and CPU and GPU.
+Comparing the performances of computational backends using CPU and GPU.

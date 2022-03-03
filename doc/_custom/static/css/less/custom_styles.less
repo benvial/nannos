@@ -62,7 +62,6 @@ h6 {
 //     background-color: transparent;
 //   }
 // }
-
 // section {
 //   padding: 60px 0;
 // }
@@ -115,10 +114,7 @@ section.color-header h2 {
   border-color: white;
   margin-top: 10px;
   margin-bottom: 10px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  padding-left: 18px;
-  padding-right: 18px;
+  padding: 12px 18px;
 }
 
 .btn-round.focus,
@@ -130,13 +126,10 @@ section.color-header h2 {
 section.button-banner {
   color: @gray-base;
   background-color: @brand-primary;
-  padding-top: 40px;
-  padding-bottom: 40px;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding: 40px 10px;
 }
 
-.button-banner-col{
+.button-banner-col {
   min-height: 200px;
 }
 
@@ -225,9 +218,9 @@ section.color-footer {
 }
 
 .foot-fa {
-  font-size: 180%;
-  padding-top: 16px;
   text-align: center;
+  padding-bottom: 20px;
+  padding-top: 20px;
 }
 
 .foot-fa a {
@@ -529,10 +522,12 @@ input {
 
 .fab.fa-gitlab:hover {
   color: @brand-secondary;
+  background-color: darken(@gray-base,15%);
 }
 
 .fab.fa-docker:hover {
   color: @brand-secondary;
+  background-color: darken(@gray-base,15%);
 }
 
 div.body {
@@ -639,6 +634,17 @@ ul.search li {
   color: @gray-base !important;
 }
 
+.navbar-light .navbar-nav .nav-link {
+  color: @gray-base !important;
+  background-color: transparent;
+  text-decoration-line: underline;
+  text-underline-position: under;
+  text-decoration-style: solid;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  transition: ease-in-out all 0.3s;
+}
+
 .navbar-light .navbar-nav .nav-link:focus,
 .navbar-light .navbar-nav .nav-link:hover {
   color: @gray-base;
@@ -648,7 +654,7 @@ ul.search li {
   text-decoration-style: solid;
   text-decoration-color: @brand-primary;
   text-decoration-thickness: 2px;
-  color: unset !important;
+  // color: unset !important;
 }
 
 .bd-sidebar .nav > .active > a,
@@ -658,13 +664,15 @@ ul.search li {
 }
 
 i.fab {
-  font-size: 0.8em !important;
-  padding-right: 12px;
-  background-color: #232331;
-  padding: 0.4em 0.47em;
+  background-color: darken(@gray-base,7%);
   border-radius: 50%;
+  padding: 10px;
+  width: 1.9em;
+  height: 1.9em;
+  text-align: center;
+  font-size: 1.3em;
+  transition: ease-in-out all 0.3s;
 }
-
 
 .icondld {
   display: inline-block;
@@ -689,6 +697,21 @@ i.fab {
   background: @gray-base;
   -webkit-mask-image: url("https://cdn.jsdelivr.net/npm/simple-icons@v4/icons/jupyter.svg");
   mask-image: url("https://cdn.jsdelivr.net/npm/simple-icons@v4/icons/jupyter.svg");
+}
+
+img,
+svg {
+  vertical-align: middle;
+  border-radius: 12px;
+}
+
+.bd-search input {
+  border-radius: 12px;
+}
+
+.form-control:focus {
+  border-color: #fff;
+  box-shadow: 0 0 0 0.2rem #e1e1e1;
 }
 
 a.copybtn {
@@ -730,7 +753,6 @@ a.copybtn {
   font-size: 210%;
 }
 
-
 .media > .pull-left,
 .media-left {
   padding-right: 60px; // min-height: 120px;
@@ -751,6 +773,7 @@ a.copybtn {
 
 a {
   color: @brand-secondary;
+  transition: ease-in-out all 0.3s;
 }
 
 a:hover {
@@ -786,10 +809,10 @@ a:hover {
   color: @brand-secondary;
 }
 
-div.badges a.reference.external.image-reference img {
-  padding-right: 0.3em;
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
+
+
+div.badges img {
+  margin: 4px;
 }
 
 .badges {
@@ -857,8 +880,6 @@ span.highlighted {
   padding: 20px;
 }
 
-
-
 .features-banner {
   padding-top: 60px;
   padding-bottom: 60px;
@@ -867,11 +888,11 @@ span.highlighted {
   background-color: @gray-light;
   vertical-align: center;
 }
+
 .features-banner h1 {
   color: #878887;
   text-align: center;
 }
-
 
 .features-banner li {
   list-style-position: inside;
@@ -880,12 +901,11 @@ span.highlighted {
   font-size: larger;
 }
 
-
-
 .navbar {
   padding-bottom: 20px;
   padding-top: 20px;
 }
+
 .navbar-collapse {
   padding-top: 12px;
 }
@@ -894,3 +914,26 @@ span.highlighted {
 // .landing-page-title{
 //   padding-top: 60px;
 // }
+
+
+
+.sphx-glr-thumbcontainer[tooltip]:hover::before {
+  border-color: @gray-base transparent  !important;
+  opacity: 0.8;
+  bottom: 82% !important;
+  left: 76.5% !important;
+}
+
+
+.sphx-glr-thumbcontainer[tooltip]:hover::after {
+  background: @gray-base !important;
+  opacity: 0.8;
+  font-size: 85%;
+  left: 92% !important;
+  bottom: 79% !important;
+}
+
+
+.sphx-glr-thumbcontainer a.internal {
+  font-size: 85%;
+}

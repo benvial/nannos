@@ -15,7 +15,7 @@ def test_geo():
 
     bk = nn.backend
 
-    N = 2 ** 7
+    N = 2**7
     x = bk.linspace(0, 1, N)
     y = bk.linspace(0, 1, N)
     epsilon = bk.ones((N, N))
