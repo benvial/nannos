@@ -23,12 +23,12 @@
       <div class="col-md-6">
 
         <div class="footer-copyright">
-          <p>{{project}} version {{version}}.</p>
+          {{project}}  v{{version}}. 
           {%- if show_copyright %}
           {%- if hasdoc('copyright') %}
-          {% trans path=pathto('copyright'), copyright=copyright|e %}<p>&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}. </p>{% endtrans %}
+          {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}. {% endtrans %}
           {%- else %}
-          {% trans copyright=copyright|e %}<p>&copy; Copyright {{ copyright }}.</p>{% endtrans %}
+          {% trans copyright=copyright|e %}&copy;{{ copyright }}.{% endtrans %}
           {%- endif %}
           {%- endif %}
           {%- if last_updated %}

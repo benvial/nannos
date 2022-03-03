@@ -18,8 +18,8 @@ np = nn.backend
 nh = 51
 L1 = [1.0, 0]
 L2 = [0, 1.0]
-Nx = 2**5
-Ny = 2**5
+Nx = 2 ** 5
+Ny = 2 ** 5
 eps_pattern = 4.0
 eps_hole = 1.0
 mu_pattern = 1.0
@@ -36,7 +36,7 @@ def build_pattern(anisotropic=False):
     x0 = np.linspace(0, 1.0, Nx)
     y0 = np.linspace(0, 1.0, Ny)
     x, y = np.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
 
     ids = np.ones((Nx, Ny), dtype=np.complex128)
     zs = np.zeros_like(ids)

@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 np.random.seed(84)
-N = 2**10
+N = 2 ** 10
 matrix_fft = np.random.rand(N, N) + 1j * np.random.rand(N, N)
 
 
@@ -17,7 +17,7 @@ def test_fft():
     i = 0
     vals, vects = [], []
     for n in [8, 10, 12]:
-        N = 2**n
+        N = 2 ** n
 
         print(f"matrix size = {N}")
         matrix_fft = np.random.rand(N, N) + 1j * np.random.rand(N, N)

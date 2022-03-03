@@ -20,7 +20,7 @@ print("##########")
 def test_para():
 
     npo.random.seed(1984)
-    Nx = Ny = 2**5
+    Nx = Ny = 2 ** 5
 
     x = npo.random.rand(Nx * Ny)
 
