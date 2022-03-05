@@ -23,21 +23,10 @@
       <div class="col-md-6">
 
         <div class="footer-copyright">
-          {{project}}  v{{version}}. 
-          {%- if show_copyright %}
-          {%- if hasdoc('copyright') %}
-          {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}. {% endtrans %}
-          {%- else %}
-          {% trans copyright=copyright|e %}&copy;{{ copyright }}.{% endtrans %}
-          {%- endif %}
-          {%- endif %}
-          {%- if last_updated %}
-          {% trans last_updated=last_updated|e %}Last updated on {{ last_updated }}. {% endtrans %}
-          {%- endif %}
-          {%- if show_sphinx %}
-          {% trans sphinx_version=sphinx_version|e %}Created using <a href="http://sphinx-doc.org/" target="_blank">Sphinx</a> {{ sphinx_version }}.{% endtrans %}<br />
-          {%- endif %}
-
+          
+          <img src={{ pathto('_assets/nannos-name-white.svg', 1) }} alt="gyptis">
+          <p>v{{version}} | 
+          {% trans copyright=copyright|e %}&copy;{{ copyright }}{% endtrans %}</p>
         </div>
       </div>
       {%- endif %}

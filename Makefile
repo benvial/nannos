@@ -185,7 +185,7 @@ repo:
 
 
 ## Clean, reformat and push to gitlab
-save: clean style gl
+save: style gl
 	$(call message,${@})
 	
 
@@ -200,7 +200,7 @@ gl-noci:
 	
 
 ## Clean, reformat and push to gitlab (skipping continuous integration)
-save-noci: clean style gl-noci
+save-noci: style gl-noci
 	$(call message,${@})
 	
 

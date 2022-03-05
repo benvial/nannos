@@ -8,20 +8,24 @@ div.sphx-glr-download a {
   border: 1px solid @gray-base!important;
   display: inline-block!important;
   font-weight: bold!important;
-  padding: 0.8em!important;
+  padding: 1.6em !important ;
   text-align: center!important;
   font-size: @font-size-small!important;
   max-width: 400px!important;
+  transition: ease-in-out 0.3s;
+  margin: 8px;
 }
 
 div.sphx-glr-download a:hover {
   box-shadow: none!important;
   text-decoration: none!important;
   background-image: none!important;
-  background-color: @body-bg-darker !important;
+  background-color: @brand-primary !important;
+  color: white !important;
   // color: @brand-primary!important;
   // border: 3px solid @brand-primary!important;
   max-width: 400px!important;
+  scale: 1.03;
 }
 
 div.sphx-glr-download code.download {
@@ -66,9 +70,6 @@ div.sphx-glr-download code.download hover {
 /*.sphx-glr-thumbcontainer {
     border-radius: 0px;
 }*/
-
-
-
 .sphx-glr-signature {
   visibility: hidden;
 }
@@ -135,8 +136,6 @@ dl.footnote > dt {
   color: @body-bg!important;
 }
 
-
-
 .sphx-glr-script-out::before {
   color: @brand-primary;
   font-family: "Font Awesome 5 Free";
@@ -163,7 +162,7 @@ div.sphx-glr-footer {
   visibility: hidden;
 }
 
-.citation >dd > p > a.reference.external::before {
+.citation > dd > p > a.reference.external::before {
   color: @brand-primary;
   font-family: "Font Awesome 5 Free";
   content: "\f35d";
@@ -173,23 +172,22 @@ div.sphx-glr-footer {
   font-size: @font-size-base;
 }
 
-.citation >dd > p > a {
+.citation > dd > p > a {
   visibility: hidden;
-  font-size: 0px;
+  font-size: 0;
 }
 
-.citation >dd > p > a.reference.external:hover::before {
+.citation > dd > p > a.reference.external:hover::before {
   color: lighten(@brand-primary, 13.5%);
 }
 
-.citation >dd > p > a.reference.external:focus::before {
+.citation > dd > p > a.reference.external:focus::before {
   color: lighten(@brand-primary, 13.5%);
 }
 
 div.sphx-glr-download {
   margin: 1em auto;
   vertical-align: middle;
-  
   // display: -webkit-inline-box;
 }
 // div.sphx-glr-download-link-note {
@@ -218,11 +216,113 @@ div.sphx-glr-download-link-note.admonition.note {
   height: 0px!important;
 }
 
-
 .sphx-glr-thumbcontainer a.internal {
-    color: @gray-base;
+  color: @gray-base;
 }
 
 .sphx-glr-thumbcontainer a.internal:hover {
-    text-decoration: none;
+  text-decoration: none;
+}
+
+
+
+
+.sphx-glr-thumbcontainer[tooltip]:hover::before {
+  border-color: @gray-base transparent  !important;
+  opacity: 0.8;
+  bottom: 82% !important;
+  left: 76.5% !important;
+}
+
+
+.sphx-glr-thumbcontainer[tooltip]:hover::after {
+  background: @gray-base !important;
+  opacity: 0.8;
+  font-size: 85%;
+  left: 92% !important;
+  bottom: 79% !important;
+}
+
+
+.sphx-glr-thumbcontainer a.internal {
+  font-size: 85%;
+}
+
+
+
+
+
+.sphx-glr-thumbcontainer[tooltip]:hover::before {
+  border-color: @gray-base transparent !important;
+  opacity: 0.8;
+  bottom: 82% !important;
+  left: 76.5% !important;
+  visibility: hidden;
+}
+
+
+.sphx-glr-thumbcontainer a.internal {
+  font-size: 85%;
+}
+
+.sphx-glr-thumbcontainer {
+  background: #fff0 !important;
+  border: solid #82828259 1px !important;
+  border-radius: 0px !important;
+  width: 44%;
+}
+
+.sphx-glr-thumbcontainer img {
+  display: block;
+  max-height: 100% !important;
+  max-width: 100% !important;
+}
+
+.sphx-glr-thumbcontainer a.internal {
+  // padding: 12px !important !important;
+  // position: relative !important;
+  // display: block !important;
+}
+
+.caption-text > .reference.internal {
+    color: #868585 !important;
+    padding-top: 32px !important;
+    font-style: oblique;
+    font-size: 90%;
+    font-weight: 700;
+    text-transform: uppercase;
+
+}
+.sphx-glr-thumbcontainer[tooltip]:hover::after {
+  background: @gray-base !important;
+  opacity: 0.8;
+  border-radius: 0px !important;
+  padding-top: 5% !important;
+  position: absolute !important;
+  width: 94% !important;
+  height: 20% !important;
+  bottom: 3% !important;
+  left: 3% !important;
+  text-align: center !important;
+  font-style: oblique;
+font-size: inherit;
+}
+
+
+.sphx-glr-thumbcontainer img {
+  padding-top: 32px;
+}
+
+
+div.sphx-glr-download:hover code.download {
+  color: white !important;
+}
+div.sphx-glr-download:hover i {
+  background: white !important;
+}
+code.download {
+  transition: ease-in-out 0.3s;
+}
+i {
+  transition: ease-in-out 0.3s;
 }

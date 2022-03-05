@@ -48,9 +48,24 @@ def _get_tangent_field_fft(grid, normalize=False, rfilt=4, expo=0.5):
     # return [Nstar[0], Nstar[1]]
 
 
-def _get_tangent_field_min(grid, harmonics, normalize=False, rfilt=4):
-    from autograd import grad
-    from autograd import numpy as npg
+def _get_tangent_field_min(
+    grid, harmonics, normalize=False, rfilt=6, opt_backend="autograd"
+):
+
+    if opt_backend == "jax":
+        from jax import grad
+        from jax import numpy as npg
+        from jax.config import config
+
+        # config.update("jax_platform_name", "cpu")
+        config.update("jax_enable_x64", True)
+        from jax import jit
+    else:
+        from autograd import grad
+        from autograd import numpy as npg
+
+        jit = lambda x: x
+
     from scipy.optimize import minimize
 
     def norm(v):
@@ -66,64 +81,81 @@ def _get_tangent_field_min(grid, harmonics, normalize=False, rfilt=4):
     Nx, Ny = grid.shape
     Nx_ds = min(2**6, Nx)
     Ny_ds = min(2**6, Ny)
+    #
+    # Nx_ds =  Nx
+    # Ny_ds =  Ny
 
     downsample_x = int(Nx / Nx_ds)
     downsample_y = int(Ny / Ny_ds)
     shape_small = (Nx_ds, Ny_ds)
 
     nh = len(harmonics[0])
-
-    nh = min(nh, 150)
+    nh = min(nh, 51)
     harmonics = harmonics[:, :nh]
 
     xf = apply_filter(grid, rfilt=rfilt)
     dgrid_f = npg.array(npg.gradient(xf))
 
     normdgrid_f = norm(dgrid_f)
-    maxi = npg.max(normdgrid_f)
+    # maxi = npg.max(normdgrid_f)
     # dgrid_f = npg.array([dgrid_f[i] /maxi for i in range(2)])
     dgrid_f = npg.array([_normalize(dgrid_f[i], normdgrid_f) for i in range(2)])
 
-    def get_amps(amplitudes, shape=(Nx, Ny)):
+    def _set_idx(mat, idx, val):
+        if opt_backend == "jax":
+            mat = mat.at[tuple(idx)].set(val)
+        else:
+            # idx += [None]
+            mat[tuple(idx)] = val
+        return mat
+
+    def _get_amps(amplitudes, shape):
         amplitudes = npg.array([amplitudes])
         if len(amplitudes.shape) == 1:
             amplitudes = npg.reshape(amplitudes, amplitudes.shape + (1,))
         f = npg.zeros(shape + (amplitudes.shape[0],) + (nh,), dtype=npg.complex128)
-        f[harmonics[0], harmonics[1], 0, :] = npg.eye(nh)
+        # f[harmonics[0], harmonics[1],0] = npg.eye(nh)
+        idx = [harmonics[0], harmonics[1], 0]
+        # f[tuple(idx)] =  npg.eye(nh)
+        f = _set_idx(f, idx, npg.eye(nh))
         s = npg.sum(amplitudes * f, axis=-1)
         ft = npg.fft.ifft2(s, axes=(0, 1)) * Nx * Ny
         return ft[:, :, 0]
 
+    @jit
+    def get_amps(amplitudes):
+        return _get_amps(amplitudes, shape_small)
+
     def minifun(x):
         coef = x[:nh] + 1j * x[nh:]
-        a = get_amps(coef, shape_small)
+        a = get_amps(coef)
         da = npg.array(npg.gradient(a))
         I = npg.mean(npg.abs(da - dgrid_f[:, ::downsample_x, ::downsample_y]) ** 2)
+        # print(I)
         return I
 
-    minifun_der = grad(minifun)
+    @jit
+    def minifun_der(x):
+        d = grad(minifun)(x)
+        return d
 
     x0 = npg.zeros(2 * nh)
+    # x0 = npo.random.rand(2 * nh)
     res = minimize(
         minifun,
         x0,
         method="BFGS",
         jac=minifun_der,
-        options={"gtol": 1e-3, "disp": False, "maxiter": 20},
+        tol=5e-4,
+        options={"disp": False, "maxiter": 50},
     )
 
     xopt = res.x
     coef = xopt[:nh] + 1j * xopt[nh:]
 
-    a = get_amps(coef)
+    a = _get_amps(coef, (Nx, Ny))
     t = npg.array(npg.gradient(a))
     t = [t[1], -t[0]]
-
-    # maxi = npg.max(norm(t))
-
-    # t = [_normalize(t[i], norm_t) for i in range(2)]
-
-    # t = [t[i] / maxi for i in range(2)]
 
     if normalize:
         norm_t = norm(t)
@@ -134,9 +166,9 @@ def _get_tangent_field_min(grid, harmonics, normalize=False, rfilt=4):
 
 def get_tangent_field(grid, harmonics, normalize=False, rfilt=4, type="fft"):
     if type == "fft":
-        return _get_tangent_field_fft(grid, normalize, rfilt)
+        return _get_tangent_field_fft(grid, normalize, rfilt=rfilt)
     elif type == "opt":
-        return _get_tangent_field_min(grid, harmonics, normalize, rfilt)
+        return _get_tangent_field_min(grid, harmonics, normalize, rfilt=rfilt)
     else:
         raise ValueError(
             f"Wrong type of tangent field {type}. Please choose 'fft' or 'opt'"

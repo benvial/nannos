@@ -89,21 +89,26 @@ section p:last-child {
   margin-bottom: 0;
 }
 
+
 section.color-header {
   color: @gray-base;
   background-color: @body-bg;
-  padding: 80px 0;
+  padding: 40px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0,0,0,.6)), url("../_assets/bg.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 600px;
 }
 
 section.color-header h1 {
-  color: @brand-primary;
-  background-color: @body-bg;
-  font-size: 300%;
+  color: white;
+  font-size: 400%;
+  font-weight: 200;
 }
 
 section.color-header h2 {
-  font-size: 160%;
-  color: #95979f;
+  color: white !important;
+  font-size: 130%;
 }
 
 .btn-round {
@@ -143,8 +148,8 @@ section.color-footer {
   border-top: 0;
   background-color: @gray-base;
   color: @body-bg;
-  padding-top: 70px;
-  padding-bottom: 70px;
+  padding-top: 120px;
+  padding-bottom: 120px;
 }
 
 .footer .footer-copyright {
@@ -220,7 +225,7 @@ section.color-footer {
 .foot-fa {
   text-align: center;
   padding-bottom: 20px;
-  padding-top: 20px;
+  padding-top: 64px;
 }
 
 .foot-fa a {
@@ -885,7 +890,6 @@ span.highlighted {
   padding-bottom: 60px;
   text-align: center;
   color: #878887;
-  background-color: @gray-light;
   vertical-align: center;
 }
 
@@ -917,23 +921,22 @@ span.highlighted {
 
 
 
-.sphx-glr-thumbcontainer[tooltip]:hover::before {
-  border-color: @gray-base transparent  !important;
-  opacity: 0.8;
-  bottom: 82% !important;
-  left: 76.5% !important;
+.navbar-center-item {
+  font-size: larger;
+  text-transform: uppercase;
+}
+
+.homepage-head {
+  padding-top: 100px;
+  padding-bottom: 10px;
+}
+.footer-copyright img {
+  width: 30%;
+  min-width: 140px;
+  padding-top: 20px;
 }
 
 
-.sphx-glr-thumbcontainer[tooltip]:hover::after {
-  background: @gray-base !important;
-  opacity: 0.8;
-  font-size: 85%;
-  left: 92% !important;
-  bottom: 79% !important;
-}
-
-
-.sphx-glr-thumbcontainer a.internal {
-  font-size: 85%;
+.feat-col{
+  
 }

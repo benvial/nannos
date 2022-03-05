@@ -45,7 +45,7 @@ st = nn.Layer("pat", thickness=1)
 st.add_pattern(nn.Pattern(grid))
 lays = [nn.Layer("sup"), st, nn.Layer("sub")]
 pw = nn.PlaneWave(1.2)
-sim = nn.Simulation(nn.Lattice(((1, 0), (0, 1))), lays, pw, nh=200)
+sim = nn.Simulation(nn.Lattice(((1, 0), (0, 1))), lays, pw, nh=100)
 
 
 t = get_tangent_field(grid, sim.harmonics, normalize=False, type="fft")
@@ -77,10 +77,8 @@ norm_t = norm(topt)
 maxi = bk.max(norm_t)
 topt = [topt[i] / maxi for i in range(2)]
 
-
 plt.figure()
 plt.imshow(grid.T, cmap="tab20c", origin="lower", extent=(0, 1, 0, 1))
-dsp = 10
 plt.quiver(
     x[::dsp, ::dsp],
     y[::dsp, ::dsp],
@@ -103,7 +101,7 @@ def run(t):
     pw = nn.PlaneWave(1.2)
     lays = [nn.Layer("sup"), st, nn.Layer("sub")]
     sim = nn.Simulation(
-        nn.Lattice(((1, 0), (0, 1))), lays, pw, nh=200, formulation="tangent"
+        nn.Lattice(((1, 0), (0, 1))), lays, pw, nh=151, formulation="tangent"
     )
     R, T = sim.diffraction_efficiencies()
     print(f"R = {R}")
