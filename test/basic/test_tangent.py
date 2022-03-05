@@ -43,7 +43,7 @@ def test_tangent():
     )
     ta = [npo.array(t[i]) for i in range(2)]
     normt = npo.linalg.norm(npo.array(ta), axis=0)
-    assert npo.allclose(normt, 1, atol=1e-4)
+    assert npo.allclose(normt, 1, atol=1e-3)
 
     with pytest.raises(ValueError) as excinfo:
         t = nn.formulations.tangent.get_tangent_field(None, None, type="fake")
