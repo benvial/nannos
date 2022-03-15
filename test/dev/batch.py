@@ -66,6 +66,6 @@ def benchmark(f, N, nbatch):
                     print(f"speedup torch gpu batch = {tbatch_torch/tbatch}")
 
 
-benchmark("fft", 2**10, 10)
+benchmark("fft", 2 ** 10, 10)
 benchmark("eig", 300, 10)
 benchmark("inv", 500, 50)

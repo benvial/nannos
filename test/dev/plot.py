@@ -12,8 +12,8 @@ pv.set_plot_theme("document")
 L1 = [1.0, 0]
 L2 = [0, 1.0]
 
-Nx = 2**7
-Ny = 2**7
+Nx = 2 ** 9
+Ny = 2 ** 9
 
 eps_pattern = 4.0
 eps_hole = 1
@@ -24,22 +24,26 @@ x, y = np.meshgrid(x0, y0, indexing="ij")
 lays = [nn.Layer("sup")]
 
 
-import nannos.optimize as no
+# import nannos.optimize as no
 
 density0 = np.random.rand(Nx, Ny)
 density0 = np.array(density0)
 density0 = 0.5 * (density0 + np.fliplr(density0))
 density0 = 0.5 * (density0 + np.flipud(density0))
 density0 = 0.5 * (density0 + density0.T)
-density0 = no.apply_filter(density0, Nx / 20)
+# density0 = no.apply_filter(density0, Nx / 20)
+from scipy.ndimage import gaussian_filter
+
+density0 = gaussian_filter(density0, sigma=Nx / 20)
 density0 = (density0 - density0.min()) / (density0.max() - density0.min())
 
-density0[density0 < 0.3] = 0
-density0[np.logical_and(density0 >= 0.3, density0 < 0.6)] = 0.5
-density0[density0 >= 0.6] = 1
+density0[density0 < 0.33] = 0
+density0[np.logical_and(density0 >= 0.33, density0 < 0.66)] = 0.5
+density0[density0 >= 0.66] = 1
 
 
-epsgrid = no.simp(density0, 1, 11, p=1)
+# epsgrid = no.simp(density0, 1, 11, p=1)
+epsgrid = 10 * density0 + 1
 pattern = nn.Pattern(epsgrid, name="design")
 meta = nn.Layer("meta", thickness=0.2)
 meta.add_pattern(pattern)
@@ -47,8 +51,8 @@ lays.append(meta)
 
 
 il = 0
-for radius, thickness in zip([0.3, 0.2, 0.1], [0.3, 0.7, 0.1]):
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
+for radius, thickness in zip([0.4, 0.2, 0.1], [0.3, 0.7, 0.1]):
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
     ids = np.ones((Nx, Ny), dtype=float)
     epsgrid = ids * (np.random.rand(1) * 10 + 2)
     epsgrid[hole] = eps_hole
@@ -71,7 +75,8 @@ colors = ["#ed7559", "#4589b5", "#cad45f", "#7a6773", "#ed59da"]
 
 p = pv.Plotter()
 
-dz = 0.2
+dz = 0.9
+# dz = 0
 
 z = 0
 for layer in np.flipud(sim.layers):
@@ -96,7 +101,7 @@ for layer in np.flipud(sim.layers):
                 roughness=0.1,
                 pbr=True,
                 diffuse=1,
-                color=np.random.rand(3),
+                color=1 - 0.1 * np.random.rand(3),
             )
     else:
         epsgrid = layer.patterns[0].epsilon.real
@@ -160,29 +165,29 @@ my_colormap = ListedColormap(newcolors)
 #         (0.0, 0.0, 0.0),
 #         (0.018, 0.99, -0.06)]
 
-
-# Apply a threshold over a data range
-
-p = pv.Plotter()
-
-# def plot_lay()
-
-threshed = grid.threshold([0, 1])
-# p.add_mesh(threshed, cmap=my_colormap,
-#            pbr=True,lighting='three lights')
-threshed = grid.threshold([eps_pattern, 111])
-# light = pv.Light()
-# light.set_direction_angle(70, -50)
-# p.add_light(light)
-p.add_mesh(threshed, color="#77a38d", metallic=0.3, roughness=0.1, pbr=True, diffuse=1)
-p.show()
-
-# grid.plot(show_edges=False, cmap=my_colormap,
-#            pbr=True)
-
-# from pyvista import examples
-# cubemap = examples.download_sky_box_cube_map()
-
+#
+# # Apply a threshold over a data range
+#
 # p = pv.Plotter()
-# p.add_actor(cubemap.to_skybox())
-# p.set_environment_texture(cubemap)  # For reflecting the environment off the mesh
+#
+# # def plot_lay()
+#
+# threshed = grid.threshold([0, 1])
+# # p.add_mesh(threshed, cmap=my_colormap,
+# #            pbr=True,lighting='three lights')
+# threshed = grid.threshold([eps_pattern, 111])
+# # light = pv.Light()
+# # light.set_direction_angle(70, -50)
+# # p.add_light(light)
+# p.add_mesh(threshed, color="#77a38d", metallic=0.3, roughness=0.1, pbr=True, diffuse=1)
+# p.show()
+#
+# # grid.plot(show_edges=False, cmap=my_colormap,
+# #            pbr=True)
+#
+# # from pyvista import examples
+# # cubemap = examples.download_sky_box_cube_map()
+#
+# # p = pv.Plotter()
+# # p.add_actor(cubemap.to_skybox())
+# # p.set_environment_texture(cubemap)  # For reflecting the environment off the mesh

@@ -17,13 +17,13 @@ def test_tangent():
     bk = nn.backend
 
     n2 = 9
-    Nx, Ny = 2**n2, 2**n2
+    Nx, Ny = 2 ** n2, 2 ** n2
     radius = 0.2
     grid = bk.ones((Nx, Ny), dtype=float)
     x0 = bk.linspace(0, 1.0, Nx)
     y0 = bk.linspace(0, 1.0, Ny)
     x, y = bk.meshgrid(x0, y0, indexing="xy")
-    hole = (x - 0.3) ** 2 + (y - 0.3) ** 2 < radius**2
+    hole = (x - 0.3) ** 2 + (y - 0.3) ** 2 < radius ** 2
     square0 = bk.logical_and(x > 0.7, x < 0.9)
     square1 = bk.logical_and(y > 0.2, y < 0.8)
     square = bk.logical_and(square1, square0)
