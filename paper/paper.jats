@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.2 20190208//EN"
+                  "JATS-publishing1.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+<front>
+<journal-meta>
+<journal-id></journal-id>
+<journal-title-group>
+<journal-title>Journal of Open Source Software</journal-title>
+<abbrev-journal-title>JOSS</abbrev-journal-title>
+</journal-title-group>
+<issn publication-format="electronic">2475-9066</issn>
+<publisher>
+<publisher-name>Open Journals</publisher-name>
+</publisher>
+</journal-meta>
+<article-meta>
+<article-id pub-id-type="publisher-id">0</article-id>
+<article-id pub-id-type="doi">N/A</article-id>
+<title-group>
+<article-title>Nannos: an electromagnetic solver for structured
+multilayer stacks with automatic differentiation and GPU
+acceleration</article-title>
+</title-group>
+<contrib-group>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0001-9468-0286</contrib-id>
+<name>
+<surname>Vial</surname>
+<given-names>Benjamin</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+<xref ref-type="corresp" rid="cor-1"><sup>*</sup></xref>
+</contrib>
+<aff id="aff-1">
+<institution-wrap>
+<institution>Queen Mary University of London, Uited
+Kingdom</institution>
+</institution-wrap>
+</aff>
+</contrib-group>
+<author-notes>
+<corresp id="cor-1">* E-mail: <email></email></corresp>
+</author-notes>
+<volume>¿VOL?</volume>
+<issue>¿ISSUE?</issue>
+<fpage>¿PAGE?</fpage>
+<permissions>
+<copyright-statement>Authors of papers retain copyright and release the
+work under a Creative Commons Attribution 4.0 International License (CC
+BY 4.0)</copyright-statement>
+<copyright-year>2022</copyright-year>
+<copyright-holder>The article authors</copyright-holder>
+<license license-type="open-access" xlink:href="https://creativecommons.org/licenses/by/4.0/">
+<license-p>Authors of papers retain copyright and release the work under
+a Creative Commons Attribution 4.0 International License (CC BY
+4.0)</license-p>
+</license>
+</permissions>
+<kwd-group kwd-group-type="author">
+<kwd>Python</kwd>
+<kwd>Fourier modal method</kwd>
+<kwd>rigorous coupled wave analysis</kwd>
+<kwd>photonics</kwd>
+<kwd>metasurfaces</kwd>
+<kwd>diffraction</kwd>
+</kwd-group>
+</article-meta>
+</front>
+<body>
+<sec id="summary">
+  <title>Summary</title>
+</sec>
+<sec id="statement-of-need">
+  <title>Statement of need</title>
+</sec>
+</body>
+<back>
+</back>
+</article>

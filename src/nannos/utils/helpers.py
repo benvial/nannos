@@ -45,7 +45,7 @@ def _apply_filter(x, rfilt):
         # First a 1-D  Gaussian
         # t = bk.linspace(0, Nx-1, Nx)
         t = bk.array(bk.linspace(-Nx / 2, Nx / 2, Nx))
-        bump = bk.exp(-(t ** 2) / rfilt ** 2)
+        bump = bk.exp(-(t**2) / rfilt**2)
         bump /= bk.trapz(bump)  # normalize the integral to 1
 
         # make a 2-D kernel out of it
@@ -59,7 +59,7 @@ def _apply_filter(x, rfilt):
 
         out = bk.real(inverse_fourier_transform(img2_ft, axes=(0, 1)))
 
-        return bk.fft.fftshift(out) * (Nx ** 2)
+        return bk.fft.fftshift(out) * (Nx**2)
 
 
 apply_filter = jit(_apply_filter, static_argnums=(1))

@@ -25,7 +25,7 @@ from nannos.geometry import shape_mask
 plt.close("all")
 plt.ion()
 
-N = 2 ** 7
+N = 2**7
 
 ####################################################################
 # Double-sided scythe (DSS)
@@ -48,7 +48,7 @@ epsilon = np.ones((N, N))
 circle = sg.Point(*center).buffer(R)
 mask = shape_mask(circle, x, y)
 
-epsilon[mask] = 3.5 ** 2  # alpha-Si
+epsilon[mask] = 3.5**2  # alpha-Si
 
 arm_1 = sg.Polygon(
     [
@@ -86,7 +86,7 @@ lattice = nn.Lattice(([P, 0], [0, P]))
 ##############################################################################
 # Define the layers
 eps_sub = 1
-eps_sup = 1.45 ** 2  # SiO2
+eps_sup = 1.45**2  # SiO2
 
 sup = nn.Layer("Superstrate", epsilon=eps_sup)
 ms = nn.Layer("Metasurface", thickness=H)
@@ -159,7 +159,7 @@ for wl in wls:
 
     #### circular basis
 
-    Lambda = np.array([[1, 1], [1j, -1j]]) / 2 ** 0.5
+    Lambda = np.array([[1, 1], [1j, -1j]]) / 2**0.5
 
     Tmatrix_circ = np.linalg.inv(Lambda) @ Tmatrix @ Lambda
 
