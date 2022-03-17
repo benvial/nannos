@@ -299,6 +299,7 @@ class Simulation:
         return R, T
 
     def get_z_stress_tensor_integral(self, layer_index, z=0):
+        layer, layer_index = self._get_layer(layer_index)
         if not hasattr(self, "fields_fourier"):
             self.get_field_fourier(layer_index, z=z)
         # ex, ey, ez = self.fields_fourier[0, 0,:,:]
@@ -314,7 +315,6 @@ class Simulation:
         hy = h[1]
         hz = h[2]
 
-        layer, layer_index = self._get_layer(layer_index)
         dz = (self.ky * hx - self.kx * hy) / self.omega
         if layer.is_uniform:
             dx = ex * layer.epsilon
@@ -479,6 +479,7 @@ class Simulation:
         return layer
 
     def _get_amplitudes(self, layer_index, z=0, translate=True):
+        layer, layer_index = self._get_layer(layer_index)
         n_interfaces = len(self.layers) - 1
         if layer_index == 0:
             aN, b0 = self._solve_ext()
@@ -494,6 +495,7 @@ class Simulation:
         return ai, bi
 
     def _solve_int(self, layer_index):
+        layer, layer_index = self._get_layer(layer_index)
         n_interfaces = len(self.layers) - 1
         S = self.get_S_matrix(indices=(0, layer_index))
         P = self.get_S_matrix(indices=(layer_index, n_interfaces))

@@ -260,9 +260,13 @@ cleantest:
 	$(call message,${@})
 	@rm -rf .coverage* htmlcov coverage.xml
 
-
-
 	
+## Install requirements for testing
+test-req:
+	$(call message,${@})
+	@cd test && pip install --upgrade -r requirements.txt
+
+
 
 define runtest
 		@echo 

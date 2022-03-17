@@ -45,7 +45,7 @@ staging:
 test:
   script:
     - make install
-    - make dev
+    - make test-req
     - make test
     - coverage xml
   artifacts:
