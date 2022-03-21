@@ -8,9 +8,9 @@ import nlopt
 import numpy as npo
 from scipy.optimize import minimize
 
-from . import backend as bk
-from . import grad
-from .utils import apply_filter
+from .. import backend as bk
+from .. import grad
+from ..utils import apply_filter
 
 
 def simp(x, eps_min, eps_max, p=1):
