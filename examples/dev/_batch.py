@@ -21,6 +21,9 @@ import numpy as np
 
 import nannos as nn
 
+plt.close("all")
+plt.ion()
+
 ##############################################################################
 # We will study a benchmark of hole in a dielectric surface similar to
 # those studied in :cite:p:`Fan2002`.
@@ -29,7 +32,7 @@ nh = 100
 L1 = [1.0, 0]
 L2 = [0, 1.0]
 freq = 1.4
-theta = 0.0 * np.pi / 180
+theta = 30.0 * np.pi / 180
 phi = 0.0 * np.pi / 180
 psi = 0.0 * np.pi / 180
 
@@ -49,23 +52,23 @@ y0 = np.linspace(0, 1.0, Ny)
 x, y = np.meshgrid(x0, y0, indexing="ij")
 hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
 epsgrid[hole] = eps_hole
-
-
-##############################################################################
-# Visualize the permittivity
-
-cmap = mpl.colors.ListedColormap(["#ffe7c2", "#232a4e"])
-
-bounds = [eps_hole, eps_pattern]
-norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-plt.imshow(epsgrid, cmap=cmap, extent=(0, 1, 0, 1))
-plt.colorbar(ticks=bounds)
-plt.xlabel("$x$")
-plt.ylabel("$y$")
-plt.title(r"permittitivity $\varepsilon(x,y)$")
-plt.tight_layout()
-plt.show()
-
+#
+#
+# ##############################################################################
+# # Visualize the permittivity
+#
+# cmap = mpl.colors.ListedColormap(["#ffe7c2", "#232a4e"])
+#
+# bounds = [eps_hole, eps_pattern]
+# norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+# plt.imshow(epsgrid, cmap=cmap, extent=(0, 1, 0, 1))
+# plt.colorbar(ticks=bounds)
+# plt.xlabel("$x$")
+# plt.ylabel("$y$")
+# plt.title(r"permittitivity $\varepsilon(x,y)$")
+# plt.tight_layout()
+# plt.show()
+#
 
 ##############################################################################
 # Define the lattice
@@ -113,69 +116,53 @@ print("Ti = ", Ti[:nmax])
 print("R = ", R)
 print("T = ", T)
 print("R+T = ", R + T)
-
-
-##############################################################################
-# Plot
-
-
-fig, (axR, axT) = plt.subplots(1, 2, figsize=(4, 2))
-
-labels = [f"({g[0]},{g[1]})" for g in (sim.harmonics[:, :nmax]).T]
-
-
-axR.bar(range(nmax), Ri[:nmax], color=["#e69049"])
-axR.set_xticks(range(nmax))
-axR.set_xticklabels(labels=labels)
-axR.set_xlabel("order")
-axR.set_ylabel("reflection $R_{i,j}$")
-axR.annotate(
-    r"$R = \sum_i\,\sum_j\, R_{i,j}=$" + f"{sum(Ri[:nmax]):0.4f}",
-    (0.5, 0.9),
-    xycoords="axes fraction",
-)
-
-axT.bar(range(nmax), Ti[:nmax], color=["#4a77ba"])
-axT.set_xticks(range(nmax))
-axT.set_xticklabels(labels=labels)
-axT.set_xlabel("order")
-axT.set_ylabel("transmission $T_{i,j}$")
-axT.annotate(
-    r"$T =\sum_i\,\sum_j\, T_{i,j}=$" + f"{sum(Ti[:nmax]):0.4f}",
-    (0.5, 0.9),
-    xycoords="axes fraction",
-)
-
-
-plt.suptitle("Diffraction efficiencies: $R+T=$" + f"{sum(Ri[:nmax]+Ti[:nmax]):0.4f}")
-plt.tight_layout()
-plt.show()
-
-
-##############################################################################
-# Fig 12 (c) from :cite:p:`Fan2002`.
-
-
-def compute_transmission(fn):
-    pw = nn.PlaneWave(frequency=fn, angles=(0, 0, 0))
-    sim = nn.Simulation(lattice, stack, pw, 100)
-    R, T = sim.diffraction_efficiencies()
-    print(f"f = {fn} (normalized)")
-    print("T = ", T)
-    return T
-
-
-freqs_norma = np.linspace(0.25, 0.6, 100)
-freqs_adapted, transmission = nn.adaptive_sampler(
-    compute_transmission,
-    freqs_norma,
-)
-
-
-plt.figure()
-plt.plot(freqs_adapted, transmission, c="#be4c83")
-plt.xlim(freqs_norma[0], freqs_norma[-1])
-plt.ylim(0, 1)
-plt.xlabel(r"frequency ($2\pi c / a$)")
-plt.ylabel("Transmission")
-plt.tight_layout()
+#
+#
+# M = ms.matrix
+#
+# fig, ax = plt.subplots(1, 2)
+# a = ax[0].imshow(M.real)
+# plt.colorbar(a, ax=ax[0])
+# b = ax[1].imshow(M.imag)
+# plt.colorbar(b, ax=ax[1])
+#
+#
+# test = (M - np.conj(M).T)# / np.mean(M)
+#
+# fig, ax = plt.subplots(1, 2)
+#
+# a = ax[0].imshow(test.real)
+# plt.colorbar(a, ax=ax[0])
+# b = ax[1].imshow(test.imag)
+# plt.colorbar(b, ax=ax[1])
+#
+#
+#
+# w, v = np.linalg.eig(M)
+# wh, vh = np.linalg.eigh(M)
+#
+#
+# plt.figure()
+# plt.plot(w.real,w.imag,"o")
+# plt.plot(wh.real,wh.imag,"x")
+#
+#
+# def check_symmetric(a, rtol=1e-03, atol=1e-01):
+#     return np.allclose(a, a.T, rtol=rtol, atol=atol)
+#
+#
+#
+# AA = (M - np.conj(M))
+# # AA /= np.linalg.norm(M)
+# plt.imshow(AA.imag)
+# plt.colorbar()
+# MT = np.conj(M).T
+# plt.figure()
+# plt.imshow(M.imag)
+# plt.colorbar()
+# plt.figure()
+# plt.imshow(MT.imag)
+# plt.colorbar()
+#
+#
+# np.allclose((M - np.conj(M).T) / np.linalg.norm(M), 0, rtol=1e-39, atol=1e-2)

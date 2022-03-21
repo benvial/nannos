@@ -14,7 +14,7 @@ from .utils import apply_filter
 
 
 def simp(x, eps_min, eps_max, p=1):
-    return (eps_max - eps_min) * x**p + eps_min
+    return (eps_max - eps_min) * x ** p + eps_min
 
 
 def project(x, beta=1, thres=0.5):
@@ -87,7 +87,7 @@ class TopologyOptimizer:
             print(f"global iteration {iopt}")
             print("-----------------------")
 
-            proj_level = 2**iopt
+            proj_level = 2 ** iopt
             args = list(self.args)
             args[0] = proj_level
             args = tuple(args)
