@@ -21,7 +21,7 @@ def _normalize(x, n):
 
 def _ft_filt(x, expo):
     with npo.errstate(divide="ignore"):
-        f = 1 / (x ** expo)
+        f = 1 / (x**expo)
     return bk.array(bk.where(x == 0.0, 0.0 * x, f))
 
 
@@ -36,7 +36,7 @@ def _get_tangent_field_fft(grid, normalize=False, rfilt=4, expo=0.5):
     fx = bk.fft.fftfreq(Nx)
     fy = bk.fft.fftfreq(Ny)
     Fx, Fy = bk.meshgrid(fx, fy, indexing="ij")
-    ghat = _ft_filt(Fx ** 2 + Fy ** 2, expo=expo) * Nx * Ny
+    ghat = _ft_filt(Fx**2 + Fy**2, expo=expo) * Nx * Ny
     # ghat = apply_filter(Fx**2 + Fy**2, rfilt)
     Nhat = [fourier_transform(N[i]) for i in range(2)]
     Nstar = [(inverse_fourier_transform(Nhat[i] * ghat)) for i in range(2)]
@@ -79,8 +79,8 @@ def _get_tangent_field_min(
         return npg.array(npg.where(n == 0.0, 0.0 * x, f))
 
     Nx, Ny = grid.shape
-    Nx_ds = min(2 ** 6, Nx)
-    Ny_ds = min(2 ** 6, Ny)
+    Nx_ds = min(2**6, Nx)
+    Ny_ds = min(2**6, Ny)
     #
     # Nx_ds =  Nx
     # Ny_ds =  Ny

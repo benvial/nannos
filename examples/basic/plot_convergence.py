@@ -34,8 +34,8 @@ def checkerboard(nh, formulation):
     psi = 0.0 * nn.pi / 180
     pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
 
-    Nx = 2 ** 9
-    Ny = 2 ** 9
+    Nx = 2**9
+    Ny = 2**9
 
     x0 = np.linspace(0, 1.0, Nx)
     y0 = np.linspace(0, 1.0, Ny)

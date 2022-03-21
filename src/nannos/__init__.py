@@ -43,27 +43,38 @@ def _has_cuda():
 HAS_TORCH = has_torch()
 HAS_CUDA = _has_cuda()
 
-_nannos_device = "cpu"
-
 
 def use_gpu(boolean):
-    global _nannos_device
+    global DEVICE
+    global _CPU_DEVICE
+    global _GPU_DEVICE
 
     if boolean:
 
         if BACKEND not in ["torch"]:
             log.info(f"Cannot use GPU with {BACKEND} backend.")
-
-        if not HAS_TORCH:
-            log.info("pytorch not found. Cannot use GPU.")
-        elif not HAS_CUDA:
-            log.info("cuda not found. Cannot use GPU.")
+            _delvar("_GPU_DEVICE")
+            _CPU_DEVICE = True
         else:
-            _nannos_device = "cuda"
-            log.info("Using GPU.")
+            if not HAS_TORCH:
+                log.info("pytorch not found. Cannot use GPU.")
+                _delvar("_GPU_DEVICE")
+                _CPU_DEVICE = True
+            elif not HAS_CUDA:
+                log.info("cuda not found. Cannot use GPU.")
+                _delvar("_GPU_DEVICE")
+                _CPU_DEVICE = True
+            else:
+                DEVICE = "cuda"
+                log.info("Using GPU.")
+                _delvar("_CPU_DEVICE")
+                _GPU_DEVICE = True
     else:
-        _nannos_device = "cpu"
+        _CPU_DEVICE = True
+        _delvar("_GPU_DEVICE")
+        DEVICE = "cpu"
         log.info("Using CPU.")
+    _reload_package()
 
 
 def jit(fun, **kwargs):
@@ -90,9 +101,6 @@ def set_backend(backend):
 
 
     """
-
-    import importlib
-    import sys
 
     global _NUMPY
     global _SCIPY
@@ -150,6 +158,13 @@ def set_backend(backend):
         raise ValueError(
             f"Unknown backend '{backend}'. Please choose between 'numpy', 'scipy', 'jax', 'torch' and 'autograd'."
         )
+    _reload_package()
+
+
+def _reload_package():
+
+    import importlib
+    import sys
 
     import nannos
 
@@ -202,7 +217,7 @@ elif "_JAX" in globals():
     # for autodif wrt eigenvectors yet.
     # see: https://github.com/google/jax/issues/2748
 
-    # if _nannos_device == "cpu":
+    # if DEVICE == "cpu":
     #     config.update("jax_platform_name", "cpu")
     # else:
     #     config.update("jax_platform_name", "gpu")
@@ -221,9 +236,9 @@ elif "_TORCH" in globals():
 
         def _array(a, **kwargs):
             if isinstance(a, backend.Tensor):
-                return a.to(torch.device(_nannos_device))
+                return a.to(torch.device(DEVICE))
             else:
-                return backend.tensor(a, **kwargs).to(torch.device(_nannos_device))
+                return backend.tensor(a, **kwargs).to(torch.device(DEVICE))
 
         backend.array = _array
 
@@ -231,9 +246,10 @@ elif "_TORCH" in globals():
             def df(x, *args, **kwargs):
                 x = backend.array(x, dtype=bk.float64)
                 _x = x.clone().detach().requires_grad_(True)
-                return backend.autograd.grad(
+                out = backend.autograd.grad(
                     f(_x, *args, **kwargs), _x, allow_unused=True
                 )[0]
+                return out
 
             return df
 
@@ -246,7 +262,13 @@ else:
     backend = numpy
 
 
+def get_device():
+    return "cuda" if "_GPU_DEVICE" in globals() else "cpu"
+
+
 BACKEND = get_backend()
+DEVICE = get_device()
+
 
 _backend_env_var = os.environ.get("NANNOS_BACKEND")
 
@@ -256,6 +278,7 @@ if _backend_env_var in available_backends and _backend_env_var is not None:
         set_backend(_backend_env_var)
 
 from .constants import *
+from .dev import _optimize as optimize
 from .excitation import *
 from .lattice import *
 from .layers import *
