@@ -12,8 +12,8 @@ pv.set_plot_theme("document")
 L1 = [1.0, 0]
 L2 = [0, 1.0]
 
-Nx = 2**9
-Ny = 2**9
+Nx = 2 ** 9
+Ny = 2 ** 9
 
 eps_pattern = 4.0
 eps_hole = 1
@@ -52,7 +52,7 @@ lays.append(meta)
 
 il = 0
 for radius, thickness in zip([0.4, 0.2, 0.1], [0.3, 0.7, 0.1]):
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius**2
+    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
     ids = np.ones((Nx, Ny), dtype=float)
     epsgrid = ids * (np.random.rand(1) * 10 + 2)
     epsgrid[hole] = eps_hole

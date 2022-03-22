@@ -20,7 +20,7 @@ import shapely.geometry as sg
 
 from nannos.geometry import shape_mask
 
-N = 2**9
+N = 2 ** 9
 x = np.linspace(0, 1, N)
 y = np.linspace(0, 1, N)
 epsilon = np.ones((N, N))
@@ -92,7 +92,7 @@ mask = shape_mask(srr, x, y)
 epsilon[mask] = 6
 
 
-plt.imshow(epsilon, cmap="Pastel1_r", origin="lower", extent=[0, 1, 0, 1])
+plt.imshow(epsilon, cmap="tab20c", origin="lower", extent=[0, 1, 0, 1])
 plt.colorbar()
 plt.show()
 
@@ -135,6 +135,6 @@ for i, (c, r) in enumerate(zip(centers, radii)):
     epsilon[mask] = 7 + i
 
 
-plt.imshow(epsilon, cmap="Pastel1_r", origin="lower", extent=[0, 1, 0, 1])
+plt.imshow(epsilon, cmap="tab20c", origin="lower", extent=[0, 1, 0, 1])
 plt.colorbar()
 plt.show()
