@@ -13,6 +13,8 @@ from . import jit
 from .formulations import fft
 from .utils import block, get_block, norm
 
+# from .parallel import parloop
+
 _inv_function = bk.linalg.inv
 
 
@@ -121,12 +123,37 @@ class Simulation:
         layers_solved = []
         for layer in self.layers:
             layer = self._build_matrix(layer)
-            # layer.solve_eigenproblem(layer.matrix)
             if layer.is_uniform:
-                # layer.eigenvectors = bk.eye(self.nh*2)
                 layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
             else:
                 layer.solve_eigenproblem(layer.matrix)
+            layers_solved.append(layer)
+        self.layers = layers_solved
+        self.is_solved = True
+
+    def _solve_parallel(self):
+        """Solve the grating problem."""
+
+        layers_structured = [layer for layer in self.layers if not layer.is_uniform]
+
+        # @parloop(n_jobs=1)
+        def solve_structured_layers(layer, self=self):
+            layer = self._build_matrix(layer)
+            layer.solve_eigenproblem(layer.matrix)
+            return layer
+
+        # layers_structured = solve_structured_layers(layers_structured)
+
+        layers_structured = [solve_structured_layers(l) for l in layers_structured]
+        layers_solved = []
+        i = 0
+        for layer in self.layers:
+            if layer.is_uniform:
+                layer = self._build_matrix(layer)
+                layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
+            else:
+                layer = layers_structured[i]
+                i += 1
             layers_solved.append(layer)
         self.layers = layers_solved
         self.is_solved = True
@@ -414,7 +441,7 @@ class Simulation:
             # Pmu = bk.eye(self.nh * 2)
             Pmu = block([[mu * self.IdG, self.ZeroG], [self.ZeroG, mu * self.IdG]])
 
-            Qeps = self.omega ** 2 * Pmu - Keps
+            Qeps = self.omega**2 * Pmu - Keps
         else:
             epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
             mu_zz = mu[2, 2] if is_mu_anisotropic else mu
@@ -462,8 +489,8 @@ class Simulation:
 
             # Qeps = self.omega ** 2 * bk.eye(self.nh * 2) - Keps
             # matrix = Peps @ Qeps - Kmu
-            Qeps = self.omega ** 2 * Pmu - Keps
-            matrix = self.omega ** 2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
+            Qeps = self.omega**2 * Pmu - Keps
+            matrix = self.omega**2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
 
             layer.matrix = matrix
             layer.Kmu = Kmu

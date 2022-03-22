@@ -46,13 +46,13 @@ theta = 0.0 * bk.pi / 180
 phi = 0.0 * bk.pi / 180
 psi = 0.0 * bk.pi / 180
 
-Nx = 2 ** 7
-Ny = 2 ** 7
+Nx = 2**7
+Ny = 2**7
 
-eps_sup = 1.45 ** 2
+eps_sup = 1.45**2
 eps_sub = 1.0
 eps_min = 1.0
-eps_max = 3.60 ** 2
+eps_max = 3.60**2
 
 h_ms = 0.6
 

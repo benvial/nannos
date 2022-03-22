@@ -16,7 +16,7 @@ plt.close("all")
 lattice = nn.Lattice(((1, 0), (1.4, 1.5)))
 # lattice = nn.Lattice(((1,0), (0., 1.5)))
 # lattice = nn.Lattice(((1, 0), (-0.5, 3 ** 0.5 / 2)))
-lattice = nn.Lattice(((1, 0), (0.5, 3 ** 0.5 / 2)))
+lattice = nn.Lattice(((1, 0), (0.5, 3**0.5 / 2)))
 # lattice = nn.Lattice(((1, 0.3   ), (0.2, 2)))
 # lattice = nn.Lattice(((1, 0), (0,1)))
 
@@ -27,7 +27,7 @@ bk = nn.backend
 radius = 0.3  # 3**0.5/4
 
 n2 = 8
-Nx, Ny = 2 ** n2, 2 ** n2
+Nx, Ny = 2**n2, 2**n2
 grid = bk.ones((Nx, Ny), dtype=float) * 5
 x0 = bk.linspace(0, 1.0, Nx)
 y0 = bk.linspace(0, 1.0, Ny)
@@ -60,7 +60,7 @@ radius_x, radius_y = radius / 2, radius
 xc, yc = 0.5, 0.5
 xc1 = xc * M[0][0] + yc * M[0][1]
 yc1 = xc * M[1][0] + yc * M[1][1]
-hole = (x - xc1) ** 2 / radius_x ** 2 + (y - yc1) ** 2 / radius_y ** 2 < 1
+hole = (x - xc1) ** 2 / radius_x**2 + (y - yc1) ** 2 / radius_y**2 < 1
 
 
 R = ((x - xc1) ** 2 + (y - yc1) ** 2) ** 0.5

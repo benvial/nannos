@@ -13,8 +13,6 @@ from functools import wraps
 
 from joblib import Parallel, delayed
 
-from . import numpy as np
-
 
 def parloop(n_jobs=1):
     def deco_parloop(func):

@@ -25,7 +25,7 @@ from nannos.geometry import shape_mask
 plt.close("all")
 plt.ion()
 
-N = 2 ** 7
+N = 2**8
 
 ####################################################################
 # Double-sided scythe (DSS)
@@ -33,10 +33,11 @@ P = 850
 R = 280
 L1 = L2 = 220
 W1 = W2 = 191
-# W1 = 191
-# W2 = 231
+W1 = 191
+W2 = 231
 H = 350
 center = P / 2, P / 2
+n_Si = 3.2
 
 ####################################################################
 # Various patterns
@@ -48,7 +49,7 @@ epsilon = np.ones((N, N))
 circle = sg.Point(*center).buffer(R)
 mask = shape_mask(circle, x, y)
 
-epsilon[mask] = 3.5 ** 2  # alpha-Si
+epsilon[mask] = n_Si**2  # alpha-Si
 
 arm_1 = sg.Polygon(
     [
@@ -86,7 +87,7 @@ lattice = nn.Lattice(([P, 0], [0, P]))
 ##############################################################################
 # Define the layers
 eps_sub = 1
-eps_sup = 1.45 ** 2  # SiO2
+eps_sup = 1.45**2  # SiO2
 
 sup = nn.Layer("Superstrate", epsilon=eps_sup)
 ms = nn.Layer("Metasurface", thickness=H)
@@ -102,12 +103,52 @@ ms.add_pattern(pattern)
 ##############################################################################
 # Define the incident plane wave
 
-nh = 51
+nh = 151
 spectra = []
 
 wls = np.linspace(1330, 1480, 51)
 
-wls = np.linspace(1400, 1550, 51)
+# wls = np.linspace(1400, 1550, 1)
+
+
+theta, phi, psi = 3.7 * nn.pi / 180, 0, 0
+freq = 1 / wls[0]
+
+
+Tpola = dict()
+
+
+plt.figure()
+CD_spetra = []
+i = 0
+for wl in wls:
+    freq = 1 / wl
+
+    for orientation in ["right", "left"]:
+        # pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+        pw = nn.excitation.CircPolPlaneWave(
+            frequency=freq, angles=(theta, phi, psi), orientation=orientation
+        )
+        stack = [sup, ms, sub]
+        sim = nn.Simulation(lattice, stack, pw, nh)
+        R, T = sim.diffraction_efficiencies()
+        print("R = ", R)
+        print("T = ", T)
+        print("R+T = ", R + T)
+        Tpola[orientation] = T
+
+    CD = (Tpola["right"] - Tpola["left"]) / (Tpola["right"] + Tpola["left"])
+
+    print("CD = ", CD)
+    CD_spetra.append(CD)
+
+    plt.plot(wl, CD, "sr")
+    i += 1
+    plt.plot(wls[:i], CD_spetra, "r")
+    plt.pause(0.1)
+
+
+xsxs
 
 plt.figure()
 
@@ -159,7 +200,7 @@ for wl in wls:
 
     #### circular basis
 
-    Lambda = np.array([[1, 1], [1j, -1j]]) / 2 ** 0.5
+    Lambda = np.array([[1, 1], [1j, -1j]]) / 2**0.5
 
     Tmatrix_circ = np.linalg.inv(Lambda) @ Tmatrix @ Lambda
 
