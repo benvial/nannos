@@ -102,7 +102,7 @@ def _parallelogramic_truncation(nh, Lk):
     jsort = bk.argsort(Gl2)
     Gsorted = [g[jsort] for g in G]
 
-    nh = NGroot**2
+    nh = NGroot ** 2
 
     G = bk.vstack(Gsorted)[:, :nh]
 
@@ -119,7 +119,7 @@ def _circular_truncation(nh, Lk):
 
     u_extent = bk.array(
         [
-            1 + int(circ_radius / (q * bk.sqrt(1.0 - udot**2 / (u[0] * u[1]) ** 2)))
+            1 + int(circ_radius / (q * bk.sqrt(1.0 - udot ** 2 / (u[0] * u[1]) ** 2)))
             for q in u
         ]
     )

@@ -15,7 +15,7 @@ from ..utils import apply_filter
 
 
 def simp(x, eps_min, eps_max, p=1):
-    return (eps_max - eps_min) * x**p + eps_min
+    return (eps_max - eps_min) * x ** p + eps_min
 
 
 def project(x, beta=1, thres=0.5):
@@ -89,7 +89,7 @@ class TopologyOptimizer:
             print(f"global iteration {iopt}")
             print("-----------------------")
 
-            proj_level = 2**iopt
+            proj_level = 2 ** iopt
             args = list(self.args)
             args[0] = proj_level
             args = tuple(args)
@@ -110,7 +110,7 @@ class TopologyOptimizer:
 
                 stop = StopFun(fun=fun_scipy, stopval=self.stopval)
                 try:
-                    opt = minimize(
+                    self.opt = minimize(
                         stop.fun,
                         x0,
                         args=args,
@@ -119,8 +119,8 @@ class TopologyOptimizer:
                         bounds=bounds,
                         options=options,
                     )
-                    xopt = opt.x
-                    fopt = opt.fun
+                    xopt = self.opt.x
+                    fopt = self.opt.fun
                 except StopFunError as e:
                     print(e)
                     xopt = stop.x
@@ -144,19 +144,27 @@ class TopologyOptimizer:
                 lb = npo.zeros(self.nvar, dtype=npo.float64)
                 ub = npo.ones(self.nvar, dtype=npo.float64)
 
-                opt = nlopt.opt(nlopt.LD_MMA, self.nvar)
-                opt.set_lower_bounds(lb)
-                opt.set_upper_bounds(ub)
+                self.opt = nlopt.opt(nlopt.LD_MMA, self.nvar)
+                self.opt.set_lower_bounds(lb)
+                self.opt.set_upper_bounds(ub)
+                if "ftol_rel" in self.options:
+                    self.opt.set_ftol_rel(self.options["ftol_rel"])
+                if "xtol_rel" in self.options:
+                    self.opt.set_xtol_rel(self.options["xtol_rel"])
+                if "ftol_abs" in self.options:
+                    self.opt.set_ftol_abs(self.options["ftol_abs"])
+                if "xtol_abs" in self.options:
+                    self.opt.set_xtol_abs(self.options["xtol_abs"])
 
-                # opt.set_ftol_rel(1e-16)
-                # opt.set_xtol_rel(1e-16)
+                # self.opt.set_ftol_rel(1e-16)
+                # self.opt.set_xtol_rel(1e-16)
                 if self.stopval is not None:
-                    opt.set_stopval(self.stopval)
+                    self.opt.set_stopval(self.stopval)
                 if self.maxiter is not None:
-                    opt.set_maxeval(self.maxiter)
+                    self.opt.set_maxeval(self.maxiter)
 
-                opt.set_min_objective(fun_nlopt)
-                xopt = opt.optimize(x0)
-                fopt = opt.last_optimum_value()
+                self.opt.set_min_objective(fun_nlopt)
+                xopt = self.opt.optimize(x0)
+                fopt = self.opt.last_optimum_value()
             x0 = xopt
         return xopt, fopt
