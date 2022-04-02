@@ -14,9 +14,7 @@ API Reference
   
   Simulation
   Lattice
-  Layer
   PlaneWave
-  Pattern
   
   
 

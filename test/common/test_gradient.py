@@ -36,15 +36,14 @@ def test_grad(formulation):
         from nannos import numpy as np
 
         def f(var):
+            lattice = nn.Lattice(([1, 0], [0, 1]))
             xa = var.reshape(Nx, Ny)
             eps_pattern = 9 + 1 * xa
-            sup = nn.Layer("Superstrate")
-            sub = nn.Layer("Substrate")
-            ms = nn.Layer("ms", 1)
-            pattern = nn.Pattern(eps_pattern)
-            ms.add_pattern(pattern)
+            sup = lattice.Layer("Superstrate")
+            sub = lattice.Layer("Substrate")
+            ms = lattice.Layer("ms", 1)
+            ms.epsilon = eps_pattern
             sim = nn.Simulation(
-                nn.Lattice(([1, 0], [0, 1])),
                 [sup, ms, sub],
                 nn.PlaneWave(1.1),
                 10,

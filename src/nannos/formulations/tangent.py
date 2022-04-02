@@ -13,43 +13,56 @@ from ..utils import apply_filter, norm
 from .fft import fourier_transform, inverse_fourier_transform
 
 
-def _normalize(x, n):
+def _normalize(x, n, invalid=0, threshold=0.0):
     with npo.errstate(invalid="ignore"):
         f = x / (n)
-    return bk.array(bk.where(n == 0.0, 0.0 * x, f))
+    return bk.array(bk.where(n <= threshold, invalid * bk.ones_like(x), f))
+
+
+def _normalize_vec(V, n, threshold=1e-6):
+    Vx = _normalize(V[0], n, invalid=1, threshold=threshold)
+    Vy = _normalize(V[1], n, invalid=0, threshold=threshold)
+    return [Vx, Vy]
 
 
 def _ft_filt(x, expo):
     with npo.errstate(divide="ignore"):
-        f = 1 / (x ** expo)
+        f = 1 / (x**expo)
     return bk.array(bk.where(x == 0.0, 0.0 * x, f))
 
 
 def _get_tangent_field_fft(grid, normalize=False, rfilt=4, expo=0.5):
     Nx, Ny = grid.shape
+
+    grid = bk.hstack([grid, grid, grid])
+    grid = bk.vstack([grid, grid, grid])
+
     xf = apply_filter(grid, rfilt)
     v = bk.gradient(grid)
     vf = bk.gradient(xf)
     norma = norm(v)
     N = [bk.array(v[i]) * bk.abs(vf[i]) for i in range(2)]
     N = [_normalize(N[i], norma) for i in range(2)]
-    fx = bk.fft.fftfreq(Nx)
-    fy = bk.fft.fftfreq(Ny)
+    fx = bk.fft.fftfreq(3 * Nx)
+    fy = bk.fft.fftfreq(3 * Ny)
     Fx, Fy = bk.meshgrid(fx, fy, indexing="ij")
-    ghat = _ft_filt(Fx ** 2 + Fy ** 2, expo=expo) * Nx * Ny
+    ghat = _ft_filt(Fx**2 + Fy**2, expo=expo) * Nx * Ny
     # ghat = apply_filter(Fx**2 + Fy**2, rfilt)
     Nhat = [fourier_transform(N[i]) for i in range(2)]
     Nstar = [(inverse_fourier_transform(Nhat[i] * ghat)) for i in range(2)]
-    if normalize:
-        norm_Nstar = norm(Nstar)
-        Nstar = [_normalize(Nstar[i], norm_Nstar) for i in range(2)]
 
-    return [Nstar[1], -Nstar[0]]
-    # return [Nstar[0], Nstar[1]]
+    Nstar = [Nstar[i][Nx : 2 * Nx, Ny : 2 * Ny] for i in range(2)]
+    t = [Nstar[1].real, -Nstar[0].real]
+    # t = bk.array(t).real
+    if normalize:
+        norm_t = norm(t)
+        t = _normalize_vec(t, norm_t)
+
+    return t
 
 
 def _get_tangent_field_min(
-    grid, harmonics, normalize=False, rfilt=6, opt_backend="autograd"
+    grid, harmonics, normalize=False, rfilt=4, opt_backend="autograd"
 ):
 
     if opt_backend == "jax":
@@ -79,8 +92,8 @@ def _get_tangent_field_min(
         return npg.array(npg.where(n == 0.0, 0.0 * x, f))
 
     Nx, Ny = grid.shape
-    Nx_ds = min(2 ** 6, Nx)
-    Ny_ds = min(2 ** 6, Ny)
+    Nx_ds = min(2**6, Nx)
+    Ny_ds = min(2**6, Ny)
     #
     # Nx_ds =  Nx
     # Ny_ds =  Ny
@@ -154,14 +167,15 @@ def _get_tangent_field_min(
     coef = xopt[:nh] + 1j * xopt[nh:]
 
     a = _get_amps(coef, (Nx, Ny))
-    t = npg.array(npg.gradient(a))
-    t = [t[1], -t[0]]
+    n = npg.array(npg.gradient(a))
+    t = [n[1], -n[0]]
 
+    t = bk.array(t).real
     if normalize:
         norm_t = norm(t)
-        t = [_normalize(t[i], norm_t) for i in range(2)]
+        t = _normalize_vec(t, norm_t)
 
-    return bk.array(t)
+    return t
 
 
 def get_tangent_field(grid, harmonics, normalize=False, rfilt=4, type="fft"):

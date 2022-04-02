@@ -26,31 +26,25 @@ import nannos as nn
 
 def checkerboard(nh, formulation):
     la = 1
-    lattice = nn.Lattice(([2 * 1.25 * la, 0], [0, 2 * 1.25 * la]))
+    d = 2 * 1.25 * la
+    Nx = 2**9
+    Ny = 2**9
+    lattice = nn.Lattice(([d, 0], [0, d]), discretization=(Nx, Ny))
 
     freq = 1 / la
-    theta = 0.0 * nn.pi / 180
-    phi = 0.0 * nn.pi / 180
-    psi = 0.0 * nn.pi / 180
-    pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+    pw = nn.PlaneWave(frequency=freq, angles=(0, 0, 0))
+    epsgrid = lattice.ones() * 2.25
+    sq1 = lattice.square((0.25 * d, 0.25 * d), 0.5 * d)
+    sq2 = lattice.square((0.75 * d, 0.75 * d), 0.5 * d)
+    epsgrid[sq1] = 1
+    epsgrid[sq2] = 1
 
-    Nx = 2 ** 9
-    Ny = 2 ** 9
+    sup = lattice.Layer("Superstrate", epsilon=2.25)
+    sub = lattice.Layer("Substrate", epsilon=1)
+    st = lattice.Layer("Structured", la)
+    st.epsilon = epsgrid
 
-    x0 = np.linspace(0, 1.0, Nx)
-    y0 = np.linspace(0, 1.0, Ny)
-    x, y = np.meshgrid(x0, y0, indexing="ij")
-    epsgrid = 2.25 * np.ones((Nx, Ny), dtype=float)
-    epsgrid[np.logical_and(x > 0.5, y > 0.5)] = 1
-    epsgrid[np.logical_and(x < 0.5, y < 0.5)] = 1
-
-    sup = nn.Layer("Superstrate", epsilon=2.25)
-    sub = nn.Layer("Substrate", epsilon=1)
-    st = nn.Layer("Structured", la)
-    pattern = nn.Pattern(epsgrid)
-    st.add_pattern(pattern)
-
-    sim = nn.Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
+    sim = nn.Simulation([sup, st, sub], pw, nh, formulation=formulation)
     order = (
         -1,
         -1,
@@ -61,18 +55,20 @@ def checkerboard(nh, formulation):
 
 
 #########################################################################
-# Perform the simulation for different formulations and number of
+# Perform the simulation for different formulations and number
 # of retained harmonics:
 
 NH = [100, 200, 300, 400, 600]
-formulations = ["original", "tangent", "jones", "pol"]
+formulations = ["original", "tangent", "pol", "jones"]
 nhs = {f: [] for f in formulations}
 ts = {f: [] for f in formulations}
+
 
 for nh in NH:
     print("============================")
     print("number of harmonics = ", nh)
     print("============================")
+
     for formulation in formulations:
         Ri, Ti, t, sim = checkerboard(nh, formulation=formulation)
         R = np.sum(Ri)
@@ -87,7 +83,6 @@ for nh in NH:
         print("-----------------")
         nhs[formulation].append(sim.nh)
         ts[formulation].append(t)
-
 
 #########################################################################
 # Plot the results:
@@ -114,4 +109,5 @@ for formulation in formulations:
 plt.legend()
 plt.xlabel("number of Fourier harmonics $n_h$")
 plt.ylabel("$T_{0,-1}$")
+plt.ylim(0.1255, 0.129)
 plt.tight_layout()

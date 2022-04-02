@@ -7,15 +7,14 @@
 
 __all__ = ["Simulation"]
 
-from . import BACKEND
 from . import backend as bk
 from . import jit
 from .formulations import fft
-from .utils import block, get_block, norm
+from .utils import block, get_block, norm, set_index, unique
 
 # from .parallel import parloop
 
-_inv_function = bk.linalg.inv
+_inv = bk.linalg.inv
 
 
 class Simulation:
@@ -23,8 +22,6 @@ class Simulation:
 
     Parameters
     ----------
-    lattice : :class:`~nannos.Lattice`
-        The lattice.
     layers : list
         A list of :class:`~nannos.Layer` objects (the default is ``None``).
     excitation : :class:`~nannos.PlaneWave`
@@ -42,21 +39,42 @@ class Simulation:
 
     def __init__(
         self,
-        lattice,
         layers=[],
         excitation=None,
         nh=100,
         formulation="original",
         truncation="circular",
     ):
-        self.lattice = lattice
         self.layers = layers or []
+
+        assert self.layers
+        lattice0 = self.layers[0].lattice
+        for l in self.layers:
+            assert l.lattice == lattice0, ValueError(
+                "lattice must be the same for all layers"
+            )
+
+        self.lattice = lattice0
+
         self.excitation = excitation
         self.nh0 = int(nh)
         if self.nh0 == 1:
             self.nh0 = 2
+        if formulation not in ["original", "tangent", "jones", "pol"]:
+            raise ValueError(
+                f"Unknown formulation {formulation}. Please choose between 'original', 'tangent', 'jones' or 'pol'"
+            )
+        if self.lattice.is_1D and formulation not in ["original", "tangent"]:
+            raise ValueError(
+                f"Formulation {formulation} not available for 1D gratings. Please choose between 'original' and 'tangent'."
+            )
         self.formulation = formulation
-        self.truncation = truncation
+
+        if self.lattice.is_1D:
+            self.truncation = "1D"
+        else:
+            self.truncation = truncation
+
         self.harmonics, self.nh = self.lattice.get_harmonics(
             self.nh0, method=self.truncation
         )
@@ -100,7 +118,7 @@ class Simulation:
 
         self._layer_names = [l.name for l in self.layers]
 
-        if not _unique(self._layer_names):
+        if not unique(self._layer_names):
             raise ValueError("Layers must have different names")
 
     def _get_layer(self, id):
@@ -197,7 +215,7 @@ class Simulation:
             I_ = _build_Imatrix(layer, layer_next)
             I = [[get_block(I_, i, j, 2 * self.nh) for j in range(2)] for i in range(2)]
             A = I[0][0] - f @ S12 @ I[1][0]
-            B = _inv_function(A)
+            B = _inv(A)
             S11 = B @ f @ S11
             S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
             S21 = S22 @ I[1][0] @ S11 + S21
@@ -252,12 +270,12 @@ class Simulation:
             else:
                 ez = layer.eps_hat_inv @ ez
 
-            _set_idx(fields, [iz, 0, 0], ex)
-            _set_idx(fields, [iz, 0, 1], ey)
-            _set_idx(fields, [iz, 0, 2], ez)
-            _set_idx(fields, [iz, 1, 0], hx)
-            _set_idx(fields, [iz, 1, 1], hy)
-            _set_idx(fields, [iz, 1, 2], hz)
+            set_index(fields, [iz, 0, 0], ex)
+            set_index(fields, [iz, 0, 1], ey)
+            set_index(fields, [iz, 0, 2], ez)
+            set_index(fields, [iz, 1, 0], hx)
+            set_index(fields, [iz, 1, 1], hy)
+            set_index(fields, [iz, 1, 2], hz)
 
         self.fields_fourier = bk.array(fields)
         return self.fields_fourier
@@ -271,7 +289,7 @@ class Simulation:
         s = 0
         for i in range(self.nh):
             f = bk.zeros(shape + (amplitudes.shape[0],), dtype=bk.complex128)
-            _set_idx(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
+            set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
             # f[self.harmonics[0, i], self.harmonics[1, i], :] = 1.0
             a = amplitudes[:, i]
             s += a * f
@@ -281,7 +299,7 @@ class Simulation:
 
     def get_field_grid(self, layer_index, z=0, shape=None):
         layer, layer_index = self._get_layer(layer_index)
-        shape = shape or layer.patterns[0].epsilon.shape
+        shape = shape or layer.epsilon.shape
 
         fields_fourier = self.get_field_fourier(layer_index, z)
 
@@ -413,8 +431,8 @@ class Simulation:
             epsilon = layer.epsilon
             mu = layer.mu
         else:
-            epsilon = layer.patterns[0].epsilon
-            mu = layer.patterns[0].mu
+            epsilon = layer.epsilon
+            mu = layer.mu
         is_mu_anisotropic = mu.shape[:2] == (3, 3)
         is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
         if layer.is_uniform:
@@ -441,7 +459,7 @@ class Simulation:
             # Pmu = bk.eye(self.nh * 2)
             Pmu = block([[mu * self.IdG, self.ZeroG], [self.ZeroG, mu * self.IdG]])
 
-            Qeps = self.omega ** 2 * Pmu - Keps
+            Qeps = self.omega**2 * Pmu - Keps
         else:
             epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
             mu_zz = mu[2, 2] if is_mu_anisotropic else mu
@@ -450,8 +468,8 @@ class Simulation:
             eps_hat = self._get_toeplitz_matrix(epsilon_zz)
             # eps_hat = self._get_toeplitz_matrix(epsilon_zz,ana=False)
             mu_hat = self.IdG  # self._get_toeplitz_matrix(mu_zz)
-            eps_hat_inv = _inv_function(eps_hat)
-            mu_hat_inv = _inv_function(mu_hat)
+            eps_hat_inv = _inv(eps_hat)
+            mu_hat_inv = _inv(mu_hat)
             Keps = _build_Kmatrix(eps_hat_inv, Ky, -Kx)
             Kmu = _build_Kmatrix(mu_hat_inv, Kx, Ky)
 
@@ -462,21 +480,26 @@ class Simulation:
             if self.formulation == "original":
                 Peps = block(eps_para_hat)
             elif self.formulation == "tangent":
-                t = layer.get_tangent_field(self.harmonics, normalize=True)
-                Peps = self._get_Peps(epsilon, eps_para_hat, t, direct=False)
+                if self.lattice.is_1D:
+                    N, nuhat_inv = self._get_nu_hat_inv(epsilon, is_epsilon_anisotropic)
+                    eps_para_hat = [[eps_hat, self.ZeroG], [self.ZeroG, nuhat_inv]]
+                    Peps = block(eps_para_hat)
+                else:
+                    t = layer.get_tangent_field(self.harmonics, normalize=True)
+                    Peps = self._get_Peps(epsilon, eps_para_hat, t, direct=False)
             elif self.formulation == "jones":
                 t = layer.get_tangent_field(self.harmonics, normalize=False)
                 t = [t[i] / bk.max(norm(t)) for i in range(2)]
                 J = layer.get_jones_field(t)
+                # t = [J[0].real,J[1].real]
                 Peps = self._get_Peps(epsilon, eps_para_hat, J, direct=False)
-            elif self.formulation == "pol":
+            else:
+                # elif self.formulation == "pol":
                 t = layer.get_tangent_field(self.harmonics, normalize=False)
                 t = [t[i] / bk.max(norm(t)) for i in range(2)]
+                # t = [t[1], -t[0]]
                 Peps = self._get_Peps(epsilon, eps_para_hat, t, direct=False)
-            else:
-                raise ValueError(
-                    f"Unknown formulation {self.formulation}. Please choose between 'original', 'tangent', 'jones' or 'pol'"
-                )
+
             if is_mu_anisotropic:
                 mu_para_hat = [
                     [self._get_toeplitz_matrix(mu[i, j]) for j in range(2)]
@@ -489,8 +512,8 @@ class Simulation:
 
             # Qeps = self.omega ** 2 * bk.eye(self.nh * 2) - Keps
             # matrix = Peps @ Qeps - Kmu
-            Qeps = self.omega ** 2 * Pmu - Keps
-            matrix = self.omega ** 2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
+            Qeps = self.omega**2 * Pmu - Keps
+            matrix = self.omega**2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
 
             layer.matrix = matrix
             layer.Kmu = Kmu
@@ -504,6 +527,9 @@ class Simulation:
         layer.Qeps = Qeps
 
         return layer
+
+    def get_layer(self, id):
+        return self._get_layer(id)[0]
 
     def _get_amplitudes(self, layer_index, z=0, translate=True):
         layer, layer_index = self._get_layer(layer_index)
@@ -526,7 +552,7 @@ class Simulation:
         n_interfaces = len(self.layers) - 1
         S = self.get_S_matrix(indices=(0, layer_index))
         P = self.get_S_matrix(indices=(layer_index, n_interfaces))
-        q = _inv_function(bk.array(bk.eye(self.nh * 2)) - bk.matmul(S[0][1], P[1][0]))
+        q = _inv(bk.array(bk.eye(self.nh * 2)) - bk.matmul(S[0][1], P[1][0]))
         ai = bk.matmul(q, bk.matmul(S[0][0], self.a0))
         bi = bk.matmul(P[1][0], ai)
         return ai, bi
@@ -538,28 +564,32 @@ class Simulation:
         b0 = self.S[1][0] @ self.a0 + self.S[1][1] @ self.bN
         return aN, b0
 
-    def _get_Peps(self, epsilon, eps_hat, t, direct=False):
-
-        is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
+    def _get_nu_hat_inv(self, epsilon, is_epsilon_anisotropic):
         if is_epsilon_anisotropic:
             N = epsilon.shape[2]
             eb = block(epsilon[:2, :2])
             nu = _inv2by2block(eb, N)
-            # nu = _inv_function(epsilon[2,2])
+            # nu = _inv(epsilon[2,2])
             nu1 = bk.array(_block2list(nu, N))
             nuhat = self._get_toeplitz_matrix(nu1, transverse=True)
-
-            nuhat_inv = _block2list(_inv_function(block(nuhat)), self.nh)
+            nuhat_inv = _block2list(_inv(block(nuhat)), self.nh)
 
         else:
             N = epsilon.shape[0]
             nuhat = self._get_toeplitz_matrix(1 / epsilon)
-            nuhat_inv = _inv_function((nuhat))
+            nuhat_inv = _inv((nuhat))
+        return N, nuhat_inv
+
+    def _get_Peps(self, epsilon, eps_hat, t, direct=False):
+        is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
+        N, nuhat_inv = self._get_nu_hat_inv(epsilon, is_epsilon_anisotropic)
+
         if direct:
 
             T = block([[t[1], bk.conj(t[0])], [-t[0], bk.conj(t[1])]])
+
             invT = _inv2by2block(T, N)
-            # invT = _inv_function(T)
+            # invT = _inv(T)
             if is_epsilon_anisotropic:
                 Q = block(
                     [[eps_hat[0][0], nuhat_inv[0][1]], [eps_hat[1][0], nuhat_inv[1][1]]]
@@ -584,6 +614,7 @@ class Simulation:
                 ]
             )
             Peps = That @ Q @ invThat
+
         else:
             norm_t = norm(t)
             nt2 = bk.abs(norm_t) ** 2
@@ -654,7 +685,7 @@ def _build_Mmatrix(layer):
 def _build_Imatrix(layer1, layer2):
     a1 = _build_Mmatrix(layer1)
     a2 = _build_Mmatrix(layer2)
-    return _inv_function(a1) @ a2
+    return _inv(a1) @ a2
 
 
 def _translate_amplitudes(layer, z, ai, bi):
@@ -677,16 +708,3 @@ def _inv2by2block(T, N):
             [-M[1][0] / detT, M[0][0] / detT],
         ]
     )
-
-
-def _unique(x):
-    seen = list()
-    return not any(i in seen or seen.append(i) for i in x)
-
-
-def _set_idx(mat, idx, val):
-    if BACKEND == "jax":
-        mat = mat.at[tuple(idx)].set(val)
-    else:
-        idx += [None]
-        mat[tuple(idx)] = val

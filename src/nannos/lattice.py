@@ -8,8 +8,14 @@
 
 from . import backend as bk
 from .constants import pi
+from .geometry import *
+from .layers import Layer
 
 __all__ = ["Lattice"]
+
+
+def _isscalar(z):
+    return not hasattr(z, "__len__")
 
 
 class Lattice:
@@ -19,17 +25,32 @@ class Lattice:
     ----------
     basis_vectors : tuple
         The lattice vectors :math:`((u_x,u_y),(v_x,v_y))`.
+        For 1D lattices, specify the x-periodicity with a float `a`,
+        :math:`((a,0),(0,0))`.
 
 
     """
 
-    def __init__(self, basis_vectors):
-        self.basis_vectors = basis_vectors
+    def __init__(self, basis_vectors, discretization=(2**8, 2**8)):
+        if _isscalar(discretization):
+            discretization = [discretization, discretization]
+        else:
+            discretization = list(discretization)
+        self.is_1D = _isscalar(basis_vectors)
+        if self.is_1D:
+            self.basis_vectors = (basis_vectors, 0), (0, 1)
+            self.discretization = (discretization[0], 1)
+        else:
+            self.basis_vectors = basis_vectors
+            self.discretization = discretization
 
     @property
     def area(self):
-        v = self.basis_vectors
-        return bk.linalg.norm(bk.cross(v[0], v[1]))
+        if self.is_1D:
+            return self.basis_vectors[0][0]
+        else:
+            v = self.basis_vectors
+            return bk.linalg.norm(bk.cross(v[0], v[1]))
 
     @property
     def matrix(self):
@@ -78,10 +99,92 @@ class Lattice:
             return _circular_truncation(nh, self.reciprocal)
         elif method == "parallelogrammic":
             return _parallelogramic_truncation(nh, self.reciprocal)
+        elif method == "1D":
+            return _one_dim_truncation(nh)
         else:
             raise ValueError(
-                f"Unknown truncation method '{method}', please choose between 'circular' or 'parallelogrammic'."
+                f"Unknown truncation method '{method}', please choose between 'circular', 'parallelogrammic' or '1D'."
             )
+
+    def unit_grid(self):
+        Nx, Ny = self.discretization
+        x0 = bk.linspace(0, 1.0, Nx)
+        y0 = bk.linspace(0, 1.0, Ny)
+        x_, y_ = bk.meshgrid(x0, y0, indexing="ij")
+        grid = bk.stack([x_, y_])
+        return grid
+
+    def no1d(func):
+        def inner(self, *args, **kwargs):
+            if self.is_1D:
+                raise ValueError(f"Cannot use {func._name__} for 1D gratings")
+            return func(self, *args, **kwargs)
+
+        return inner
+
+    def grid(self):
+        return self.transform(self.unit_grid())
+
+    def transform(self, xy):
+        return bk.tensordot(self.matrix, bk.stack(xy), axes=(1, 0))
+
+    def ones(self):
+        return bk.ones(self.discretization, dtype=complex)
+
+    def geometry_mask(self, geom):
+        return geometry_mask(geom, self, *self.discretization)
+
+    @no1d
+    def polygon(self, vertices):
+        return polygon(vertices, self, *self.discretization)
+
+    @no1d
+    def circle(self, center, radius):
+        return circle(center, radius, self, *self.discretization)
+
+    @no1d
+    def ellipse(self, center, radii, rotate=0):
+        return ellipse(center, radii, self, *self.discretization, rotate=rotate)
+
+    @no1d
+    def square(self, center, width, rotate=0):
+        return square(center, width, self, *self.discretization, rotate=rotate)
+
+    @no1d
+    def rectangle(self, center, widths, rotate=0):
+        return rectangle(center, widths, self, *self.discretization, rotate=rotate)
+
+    def stripe(self, center, width):
+        return abs(self.grid()[0] - center) <= width / 2
+
+    def Layer(
+        self,
+        name="layer",
+        thickness=0,
+        epsilon=1,
+        mu=1,
+        lattice=None,
+        tangent_field=None,
+        tangent_field_type="fft",
+    ):
+        return Layer(
+            name,
+            thickness,
+            epsilon,
+            mu,
+            self,
+            tangent_field,
+            tangent_field_type,
+        )
+
+
+def _one_dim_truncation(nh):
+    n = int((nh - 1) / 2)
+    G = [(0, 0)]
+    for i in range(1, n + 1):
+        G.append((i, 0))
+        G.append((-i, 0))
+    return bk.array(G).T, len(G)
 
 
 def _parallelogramic_truncation(nh, Lk):
@@ -102,7 +205,7 @@ def _parallelogramic_truncation(nh, Lk):
     jsort = bk.argsort(Gl2)
     Gsorted = [g[jsort] for g in G]
 
-    nh = NGroot ** 2
+    nh = NGroot**2
 
     G = bk.vstack(Gsorted)[:, :nh]
 
@@ -119,7 +222,7 @@ def _circular_truncation(nh, Lk):
 
     u_extent = bk.array(
         [
-            1 + int(circ_radius / (q * bk.sqrt(1.0 - udot ** 2 / (u[0] * u[1]) ** 2)))
+            1 + int(circ_radius / (q * bk.sqrt(1.0 - udot**2 / (u[0] * u[1]) ** 2)))
             for q in u
         ]
     )

@@ -15,58 +15,57 @@ Transmission spectrum.
 
 import matplotlib.pyplot as plt
 import numpy as np
-import shapely.geometry as sg
 from matplotlib.colors import ListedColormap
 from scipy.constants import c, e, h
 
 import nannos as nn
-from nannos.geometry import shape_mask
 
 #########################################################################
 # Results are compared to the reference :cite:p:`Tikhodeev2002`.
 
 
-plt.close("all")
-plt.ion()
-
 eps_quartz = 2.132
 eps_active = 3.97
 
-N = 2 ** 7
+N = 2**7
 period = 0.68
 l_patch = 0.8 * period
-x = np.linspace(-period / 2, period / 2, N)
-y = np.linspace(-period / 2, period / 2, N)
-epsilon = np.ones((N, N)) * eps_quartz
-patch_geo = sg.Polygon(
-    [
-        (l_patch / 2, l_patch / 2),
-        (l_patch / 2, -l_patch / 2),
-        (-l_patch / 2, -l_patch / 2),
-        (-l_patch / 2, l_patch / 2),
-    ]
-)
-mask = shape_mask(patch_geo, x, y)
-epsilon[mask] = eps_active
+
+
+#########################################################################
+# Define the lattice
+
+lattice = nn.Lattice(([period, 0], [0, period]), discretization=(N, N))
+
+
+#########################################################################
+# Define the slab layer with a square patch
+
+epsilon = lattice.ones() * eps_quartz
+square = lattice.square(center=(0.5 * period, 0.5 * period), width=l_patch)
+epsilon[square] = eps_active
+
+slab = lattice.Layer("Slab", thickness=0.12)
+slab.epsilon = epsilon
+
 cmap = ListedColormap(["#dddddd", "#73a0e8"])
-extent = [-period / 2, period / 2, -period / 2, period / 2]
-plt.imshow(epsilon, cmap=cmap, origin="lower", extent=extent)
-cbar = plt.colorbar(ticks=[eps_quartz, eps_active])
+
+
+plt.figure(figsize=(3, 2.5))
+im = slab.plot(cmap=cmap)
+cbar = plt.colorbar(im[0], ticks=[eps_quartz, eps_active])
 plt.xlabel(r"$x$ ($\mu$m)")
 plt.ylabel(r"$y$ ($\mu$m)")
 plt.title(r"$\varepsilon$")
+plt.axis("scaled")
 plt.tight_layout()
-
+plt.show()
 
 #########################################################################
 # Define the simulation
 
-lattice = nn.Lattice(([period, 0], [0, period]))
-sup = nn.Layer("Superstrate", epsilon=1)
-slab = nn.Layer("Slab", thickness=0.12)
-sub = nn.Layer("Substrate", epsilon=eps_quartz)
-patch = nn.Pattern(epsilon, name="patch")
-slab.add_pattern(patch)
+sup = lattice.Layer("Superstrate", epsilon=1)
+sub = lattice.Layer("Substrate", epsilon=eps_quartz)
 stack = [sup, slab, sub]
 
 
@@ -74,7 +73,7 @@ def compute_transmission(fev):
     w = h * c / e / (fev * 1e-6)
     f = 1 / w
     pw = nn.PlaneWave(frequency=f, angles=(0, 0, np.pi / 2))
-    sim = nn.Simulation(lattice, stack, pw, 100, formulation="tangent")
+    sim = nn.Simulation(stack, pw, 100, formulation="tangent")
     R, T = sim.diffraction_efficiencies()
     print(f"f = {fev}eV")
     print("T = ", T)
@@ -105,7 +104,7 @@ fev = 2.456
 w = h * c / e / (fev * 1e-6)  # /1000
 f = 1 / w
 pw = nn.PlaneWave(frequency=f, angles=(0, 0, np.pi / 2))
-sim = nn.Simulation(lattice, stack, pw, 151, formulation="tangent")
+sim = nn.Simulation(stack, pw, 151, formulation="tangent")
 E, H = sim.get_field_grid("Superstrate", shape=(N, N))
 
 Ex, Ey, Ez = E[:, :, :, 0]
@@ -116,8 +115,11 @@ nH2 = np.abs(Hx) ** 2 + np.abs(Hy) ** 2  # + np.abs(Hz)**2
 #########################################################################
 # Electric field
 
+extent = [0, period, 0, period]
+x, y = np.linspace(0, period, N), np.linspace(0, period, N)
+
 plt.figure()
-plt.imshow(epsilon, cmap="Greys", origin="lower", extent=extent)
+plt.imshow(epsilon.real, cmap="Greys", origin="lower", extent=extent)
 plt.imshow(nE2, alpha=0.9, origin="lower", extent=extent)
 plt.colorbar()
 s = 3
@@ -126,12 +128,13 @@ plt.xlabel(r"$x$ ($\mu$m)")
 plt.ylabel(r"$y$ ($\mu$m)")
 plt.title("$E$")
 plt.tight_layout()
+plt.show()
 
 #########################################################################
 # Magnetic field
 
 plt.figure()
-plt.imshow(epsilon, cmap="Greys", origin="lower", extent=extent)
+plt.imshow(epsilon.real, cmap="Greys", origin="lower", extent=extent)
 plt.imshow(nH2, alpha=0.9, origin="lower", extent=extent)
 plt.colorbar()
 plt.quiver(x[::s], y[::s], Hx[::s, ::s].real, Hy[::s, ::s].real, color="w")
@@ -139,3 +142,4 @@ plt.xlabel(r"$x$ ($\mu$m)")
 plt.ylabel(r"$y$ ($\mu$m)")
 plt.title("$H$")
 plt.tight_layout()
+plt.show()

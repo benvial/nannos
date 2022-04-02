@@ -20,9 +20,10 @@ print("##########")
 def test_para():
 
     npo.random.seed(1984)
-    Nx = Ny = 2 ** 5
+    Nx = Ny = 2**5
 
     x = npo.random.rand(Nx * Ny)
+    x = nn.backend.array(x)
 
     res = []
     timing = []
@@ -32,16 +33,14 @@ def test_para():
 
         @nn.parloop(n_jobs=n_jobs)
         def sim(f):
-            xa = np.reshape(x, (Nx, Ny))
+            lattice = nn.Lattice(([1, 0], [0, 1]))
+            xa = nn.backend.reshape(x, (Nx, Ny))
             eps_pattern = 2 + 1 * xa
-            sup = nn.Layer("Superstrate")
-            sub = nn.Layer("Substrate")
-            ms = nn.Layer("ms", 1)
-            pattern = nn.Pattern(eps_pattern)
-            ms.add_pattern(pattern)
-            sim = nn.Simulation(
-                nn.Lattice(([1, 0], [0, 1])), [sup, ms, sub], nn.PlaneWave(f), 50
-            )
+            sup = lattice.Layer("Superstrate")
+            sub = lattice.Layer("Substrate")
+            ms = lattice.Layer("ms", 1)
+            ms.epsilon = eps_pattern
+            sim = nn.Simulation([sup, ms, sub], nn.PlaneWave(f), 50)
             R, T = sim.diffraction_efficiencies()
             return R
 

@@ -39,8 +39,8 @@ theta = 0.0 * np.pi / 180
 phi = 0.0 * np.pi / 180
 psi = 0.0 * np.pi / 180
 
-Nx = 2 ** 7
-Ny = 2 ** 7
+Nx = 2**7
+Ny = 2**7
 
 eps_sup = 1.0
 eps_slab = 16.0
@@ -94,7 +94,7 @@ def run(density, proj_level=None, rfilt=0, freq=1, nh=nh):
     ##############################################################################
     # Define the simulation
 
-    sim = nn.Simulation(lattice, stack, pw, nh, formulation=formulation)
+    sim = nn.Simulation(stack, pw, nh, formulation=formulation)
 
     return sim
 

@@ -8,31 +8,11 @@
 import pytest
 
 
-def test_notorch(monkeypatch):
-    import sys
-
-    monkeypatch.setitem(sys.modules, "torch", None)
-    import nannos
-
-    nannos.set_backend("torch")
-
-    nannos.use_gpu(True)
-    nannos.use_gpu(False)
-
-
-def test_gpu(monkeypatch):
-    import nannos
-
-    nannos.set_backend("torch")
-    nannos.use_gpu(True)
-    nannos.use_gpu(False)
-
-
 def test_backend():
     import nannos as nn
 
-    # assert nn.get_backend() == "numpy"
-    # assert nn.BACKEND == "numpy"
+    assert nn.get_backend() == "numpy"
+    assert nn.BACKEND == "numpy"
 
     nn.set_backend("scipy")
     assert nn.numpy.__name__ == "numpy"
@@ -67,3 +47,23 @@ def test_backend():
     assert nn.backend.__name__ == "numpy"
     assert nn.get_backend() == "numpy"
     assert nn.BACKEND == "numpy"
+
+
+def test_notorch(monkeypatch):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "torch", None)
+    import nannos
+
+    nannos.set_backend("torch")
+
+    nannos.use_gpu(True)
+    nannos.use_gpu(False)
+
+
+def test_gpu(monkeypatch):
+    import nannos
+
+    nannos.set_backend("torch")
+    nannos.use_gpu(True)
+    nannos.use_gpu(False)

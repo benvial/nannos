@@ -25,77 +25,52 @@ import nannos as nn
 # We will study a benchmark of hole in a dielectric surface similar to
 # those studied in :cite:p:`Fan2002`.
 
-nh = 100
-L1 = [1.0, 0]
-L2 = [0, 1.0]
-freq = 1.4
-theta = 0.0 * np.pi / 180
-phi = 0.0 * np.pi / 180
-psi = 0.0 * np.pi / 180
+##############################################################################
+# Define the lattice
 
-Nx = 2 ** 9
-Ny = 2 ** 9
+lattice = nn.Lattice([[1.0, 0], [0, 1.0]], discretization=(2**9, 2**9))
 
-eps_sup = 1.0
-eps_pattern = 12.0
-eps_hole = 1.0
-eps_sub = 1.0
-h = 0.5
 
-radius = 0.2
-epsgrid = np.ones((Nx, Ny), dtype=float) * eps_pattern
-x0 = np.linspace(0, 1.0, Nx)
-y0 = np.linspace(0, 1.0, Ny)
-x, y = np.meshgrid(x0, y0, indexing="ij")
-hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
-epsgrid[hole] = eps_hole
+##############################################################################
+# Define the layers
 
+sup = lattice.Layer("Superstrate", epsilon=1)
+ms = lattice.Layer("Metasurface", thickness=0.5)
+sub = lattice.Layer("Substrate", epsilon=1)
+
+
+##############################################################################
+# Define the pattern and add it to the metasurface layer
+
+ms.epsilon = lattice.ones() * 12.0
+circ = lattice.circle(center=(0.5, 0.5), radius=0.2)
+ms.epsilon[circ] = 1
 
 ##############################################################################
 # Visualize the permittivity
 
 cmap = mpl.colors.ListedColormap(["#ffe7c2", "#232a4e"])
-
-bounds = [eps_hole, eps_pattern]
+bounds = [1, 12]
 norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-plt.imshow(epsgrid, cmap=cmap, extent=(0, 1, 0, 1))
-plt.colorbar(ticks=bounds)
+ims = ms.plot(cmap=cmap)
+plt.axis("scaled")
+plt.colorbar(ims[0], ticks=bounds)
 plt.xlabel("$x$")
 plt.ylabel("$y$")
 plt.title(r"permittitivity $\varepsilon(x,y)$")
 plt.tight_layout()
 plt.show()
 
-
-##############################################################################
-# Define the lattice
-
-lattice = nn.Lattice((L1, L2))
-
-##############################################################################
-# Define the layers
-
-sup = nn.Layer("Superstrate", epsilon=eps_sup)
-ms = nn.Layer("Metasurface", thickness=h)
-sub = nn.Layer("Substrate", epsilon=eps_sub)
-
-
-##############################################################################
-# Define the pattern and add it to the metasurface layer
-
-pattern = nn.Pattern(epsgrid, name="hole")
-ms.add_pattern(pattern)
-
 ##############################################################################
 # Define the incident plane wave
 
-pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+pw = nn.PlaneWave(frequency=1.4, angles=(0, 0, 0))
 
 ##############################################################################
 # Define the simulation
 
 stack = [sup, ms, sub]
-sim = nn.Simulation(lattice, stack, pw, nh)
+sim = nn.Simulation(stack, pw, nh=100)
 
 
 ##############################################################################
@@ -158,7 +133,7 @@ plt.show()
 
 def compute_transmission(fn):
     pw = nn.PlaneWave(frequency=fn, angles=(0, 0, 0))
-    sim = nn.Simulation(lattice, stack, pw, 100)
+    sim = nn.Simulation(stack, pw, 100)
     R, T = sim.diffraction_efficiencies()
     print(f"f = {fn} (normalized)")
     print("T = ", T)

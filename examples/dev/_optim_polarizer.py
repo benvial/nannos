@@ -79,8 +79,8 @@ theta = 0.0 * bk.pi / 180
 phi = 0.0 * bk.pi / 180
 psi = 0.0 * bk.pi / 180
 # ------ patterns ------
-Nx = 2 ** 6
-Ny = 2 ** 6
+Nx = 2**6
+Ny = 2**6
 Npad = 0  # int(Nx / 10)
 Nlayers = 16
 # ------ permittivity ------
@@ -117,9 +117,9 @@ filter0 = True
 symz0 = True
 # ------ plot ------
 nax = (
-    int(Nlayers ** 0.5)
-    if int(Nlayers ** 0.5) ** 2 == Nlayers
-    else int(Nlayers ** 0.5) + 1
+    int(Nlayers**0.5)
+    if int(Nlayers**0.5) ** 2 == Nlayers
+    else int(Nlayers**0.5) + 1
 )
 nax_x, nax_y = nax, nax
 figsize = (3, 3)
@@ -179,7 +179,7 @@ def run(density, proj_level=None, rfilt=0, freq=1, nh=nh, psi=0, nn=nn):
         stack.append(ms)
     # stack += [lay, sub]
     stack += [sub]
-    sim = nn.Simulation(lattice, stack, pw, nh, formulation=formulation)
+    sim = nn.Simulation(stack, pw, nh, formulation=formulation)
 
     return sim
 
@@ -296,7 +296,7 @@ for i in range(Nlayers):
         density0 = symmetrize_pattern(density0rand)
     elif init == "circle":
         ### circle
-        density0[(x - 0.5) ** 2 + (y - 0.5) ** 2 < R0 ** 2] = 0
+        density0[(x - 0.5) ** 2 + (y - 0.5) ** 2 < R0**2] = 0
         # density0 *= 0.5
 
     elif init == "lines":

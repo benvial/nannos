@@ -43,7 +43,7 @@ def epsilon_Al(wli):
     f = h * c / e / wli * 1e6
     f_p = 15
     gamma = 0.1
-    return 1 - f_p ** 2 / (f * (f + 1j * gamma))
+    return 1 - f_p**2 / (f * (f + 1j * gamma))
 
 
 wls = np.linspace(wl[0], wl[-1], 500)
@@ -67,7 +67,7 @@ plt.tight_layout()
 # Define the simulation
 
 lattice = nn.Lattice(([1.0, 0], [0, 1.0]))
-sup = nn.Layer("Superstrate", epsilon=1)
+sup = lattice.Layer("Superstrate", epsilon=1)
 freqs = np.linspace(1, 25, 500)
 
 
@@ -83,13 +83,13 @@ def simulation(mat, slab_flag=False):
         else:
             eps_sub = epsilon_Al(w)
         if slab_flag:
-            sub = nn.Layer("Substrate", epsilon=1)
-            slab = nn.Layer("Slab", epsilon=eps_sub, thickness=0.4)
+            sub = lattice.Layer("Substrate", epsilon=1)
+            slab = lattice.Layer("Slab", epsilon=eps_sub, thickness=0.4)
             stack = [sup, slab, sub]
         else:
-            sub = nn.Layer("Substrate", epsilon=eps_sub)
+            sub = lattice.Layer("Substrate", epsilon=eps_sub)
             stack = [sup, sub]
-        sim = nn.Simulation(lattice, stack, pw, 1)
+        sim = nn.Simulation(stack, pw, 1)
         R, T = sim.diffraction_efficiencies()
         Tx1, Ty1, Tz1 = sim.get_z_stress_tensor_integral("Superstrate")
         if slab_flag:
@@ -145,13 +145,13 @@ plt.show()
 
 def simulation_angle(eps_sup, eps_sub, angle):
     lattice = nn.Lattice(([1.0, 0], [0, 1.0]))
-    sup = nn.Layer("Superstrate", epsilon=eps_sup)
-    slab = nn.Layer("Slab", epsilon=1, thickness=1)
-    sub = nn.Layer("Substrate", epsilon=eps_sub)
+    sup = lattice.Layer("Superstrate", epsilon=eps_sup)
+    slab = lattice.Layer("Slab", epsilon=1, thickness=1)
+    sub = lattice.Layer("Substrate", epsilon=eps_sub)
     pressure = []
     for theta in angle:
         pw = nn.PlaneWave(frequency=0.01, angles=(theta, 0, np.pi / 2))
-        sim = nn.Simulation(lattice, [sup, slab, sub], pw, 1)
+        sim = nn.Simulation([sup, slab, sub], pw, 1)
         sim.solve()
         T1x, T1y, T1z = sim.get_z_stress_tensor_integral("Slab")
         pressure.append(-T1z)
@@ -166,7 +166,7 @@ angle = np.linspace(0, np.pi / 2 * 0.99, 500)
 plt.figure()
 for eps_sup, eps_sub in zip([8, 9, 10, 10], [9, 9, 9, 9 + 0.1j]):
     pressure = (
-        simulation_angle(eps_sup, eps_sub, angle) * 3.5e9 / (c / eps_sup.real ** 0.5)
+        simulation_angle(eps_sup, eps_sub, angle) * 3.5e9 / (c / eps_sup.real**0.5)
     )
     if np.imag(eps_sub) == 0:
         label = f"{eps_sup} | 1 | {eps_sub}"

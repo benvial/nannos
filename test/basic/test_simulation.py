@@ -18,25 +18,22 @@ np = nn.backend
 nh = 51
 L1 = [1.0, 0]
 L2 = [0, 1.0]
-Nx = 2 ** 5
-Ny = 2 ** 5
+Nx = 2**5
+Ny = 2**5
 eps_pattern = 4.0
 eps_hole = 1.0
 mu_pattern = 1.0
 mu_hole = 1.0
 h = 2
 
-lattice = nn.Lattice((L1, L2))
-sup = nn.Layer("Superstrate", epsilon=1, mu=1)
-sub = nn.Layer("Substrate", epsilon=1, mu=1)
+lattice = nn.Lattice((L1, L2), discretization=Nx)
+sup = lattice.Layer("Superstrate", epsilon=1, mu=1)
+sub = lattice.Layer("Substrate", epsilon=1, mu=1)
 
 
 def build_pattern(anisotropic=False):
     radius = 0.25
-    x0 = np.linspace(0, 1.0, Nx)
-    y0 = np.linspace(0, 1.0, Ny)
-    x, y = np.meshgrid(x0, y0, indexing="ij")
-    hole = (x - 0.5) ** 2 + (y - 0.5) ** 2 < radius ** 2
+    hole = lattice.circle((0.5, 0.5), radius)
 
     ids = np.ones((Nx, Ny), dtype=np.complex128)
     zs = np.zeros_like(ids)
@@ -71,11 +68,11 @@ def test_uniform(freq, theta, phi, psi):
     eps_sup, eps_sub = 1.0, 1.0
     mu_sup, mu_sub = 1, 1
 
-    sup = nn.Layer("Superstrate", epsilon=eps_sup, mu=mu_sup)
-    sub = nn.Layer("Substrate", epsilon=eps_sub, mu=mu_sub)
+    sup = lattice.Layer("Superstrate", epsilon=eps_sup, mu=mu_sup)
+    sub = lattice.Layer("Substrate", epsilon=eps_sub, mu=mu_sub)
 
-    un = nn.Layer("Uniform", h, epsilon=eps, mu=mu)
-    sim = nn.Simulation(lattice, [sup, un, sub], pw, nh=5)
+    un = lattice.Layer("Uniform", h, epsilon=eps, mu=mu)
+    sim = nn.Simulation([sup, un, sub], pw, nh=5)
     R, T = sim.diffraction_efficiencies()
     B = R + T
     assert npo.allclose(B, 1)
@@ -84,7 +81,7 @@ def test_uniform(freq, theta, phi, psi):
     # sub = Layer("Substrate", epsilon=mu_sub, mu=eps_sub)
     #
     # un = Layer("Uniform", h, epsilon=mu, mu=eps)
-    # sim = Simulation(lattice, [sup, un, sub], pw, nh)
+    # sim = Simulation( [sup, un, sub], pw, nh)
     # Rdual, Tdual = sim.diffraction_efficiencies()
     # assert npo.allclose(Rdual + Tdual, 1)
     #
@@ -98,10 +95,10 @@ def test_uniform(freq, theta, phi, psi):
 
 
 def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
-    pattern = nn.Pattern(epsgrid, mugrid)
-    st = nn.Layer("Structured", h)
-    st.add_pattern(pattern)
-    sim = nn.Simulation(lattice, [sup, st, sub], pw, nh, formulation=formulation)
+    st = lattice.Layer("Structured", h)
+    st.epsilon = epsgrid
+    st.mu = mugrid
+    sim = nn.Simulation([sup, st, sub], pw, nh, formulation=formulation)
     return sim
 
 

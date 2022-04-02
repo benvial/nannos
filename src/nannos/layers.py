@@ -6,16 +6,16 @@
 # See the documentation at nannos.gitlab.io
 
 
-__all__ = ["Layer", "Pattern"]
+__all__ = ["Layer"]
 
 
 from copy import copy
 
-from . import BACKEND
 from . import backend as bk
 from . import jit
 from .formulations.jones import get_jones_field
 from .formulations.tangent import get_tangent_field
+from .plot import *
 from .simulation import block
 
 
@@ -42,6 +42,7 @@ class Layer:
         thickness=0,
         epsilon=1,
         mu=1,
+        lattice=None,
         tangent_field=None,
         tangent_field_type="fft",
     ):
@@ -52,11 +53,11 @@ class Layer:
         self.thickness = thickness
         self.epsilon = bk.array(epsilon, dtype=bk.complex128)
         self.mu = bk.array(mu, dtype=bk.complex128)
+        self.lattice = lattice
         self.tangent_field = tangent_field
         self.tangent_field_type = tangent_field_type
         self.iscopy = False
         self.original = self
-        self.patterns = []
 
         if self.mu != 1:
             # TODO: case with magnetic materials
@@ -66,6 +67,19 @@ class Layer:
 
     def __repr__(self):
         return f"Layer {self.name}"
+
+    def plot(self, nper=1, ax=None, cmap="tab20c", show_cell=False, **kwargs):
+        lattice = self.lattice
+        return plot_layer(
+            lattice,
+            lattice.grid(),
+            self.epsilon.real,
+            nper,
+            ax,
+            cmap,
+            show_cell,
+            **kwargs,
+        )
 
     def solve_uniform(self, omega, kx, ky, nh):
         """Solve for eigenmodes and eigenvalues of a uniform layer.
@@ -117,7 +131,7 @@ class Layer:
 
         q = (
             bk.array(
-                _epsilon * _mu * omega ** 2 - kx ** 2 - ky ** 2,
+                _epsilon * _mu * omega**2 - kx**2 - ky**2,
                 dtype=bk.complex128,
             )
             ** 0.5
@@ -164,7 +178,7 @@ class Layer:
             eig_func = jit(bk.linalg.eig)
 
             w, v = eig_func(matrix)
-            q = w ** 0.5
+            q = w**0.5
             q = bk.where(bk.imag(q) < 0.0, -q, q)
             self.eigenvalues, self.eigenvectors = q, v
         return self.eigenvalues, self.eigenvectors
@@ -187,17 +201,6 @@ class Layer:
             cp.name = name
         return cp
 
-    def add_pattern(self, pattern):
-        """Add a pattern to the layer.
-
-        Parameters
-        ----------
-        pattern : :class:`~nannos.Pattern`
-            The pattern defined as a 2d grid on the unit cell.
-
-        """
-        self.patterns.append(pattern)
-
     @property
     def is_uniform(self):
         """Check if layer is uniform.
@@ -208,16 +211,17 @@ class Layer:
             ``True`` if the layer is uniform, ``False`` if not.
 
         """
-        return len(self.patterns) == 0
+        return not (len(self.epsilon.shape) == 2 or len(self.mu.shape) == 2)
 
-    def get_tangent_field(self, harmonics, normalize=False):
+    def get_tangent_field(self, harmonics, normalize=False, type=None):
+        type = type or self.tangent_field_type
         if self.is_uniform:
             return None
         else:
             if self.tangent_field is not None:
                 return self.tangent_field
             else:
-                epsilon = self.patterns[0].epsilon
+                epsilon = self.epsilon
                 is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
                 epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
                 return get_tangent_field(
@@ -232,26 +236,3 @@ class Layer:
             return None
         else:
             return get_jones_field(t)
-
-
-class Pattern:
-    """A pattern object.
-
-    Parameters
-    ----------
-    epsilon : array_like
-        Permittivity `epsilon` (the default is 1).
-    mu : array_like
-        Permeability `mu` (the default is 1).
-    name : str
-        Name of the pattern (the default is "pattern").
-    grid : array_like
-        A 2d grid on which the pattern is defined (the default is None).
-
-    """
-
-    def __init__(self, epsilon=1, mu=1, name="pattern", grid=None):
-        self.name = name
-        self.grid = grid
-        self.epsilon = bk.array(epsilon, dtype=bk.complex128)
-        self.mu = bk.array(mu, dtype=bk.complex128)
