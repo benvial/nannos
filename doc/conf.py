@@ -48,8 +48,8 @@ extensions = [
 thebe_config = {
     "selector": "div.jupyter_cell",
     "selector_output": "div.cell_output",
-    "repository_url": "https://github.com/benvial/nannos-binder",
-    "repository_branch": "main",
+    "repository_url": "https://github.com/benvial/nannos.gitlab.io",
+    "repository_branch": "doc",
 }
 
 # a simple label style which uses the bibtex keys for labels

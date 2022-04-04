@@ -92,6 +92,11 @@ def process_html(fn, lines):
             line = line.replace("</a>.</p>", "</a></p>")
 
         line = line.replace(
+            '<i class="fas fa-list"></i> On this page',
+            '<i class="fas fa-list"></i> Contents',
+        )
+
+        line = line.replace(
             "https://mybinder.org/v2/gh/nannos/nannos",
             "https://mybinder.org/v2/gl/nannos%2Fnannos",
         )
