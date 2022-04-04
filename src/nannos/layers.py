@@ -229,7 +229,16 @@ class Layer:
             ``True`` if the layer is uniform, ``False`` if not.
 
         """
-        return len(self.epsilon.shape) == 0 and len(self.mu.shape) == 0
+        if self.is_epsilon_anisotropic:
+            e = self.epsilon.shape == (3, 3)
+        else:
+            e = self.epsilon.shape == ()
+        if self.is_mu_anisotropic:
+            m = self.mu.shape == (3, 3)
+        else:
+            m = self.mu.shape == ()
+
+        return e and m
 
     def get_tangent_field(self, harmonics, normalize=False, type=None):
         type = type or self.tangent_field_type
