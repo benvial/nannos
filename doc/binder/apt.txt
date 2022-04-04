@@ -1,2 +1,4 @@
 wget
 unzip
+libgl1-mesa-dev
+xvfb
