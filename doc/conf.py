@@ -35,19 +35,22 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    # "sphinx.ext.doctest",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
-    # 'sphinx.ext.todo',
-    # 'sphinx.ext.coverage',
-    # "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.rsvgconverter",
     "sphinx_gallery.gen_gallery",
     "sphinx_copybutton",
-    # 'sphinx_issues',
+    "jupyter_sphinx",
+    "sphinx_thebe",
 ]
 
+thebe_config = {
+    "selector": "div.jupyter_cell",
+    "selector_output": "div.cell_output",
+    "repository_url": "https://github.com/benvial/nannos-binder",
+    "repository_branch": "main",
+}
 
 # a simple label style which uses the bibtex keys for labels
 class MatchLabelStyle(BaseLabelStyle):

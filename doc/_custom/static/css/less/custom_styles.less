@@ -89,13 +89,11 @@ section p:last-child {
   margin-bottom: 0;
 }
 
-
-
 section.color-header {
   color: @gray-base;
   background-color: @body-bg;
   padding: 40px;
-  background-image: linear-gradient(  rgba(51, 51, 71, 0.7),   rgba(51, 51, 71,0.7)), url("../_assets/bg.svg");
+  background-image: linear-gradient(rgba(51, 51, 71, 0.7), rgba(51, 51, 71,0.7)), url("../_assets/bg.svg");
   background-repeat: no-repeat;
   background-size: cover;
   min-height: 600px;
@@ -108,7 +106,6 @@ section.color-header h1 {
   text-transform: lowercase;
   font-family: inherit;
 }
-
 
 section.color-header h2 {
   color: white !important;
@@ -819,8 +816,6 @@ a:hover {
   color: @brand-secondary;
 }
 
-
-
 div.badges img {
   margin: 4px;
 }
@@ -924,8 +919,6 @@ span.highlighted {
 //   padding-top: 60px;
 // }
 
-
-
 .navbar-center-item {
   font-size: larger;
   text-transform: uppercase;
@@ -935,13 +928,62 @@ span.highlighted {
   padding-top: 100px;
   padding-bottom: 10px;
 }
+
 .footer-copyright img {
   width: 30%;
   min-width: 140px;
   padding-top: 20px;
 }
 
+.feat-col {}
 
-.feat-col{
+div[class*="highlight-"] {
+  margin: 2em 0;
+}
 
+pre {
+  box-shadow: none;
+}
+
+.jupyter_container div.code_cell {
+  border: none;
+  border-radius: 0px;
+  padding: 12px;
+}
+div.jupyter_container {
+  box-shadow: none;
+  border: none;
+}
+.docutils.container {
+  padding-left: unset;
+  padding-right: unset;
+  margin-bottom: 2em;
+}
+.thebelab-button.thebe-launch-button {
+  margin-bottom: 2em !important;
+  font-size: 0.8em;
+  border: 1px black solid;
+  padding: 10px;
+  font-family: inherit;
+}
+.thebelab-button {
+  z-index: 999;
+  display: inline-block;
+  padding: 0.35em 1.2em;
+  border-radius: 0.12em;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-family: inherit;
+  font-weight: 300;
+  text-align: center;
+  transition: all 0.2s;
+  background-color: #dddddd;
+  border: 0.05em solid white;
+  color: #000000;
+  height: auto;
+  margin-bottom: 4px !important;
+  margin-right: 2px !important;
+}
+.thebelab-button.thebe-launch-button {
+  margin-bottom: 2em !important;
 }

@@ -17,7 +17,8 @@ dependencies:
   - matplotlib-base
   - pytorch
   - magma
-  - cudatoolkit=11.3
+  - cudatoolkit=10.2
+  - pyvista
   - pip:
     - autograd-latest
     - git+https://gitlab.com/nannos/nannos.git

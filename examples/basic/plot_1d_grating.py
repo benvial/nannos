@@ -23,7 +23,7 @@ import nannos as nn
 # We will study the 1D metallic grating as in :cite:p:`Li1993`.
 
 
-def run(form, psi):
+def run(form, psi, Nh):
     ts0 = []
     tsm1 = []
     ns = []
@@ -51,18 +51,14 @@ def run(form, psi):
     return np.array(ns), 100 * np.array(ts0), 100 * np.array(tsm1)
 
 
-##############################################################################
-# Plot the results:
-
-
-Nh = range(5, 75, 2)
-for psi in [0, nn.pi / 2]:
+def plot(psi):
+    Nh = range(5, 75, 2)
     fig, ax = plt.subplots(2, 1, figsize=(2.0, 3.0))
     title = "TM" if psi == 0 else "TE"
-    ns, ts0, tsm1 = run("original", psi)
+    ns, ts0, tsm1 = run("original", psi, Nh)
     ax[0].plot(ns, ts0, "-o", label="original", c="#dd803d", ms=1)
     ax[1].plot(ns, tsm1, "-o", label="original", c="#dd803d", ms=1)
-    ns_tan, ts0_tan, tsm1_tan = run("tangent", psi)
+    ns_tan, ts0_tan, tsm1_tan = run("tangent", psi, Nh)
     ax[0].plot(
         ns_tan, ts0_tan, "--s", label="tangent", c="#4a4082", ms=2, mew=0.4, mfc="None"
     )
@@ -70,7 +66,7 @@ for psi in [0, nn.pi / 2]:
         ns_tan, tsm1_tan, "--s", label="tangent", c="#4a4082", ms=2, mew=0.4, mfc="None"
     )
     ax[0].set_title("order 0")
-    ax[0].set_title("order -1")
+    ax[1].set_title("order -1")
     ax[0].legend()
     ax[1].legend()
     ax[0].set_xlabel("number of harmonics")
@@ -83,6 +79,15 @@ for psi in [0, nn.pi / 2]:
 
 
 ##############################################################################
+# For TE polarization the two formulations are equivalent:
+
+plot(nn.pi / 2)
+
+
+##############################################################################
 # We can see that in TM polarization, the convergence is greatly
 # improved by using proper Fourier factorization rules implemented by the
 # ``tangent`` formulation.
+
+
+plot(0)

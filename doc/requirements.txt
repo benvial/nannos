@@ -8,3 +8,7 @@ sphinxcontrib-svg2pdfconverter
 sphinxcontrib-bibtex
 matplotlib
 beautifulsoup4
+jupyter-sphinx
+pythreejs
+ipyvtklink
+sphinx-thebe

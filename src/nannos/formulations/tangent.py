@@ -57,7 +57,8 @@ def _get_tangent_field_fft(grid, normalize=False, rfilt=4, expo=0.5):
     if normalize:
         norm_t = norm(t)
         t = _normalize_vec(t, norm_t)
-
+    else:
+        t = [t[i] / bk.max(norm(t)) for i in range(2)]
     return t
 
 
@@ -171,9 +172,12 @@ def _get_tangent_field_min(
     t = [n[1], -n[0]]
 
     t = bk.array(t).real
+
     if normalize:
         norm_t = norm(t)
         t = _normalize_vec(t, norm_t)
+    else:
+        t = [t[i] / bk.max(norm(t)) for i in range(2)]
 
     return t
 

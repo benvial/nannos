@@ -49,10 +49,11 @@ ms.epsilon[circ] = 1
 ##############################################################################
 # Visualize the permittivity
 
+plt.figure()
 cmap = mpl.colors.ListedColormap(["#ffe7c2", "#232a4e"])
 bounds = [1, 12]
 norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-ims = ms.plot(cmap=cmap)
+ims = ms.plot(cmap=cmap, ax=plt.gca())
 plt.axis("scaled")
 plt.colorbar(ims[0], ticks=bounds)
 plt.xlabel("$x$")
@@ -95,10 +96,7 @@ print("R+T = ", R + T)
 
 
 fig, (axR, axT) = plt.subplots(1, 2, figsize=(4, 2))
-
 labels = [f"({g[0]},{g[1]})" for g in (sim.harmonics[:, :nmax]).T]
-
-
 axR.bar(range(nmax), Ri[:nmax], color=["#e69049"])
 axR.set_xticks(range(nmax))
 axR.set_xticklabels(labels=labels)
@@ -120,8 +118,6 @@ axT.annotate(
     (0.5, 0.9),
     xycoords="axes fraction",
 )
-
-
 plt.suptitle("Diffraction efficiencies: $R+T=$" + f"{sum(Ri[:nmax]+Ti[:nmax]):0.4f}")
 plt.tight_layout()
 plt.show()

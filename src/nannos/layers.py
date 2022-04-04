@@ -16,7 +16,7 @@ from . import jit
 from .formulations.jones import get_jones_field
 from .formulations.tangent import get_tangent_field
 from .plot import *
-from .simulation import block
+from .utils import block
 
 
 class Layer:
@@ -68,16 +68,29 @@ class Layer:
     def __repr__(self):
         return f"Layer {self.name}"
 
-    def plot(self, nper=1, ax=None, cmap="tab20c", show_cell=False, **kwargs):
+    def plot(
+        self,
+        nper=1,
+        ax=None,
+        cmap="tab20c",
+        show_cell=False,
+        comp="re",
+        cellstyle="w-",
+        **kwargs,
+    ):
         lattice = self.lattice
+        if comp not in ["re", "im"]:
+            raise ValueError(f"Unknown component {comp}. must be `re` or `im`.")
+        toplot = self.epsilon.real if comp == "re" else self.epsilon.imag
         return plot_layer(
             lattice,
             lattice.grid(),
-            self.epsilon.real,
+            toplot,
             nper,
             ax,
             cmap,
             show_cell,
+            cellstyle,
             **kwargs,
         )
 
@@ -104,17 +117,14 @@ class Layer:
         epsilon = self.epsilon
         mu = self.mu
 
-        is_mu_anisotropic = mu.shape[:2] == (3, 3)
-        is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
-
-        if is_mu_anisotropic or is_epsilon_anisotropic:
+        if self.is_mu_anisotropic or self.is_epsilon_anisotropic:
             # TODO: anisotropic uniform layer
             raise NotImplementedError("Uniform layer material must be isotropic")
 
         IdG = bk.eye(2 * nh)
 
         I = bk.eye(nh)
-        if is_epsilon_anisotropic:
+        if self.is_epsilon_anisotropic:
             _epsilon = block(
                 [
                     [epsilon[0, 0] * I, epsilon[0, 1] * I],
@@ -124,7 +134,7 @@ class Layer:
         else:
             _epsilon = epsilon
 
-        if is_mu_anisotropic:
+        if self.is_mu_anisotropic:
             _mu = block([[mu[0, 0] * I, mu[0, 1] * I], [mu[1, 0] * I, mu[1, 1] * I]])
         else:
             _mu = mu
@@ -202,6 +212,14 @@ class Layer:
         return cp
 
     @property
+    def is_epsilon_anisotropic(self):
+        return is_anisotropic(self.epsilon)
+
+    @property
+    def is_mu_anisotropic(self):
+        return is_anisotropic(self.mu)
+
+    @property
     def is_uniform(self):
         """Check if layer is uniform.
 
@@ -211,7 +229,7 @@ class Layer:
             ``True`` if the layer is uniform, ``False`` if not.
 
         """
-        return not (len(self.epsilon.shape) == 2 or len(self.mu.shape) == 2)
+        return len(self.epsilon.shape) == 0 and len(self.mu.shape) == 0
 
     def get_tangent_field(self, harmonics, normalize=False, type=None):
         type = type or self.tangent_field_type
@@ -222,8 +240,7 @@ class Layer:
                 return self.tangent_field
             else:
                 epsilon = self.epsilon
-                is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
-                epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
+                epsilon_zz = epsilon[2, 2] if self.is_epsilon_anisotropic else epsilon
                 return get_tangent_field(
                     epsilon_zz,
                     harmonics,
@@ -236,3 +253,7 @@ class Layer:
             return None
         else:
             return get_jones_field(t)
+
+
+def is_anisotropic(f):
+    return f.shape[:2] == (3, 3)

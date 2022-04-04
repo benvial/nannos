@@ -57,6 +57,21 @@ def blockmatmul(A, B, N):
     return block(out)
 
 
+def block2list(M, N):
+    return [[get_block(M, i, j, N) for j in range(2)] for i in range(2)]
+
+
+def inv2by2block(T, N):
+    M = block2list(T, N)
+    detT = M[0][0] * M[1][1] - M[1][0] * M[0][1]
+    return block(
+        [
+            [M[1][1] / detT, -M[0][1] / detT],
+            [-M[1][0] / detT, M[0][0] / detT],
+        ]
+    )
+
+
 def _apply_filter(x, rfilt):
     if rfilt == 0:
         return x

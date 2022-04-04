@@ -5,13 +5,12 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
+__all__ = ["Lattice"]
 
 from . import backend as bk
 from .constants import pi
 from .geometry import *
 from .layers import Layer
-
-__all__ = ["Lattice"]
 
 
 def _isscalar(z):
@@ -42,7 +41,7 @@ class Lattice:
             self.discretization = (discretization[0], 1)
         else:
             self.basis_vectors = basis_vectors
-            self.discretization = discretization
+            self.discretization = tuple(discretization)
 
     @property
     def area(self):

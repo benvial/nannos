@@ -13,6 +13,10 @@ Dielectric patch array
 Transmission spectrum.
 """
 
+
+# sphinx_gallery_thumbnail_number = -1
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap

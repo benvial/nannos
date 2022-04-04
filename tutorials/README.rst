@@ -1,21 +1,103 @@
 Tutorials
 -----------
 
-First steps.
-
-An example on how to use various backends and GPU acceleration 
-can be run on Google colab
 
 
-.. only:: html
+Basic Example
+================
 
-  .. image:: https://img.shields.io/badge/open%20in-colab-blue?color=d7a44c&logo=GoogleColab&logoColor=d7a44c&style=for-the-badge   
-    :target: https://colab.research.google.com/gist/benvial/6109ede2224195294b3cd820a06e9760/nannos.ipynb
-    :alt: colab
+This basic example demonstrates key features of nannos.
+
+.. thebe-button:: Click me to execute code!
+
+First import the package.
+
+.. jupyter-execute::
+  
+  import nannos as nn
+  
+Create the lattice.
+
+.. jupyter-execute::
+
+  lattice = nn.Lattice(basis_vectors = [[1.0, 0], [0, 1.0]], discretization=2**9)
+  
+
+Define the layers. The thickness for the semi infinite input and output media is irrelevant.
+
+.. jupyter-execute::
+
+  sup = lattice.Layer("Superstrate", epsilon=1)
+  ms = lattice.Layer("Metasurface", thickness=0.5)
+  sub = lattice.Layer("Substrate", epsilon=2)
 
 
-  .. raw:: html
+Create the permittivity pattern for the structured layer.
+  
+.. jupyter-execute::
+  
+  ms.epsilon = lattice.ones() * 12.0
+  circ = lattice.circle(center=(0.5, 0.5), radius=0.2)
+  ms.epsilon[circ] = 1
 
-   <p>
-   </p>
-   
+
+Define the incident plane wave.
+
+.. jupyter-execute::
+
+  pw = nn.PlaneWave(frequency=1.4, angles=(0, 0, 0))
+
+  
+Define the layer stack as a list from input medium to output medium.
+
+.. jupyter-execute::
+  
+  stack = [sup, ms, sub]
+
+  
+Create the simulation.
+
+.. jupyter-execute::
+  
+  sim = nn.Simulation(stack, pw, nh=100)
+
+  
+Plot the unit cell.
+
+
+.. jupyter-execute::
+  
+  p = sim.plot_structure()
+  
+.. jupyter-execute::
+  :hide-code:
+  :hide-output:
+  
+  p.show()
+  
+  
+Render it.
+  
+.. jupyter-execute::
+  
+  p.show()
+  
+
+Compute the reflection and transmission:
+    
+.. jupyter-execute::
+  
+  R,T = sim.diffraction_efficiencies()
+  print("reflection: ", R)
+  print("transmission: ", T)
+  print("sum :", R + T)
+
+.. raw:: html
+
+ <p>
+ </p>
+ 
+
+ 
+Other Tutorials
+================

@@ -10,7 +10,9 @@ __all__ = ["Simulation"]
 from . import backend as bk
 from . import jit
 from .formulations import fft
-from .utils import block, get_block, norm, set_index, unique
+from .lattice import Layer
+from .plot import plot_structure, pyvista
+from .utils import block, block2list, get_block, inv2by2block, norm, set_index, unique
 
 # from .parallel import parloop
 
@@ -131,6 +133,8 @@ class Simulation:
                 raise ValueError(f"Unknown layer name {id}")
         elif isinstance(id, int):
             return self.layers[id], id
+        elif isinstance(id, Layer):
+            return self._get_layer(id.name)
         else:
             raise ValueError(
                 f"Wrong id for layer: {id}. Please use an integrer specifying the layer index or a string for the layer name"
@@ -279,6 +283,17 @@ class Simulation:
 
         self.fields_fourier = bk.array(fields)
         return self.fields_fourier
+
+    def get_ifft(self, u, shape, axes=(0, 1)):
+        u = bk.array(u)
+        s = 0
+        for i in range(self.nh):
+            f = bk.zeros(shape, dtype=bk.complex128)
+            set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
+            a = u[i]
+            s += a * f
+        ft = fft.inverse_fourier_transform(s, axes=axes)
+        return ft
 
     def get_ifft_amplitudes(self, amplitudes, shape, axes=(0, 1)):
 
@@ -433,24 +448,23 @@ class Simulation:
         else:
             epsilon = layer.epsilon
             mu = layer.mu
-        is_mu_anisotropic = mu.shape[:2] == (3, 3)
-        is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
         if layer.is_uniform:
-
-            I = self.IdG
-            if is_epsilon_anisotropic:
+            if layer.is_epsilon_anisotropic:
                 _epsilon = block(
                     [
-                        [epsilon[0, 0] * I, epsilon[0, 1] * I],
-                        [epsilon[1, 0] * I, epsilon[1, 1] * I],
+                        [epsilon[0, 0] * self.IdG, epsilon[0, 1] * self.IdG],
+                        [epsilon[1, 0] * self.IdG, epsilon[1, 1] * self.IdG],
                     ]
                 )
             else:
                 _epsilon = epsilon
 
-            if is_mu_anisotropic:
+            if layer.is_mu_anisotropic:
                 _mu = block(
-                    [[mu[0, 0] * I, mu[0, 1] * I], [mu[1, 0] * I, mu[1, 1] * I]]
+                    [
+                        [mu[0, 0] * self.IdG, mu[0, 1] * self.IdG],
+                        [mu[1, 0] * self.IdG, mu[1, 1] * self.IdG],
+                    ]
                 )
             else:
                 _mu = mu
@@ -461,8 +475,8 @@ class Simulation:
 
             Qeps = self.omega**2 * Pmu - Keps
         else:
-            epsilon_zz = epsilon[2, 2] if is_epsilon_anisotropic else epsilon
-            mu_zz = mu[2, 2] if is_mu_anisotropic else mu
+            epsilon_zz = epsilon[2, 2] if layer.is_epsilon_anisotropic else epsilon
+            mu_zz = mu[2, 2] if layer.is_mu_anisotropic else mu
             # TODO: check if mu or epsilon is homogeneous, no need to compute the Toepliz matrix
 
             eps_hat = self._get_toeplitz_matrix(epsilon_zz)
@@ -473,7 +487,7 @@ class Simulation:
             Keps = _build_Kmatrix(eps_hat_inv, Ky, -Kx)
             Kmu = _build_Kmatrix(mu_hat_inv, Kx, Ky)
 
-            if is_epsilon_anisotropic:
+            if layer.is_epsilon_anisotropic:
                 eps_para_hat = self._get_toeplitz_matrix(epsilon, transverse=True)
             else:
                 eps_para_hat = [[eps_hat, self.ZeroG], [self.ZeroG, eps_hat]]
@@ -481,26 +495,22 @@ class Simulation:
                 Peps = block(eps_para_hat)
             elif self.formulation == "tangent":
                 if self.lattice.is_1D:
-                    N, nuhat_inv = self._get_nu_hat_inv(epsilon, is_epsilon_anisotropic)
+                    N, nuhat_inv = self._get_nu_hat_inv(layer)
                     eps_para_hat = [[eps_hat, self.ZeroG], [self.ZeroG, nuhat_inv]]
                     Peps = block(eps_para_hat)
                 else:
                     t = layer.get_tangent_field(self.harmonics, normalize=True)
-                    Peps = self._get_Peps(epsilon, eps_para_hat, t, direct=False)
+                    Peps = self._get_Peps(layer, eps_para_hat, t, direct=False)
             elif self.formulation == "jones":
                 t = layer.get_tangent_field(self.harmonics, normalize=False)
-                t = [t[i] / bk.max(norm(t)) for i in range(2)]
                 J = layer.get_jones_field(t)
-                # t = [J[0].real,J[1].real]
-                Peps = self._get_Peps(epsilon, eps_para_hat, J, direct=False)
+                Peps = self._get_Peps(layer, eps_para_hat, J, direct=False)
             else:
                 # elif self.formulation == "pol":
                 t = layer.get_tangent_field(self.harmonics, normalize=False)
-                t = [t[i] / bk.max(norm(t)) for i in range(2)]
-                # t = [t[1], -t[0]]
-                Peps = self._get_Peps(epsilon, eps_para_hat, t, direct=False)
+                Peps = self._get_Peps(layer, eps_para_hat, t, direct=False)
 
-            if is_mu_anisotropic:
+            if layer.is_mu_anisotropic:
                 mu_para_hat = [
                     [self._get_toeplitz_matrix(mu[i, j]) for j in range(2)]
                     for i in range(2)
@@ -527,6 +537,20 @@ class Simulation:
         layer.Qeps = Qeps
 
         return layer
+
+    def get_epsilon(self, layer_id, axes=(0, 1)):
+        # TODO: check formulation and anisotropy
+        layer, layer_index = self._get_layer(layer_id)
+        if layer.is_uniform:
+            return layer.epsilon
+        out = self.get_ifft(
+            layer.eps_hat[0, :], shape=self.lattice.discretization, axes=axes
+        )
+        return out
+        # if inv:
+        #     u = layer.eps_hat_inv ## nu_hat
+        #     out = self.get_ifft(u[0,:], shape=self.lattice.discretization, axes=axes)
+        #     return _inv(out)
 
     def get_layer(self, id):
         return self._get_layer(id)[0]
@@ -564,15 +588,16 @@ class Simulation:
         b0 = self.S[1][0] @ self.a0 + self.S[1][1] @ self.bN
         return aN, b0
 
-    def _get_nu_hat_inv(self, epsilon, is_epsilon_anisotropic):
-        if is_epsilon_anisotropic:
+    def _get_nu_hat_inv(self, layer):
+        epsilon = layer.epsilon
+        if layer.is_epsilon_anisotropic:
             N = epsilon.shape[2]
             eb = block(epsilon[:2, :2])
-            nu = _inv2by2block(eb, N)
+            nu = inv2by2block(eb, N)
             # nu = _inv(epsilon[2,2])
-            nu1 = bk.array(_block2list(nu, N))
+            nu1 = bk.array(block2list(nu, N))
             nuhat = self._get_toeplitz_matrix(nu1, transverse=True)
-            nuhat_inv = _block2list(_inv(block(nuhat)), self.nh)
+            nuhat_inv = block2list(_inv(block(nuhat)), self.nh)
 
         else:
             N = epsilon.shape[0]
@@ -580,17 +605,16 @@ class Simulation:
             nuhat_inv = _inv((nuhat))
         return N, nuhat_inv
 
-    def _get_Peps(self, epsilon, eps_hat, t, direct=False):
-        is_epsilon_anisotropic = epsilon.shape[:2] == (3, 3)
-        N, nuhat_inv = self._get_nu_hat_inv(epsilon, is_epsilon_anisotropic)
+    def _get_Peps(self, layer, eps_hat, t, direct=False):
+        N, nuhat_inv = self._get_nu_hat_inv(layer)
 
         if direct:
 
             T = block([[t[1], bk.conj(t[0])], [-t[0], bk.conj(t[1])]])
 
-            invT = _inv2by2block(T, N)
+            invT = inv2by2block(T, N)
             # invT = _inv(T)
-            if is_epsilon_anisotropic:
+            if layer.is_epsilon_anisotropic:
                 Q = block(
                     [[eps_hat[0][0], nuhat_inv[0][1]], [eps_hat[1][0], nuhat_inv[1][1]]]
                 )
@@ -633,7 +657,7 @@ class Simulation:
             # Delta_hat = self._get_toeplitz_matrix(Delta)
 
             eps_para_hat = block(eps_hat)
-            if is_epsilon_anisotropic:
+            if layer.is_epsilon_anisotropic:
                 D = eps_para_hat - block(nuhat_inv)
             else:
                 D = eps_para_hat - block(
@@ -642,6 +666,18 @@ class Simulation:
 
             Peps = eps_para_hat - D @ Pi
         return Peps
+
+    def plot_structure(
+        self, p=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwargs
+    ):
+        return plot_structure(self, p, nper, dz, null_thickness, **kwargs)
+
+    def plot_dragon(self):
+        mesh = pyvista.examples.download_dragon()
+        mesh["scalars"] = mesh.points[:, 1]
+        mesh.plot(
+            cpos="xy", cmap="plasma", pbr=True, metallic=1.0, roughness=0.6, zoom=1.7
+        )
 
 
 def phasor(q, z):
@@ -693,18 +729,3 @@ def _translate_amplitudes(layer, z, ai, bi):
     aim = ai * phasor(q, z)
     bim = bi * phasor(q, layer.thickness - z)
     return aim, bim
-
-
-def _block2list(M, N):
-    return [[get_block(M, i, j, N) for j in range(2)] for i in range(2)]
-
-
-def _inv2by2block(T, N):
-    M = _block2list(T, N)
-    detT = M[0][0] * M[1][1] - M[1][0] * M[0][1]
-    return block(
-        [
-            [M[1][1] / detT, -M[0][1] / detT],
-            [-M[1][0] / detT, M[0][0] / detT],
-        ]
-    )
