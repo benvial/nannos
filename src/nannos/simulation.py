@@ -430,6 +430,7 @@ class Simulation:
             return uft[delta[0, :], delta[1, :]]
 
     def _build_matrix(self, layer):
+        layer, layer_index = self._get_layer(layer)
         if layer.iscopy:
             layer.matrix = layer.original.matrix
             layer.Kmu = layer.original.Kmu
