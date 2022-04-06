@@ -146,7 +146,7 @@ class Layer:
             )
             ** 0.5
         )
-        q = bk.where(bk.imag(q) < 0.0, -q, q)
+        # q = bk.where(bk.imag(q) < 0.0, -q, q)
         self.eigenvalues = bk.hstack((q, q))
         self.eigenvectors = bk.eye(2 * len(kx), dtype=bk.complex128)
         return self.eigenvalues, self.eigenvectors
