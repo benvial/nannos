@@ -30,7 +30,7 @@ pre {
 span.pre {
     background-color: @body-bg-darker;
   }
-  
+
 .docutils.literal.notranslate {
       color: @brand-code;
   }
@@ -113,3 +113,57 @@ span.pre {
     font-size: 75%;
     padding: 3px;
 }
+.jupyter_container div.code_cell {
+background-color: @body-bg-darker;
+}
+
+/* CODEMIRROR DEFAULT THEME */
+
+.CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
+  font-family: @font-family-monospace !important;
+  // font-size: inherit;
+  font-size: 0.9rem !important;
+}
+
+.cm-s-default .cm-header {color: @brand-info !important;}
+.cm-s-default .cm-quote {color: @brand-info !important;}
+.cm-negative {color: #d44 !important;}
+.cm-positive {color: #292 !important;}
+.cm-header, .cm-strong {font-weight: bold !important;}
+.cm-em {font-style: italic !important;}
+.cm-link {text-decoration: underline !important;}
+.cm-strikethrough {text-decoration: line-through !important;}
+
+.cm-s-default .cm-keyword {color: @brand-primary-dark !important;font-weight: bold !important;}
+.cm-s-default .cm-atom {color: @brand-info !important;}
+.cm-s-default .cm-number {color: #d95671 !important;}
+.cm-s-default .cm-def {color: @brand-info !important;}
+.cm-s-default .cm-variable,
+.cm-s-default .cm-punctuation,
+.cm-s-default .cm-property,
+.cm-s-default .cm-operator {}
+.cm-s-default .cm-variable-2 {color: @brand-primary-dark !important;}
+.cm-s-default .cm-variable-3, .cm-s-default .cm-type {color: #902000 !important;}
+.cm-s-default .cm-comment {color: #bab1a8 !important;}
+.cm-s-default .cm-string {color: @brand-secondary !important;}
+.cm-s-default .cm-string-2 {color: @brand-secondary !important;}
+.cm-s-default .cm-meta {color: #555 !important;}
+.cm-s-default .cm-qualifier {color: #555 !important;}
+.cm-s-default .cm-builtin {color: #259fa3 !important;}
+.cm-s-default .cm-bracket {color: #997 !important;}
+.cm-s-default .cm-tag {color: #062873 !important;}
+.cm-s-default .cm-attribute {color: @brand-secondary !important;}
+.cm-s-default .cm-hr {color: #999 !important;}
+.cm-s-default .cm-link {color:@brand-primary-dark !important;}
+
+.cm-s-default .cm-error {color: #FF0000 !important;}
+.cm-invalidchar {color: #FF0000 !important;}
+
+.CodeMirror-composing { border-bottom: 2px solid !important; }
+
+/* Default styles for common addons */
+
+div.CodeMirror span.CodeMirror-matchingbracket {color: @brand-primary-dark !important;}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {color: @brand-secondary !important;}
+.CodeMirror-matchingtag { background: rgba(255, 150, 0, .3) !important; }
+.CodeMirror-activeline-background {background: #e8f2ff !important;}
