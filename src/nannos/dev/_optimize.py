@@ -38,7 +38,7 @@ def multi_project(x, beta=1, Nthres=2):
 
 
 def multi_simp(x, epsilons, p=1):
-    epsilons = bk.array(epsilons)
+    epsilons = bk.array(epsilons) + 0j
     nthres = len(epsilons)
     npts = nthres
     if nthres == 2:
@@ -51,7 +51,7 @@ def multi_simp(x, epsilons, p=1):
 
         def mat(pts):
             npt = len(pts)
-            return bk.array([[_x ** (n * p) for n in range(npts)] for _x in pts])
+            return bk.array([[_x ** (n * p) + 0j for n in range(npts)] for _x in pts])
 
         M = mat(pts)
         coefs = bk.linalg.inv(M) @ epsilons
