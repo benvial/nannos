@@ -29,6 +29,35 @@ def project(x, beta=1, thres=0.5):
     )
 
 
+def multi_project(x, beta=1, Nthres=2):
+    thresholds = bk.linspace(0, 1, Nthres + 1)[1:-1]
+    out = 0
+    for thres in thresholds:
+        out += project(x, beta, thres)
+    return out / len(thresholds)
+
+
+def multi_simp(x, epsilons, p=1):
+    epsilons = bk.array(epsilons)
+    nthres = len(epsilons)
+    npts = nthres
+    if nthres == 2:
+        return simp(x, epsilons[0], epsilons[1], p)
+    else:
+        pts = bk.linspace(0, 1, npts)
+
+        def pol(coefs, x):
+            return sum(c * x ** (n * p) for n, c in enumerate(coefs))
+
+        def mat(pts):
+            npt = len(pts)
+            return bk.array([[_x ** (n * p) for n in range(npts)] for _x in pts])
+
+        M = mat(pts)
+        coefs = bk.linalg.inv(M) @ epsilons
+        return pol(coefs, x)
+
+
 class StopFunError(Exception):
     """Raised when stop value reached"""
 
