@@ -10,8 +10,8 @@ from scipy.optimize import minimize
 
 from .. import DEVICE
 from .. import backend as bk
-from .. import grad
-from ..utils import apply_filter
+from .. import get_backend, grad
+from ..utils import apply_filter, tic, toc
 
 
 def simp(x, eps_min, eps_max, p=1):
@@ -89,6 +89,7 @@ class TopologyOptimizer:
         stopval=None,
         args=None,
         callback=None,
+        verbose=False,
         options={},
     ):
         self.fun = fun
@@ -100,23 +101,35 @@ class TopologyOptimizer:
         self.stopval = stopval
         self.args = args
         self.callback = callback
+        self.verbose = verbose
         self.options = options
         self.grad_fun = grad(fun)
+
+        self.current_iteration = 0
+
+    def print(self, s):
+        if self.verbose:
+            return print(s)
 
     def min_function(self):
         f = self.fun(x)
 
     def minimize(self):
 
-        print("#################################################")
-        print(f"Topology optimization with {self.nvar} variables")
-        print("#################################################")
-        print("")
-        x0 = self.x0.cpu() if DEVICE == "cuda" else self.x0
+        self.print("#################################################")
+        self.print(f"Topology optimization with {self.nvar} variables")
+        self.print("#################################################")
+        self.print("")
+        x0 = (
+            self.x0.cpu()
+            if (get_backend() == "torch" and DEVICE == "cuda")
+            else self.x0
+        )
         x0 = npo.array(x0)
         for iopt in range(*self.threshold):
-            print(f"global iteration {iopt}")
-            print("-----------------------")
+            self.print("-----------------------")
+            self.print(f"  global iteration {iopt}")
+            self.print("-----------------------")
 
             proj_level = 2**iopt
             args = list(self.args)
@@ -125,11 +138,13 @@ class TopologyOptimizer:
             if self.method == "scipy":
 
                 def fun_scipy(x, *args):
+                    self.print(f">>> iteration {self.current_iteration}")
                     x = bk.array(x, dtype=bk.float64)
                     y = self.fun(x, *args)
-                    print(f"current value = {y}")
+                    self.print(f"current value = {y}")
                     if self.callback is not None:
                         self.callback(x, y, *args)
+                    self.current_iteration += 1
                     return y
 
                 bounds = [(0, 1) for _ in range(self.nvar)]
@@ -158,17 +173,23 @@ class TopologyOptimizer:
             else:
 
                 def fun_nlopt(x, gradn):
+                    self.print(f">>> iteration {self.current_iteration}")
                     x = bk.array(x, dtype=bk.float64)
                     y = self.fun(x, *args)
-                    if gradn.size > 0:
-                        dy = self.grad_fun(x, *args)
-                        dy = dy.cpu() if DEVICE == "cuda" else dy
-                        gradn[:] = npo.array(dy, dtype=npo.float64)
-                    print(f"current value = {y}")
+                    self.print(f"current value = {y}")
                     if self.callback is not None:
                         self.callback(x, y, *args)
-                    out = npo.float(y)
-                    return out
+                    if gradn.size > 0:
+                        dy = self.grad_fun(x, *args)
+                        dy = (
+                            dy.cpu()
+                            if (get_backend() == "torch" and DEVICE == "cuda")
+                            else dy
+                        )
+                        gradn[:] = npo.array(dy, dtype=npo.float64)
+
+                    self.current_iteration += 1
+                    return npo.float(y)
 
                 lb = npo.zeros(self.nvar, dtype=npo.float64)
                 ub = npo.ones(self.nvar, dtype=npo.float64)
@@ -184,14 +205,12 @@ class TopologyOptimizer:
                     self.opt.set_ftol_abs(self.options["ftol_abs"])
                 if "xtol_abs" in self.options:
                     self.opt.set_xtol_abs(self.options["xtol_abs"])
-
-                # self.opt.set_ftol_rel(1e-16)
-                # self.opt.set_xtol_rel(1e-16)
                 if self.stopval is not None:
                     self.opt.set_stopval(self.stopval)
                 if self.maxiter is not None:
                     self.opt.set_maxeval(self.maxiter)
-
+                for k, v in self.options.items():
+                    self.opt.set_param(k, v)
                 self.opt.set_min_objective(fun_nlopt)
                 xopt = self.opt.optimize(x0)
                 fopt = self.opt.last_optimum_value()

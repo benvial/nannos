@@ -8,6 +8,7 @@
 __all__ = ["Lattice"]
 
 from . import backend as bk
+from . import get_backend
 from .constants import pi
 from .geometry import *
 from .layers import Layer
@@ -219,9 +220,11 @@ def _circular_truncation(nh, Lk):
     circ_area = nh * bk.abs(ucross)
     circ_radius = bk.sqrt(circ_area / pi) + u[0] + u[1]
 
+    _int = int if get_backend() == "torch" else bk.int32
+
     u_extent = bk.array(
         [
-            1 + int(circ_radius / (q * bk.sqrt(1.0 - udot**2 / (u[0] * u[1]) ** 2)))
+            1 + _int(circ_radius / (q * bk.sqrt(1.0 - udot**2 / (u[0] * u[1]) ** 2)))
             for q in u
         ]
     )
