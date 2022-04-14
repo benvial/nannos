@@ -111,7 +111,7 @@ wls = np.linspace(1330, 1480, 51)
 # wls = np.linspace(1400, 1550, 1)
 
 
-theta, phi, psi = 3.7 * nn.pi / 180, 0, 0
+theta, phi, psi = 3.7, 0, 0
 freq = 1 / wls[0]
 
 
@@ -125,7 +125,7 @@ for wl in wls:
     freq = 1 / wl
 
     for orientation in ["right", "left"]:
-        # pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+        # pw = nn.PlaneWave(wavelength=1/freq, angles=(theta, phi, psi))
         pw = nn.excitation.CircPolPlaneWave(
             frequency=freq, angles=(theta, phi, psi), orientation=orientation
         )
@@ -157,8 +157,8 @@ for wl in wls:
     Tmatrix = []
     for psi in [0, np.pi / 2]:
         # freq = 1 / 1400
-        theta, phi = 8 * np.pi / 180, 0
-        pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+        theta, phi = 8, 0
+        pw = nn.PlaneWave(wavelength=1 / freq, angles=(theta, phi, psi))
         # pw = nn.excitation.CircPolPlaneWave(frequency=freq, angles=(theta, phi, psi))
 
         ##############################################################################

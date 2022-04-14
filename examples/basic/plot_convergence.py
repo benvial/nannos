@@ -30,9 +30,7 @@ def checkerboard(nh, formulation):
     Nx = 2**9
     Ny = 2**9
     lattice = nn.Lattice(([d, 0], [0, d]), discretization=(Nx, Ny))
-
-    freq = 1 / la
-    pw = nn.PlaneWave(frequency=freq, angles=(0, 0, 0))
+    pw = nn.PlaneWave(wavelength=la, angles=(0, 0, 0))
     epsgrid = lattice.ones() * 2.25
     sq1 = lattice.square((0.25 * d, 0.25 * d), 0.5 * d)
     sq2 = lattice.square((0.75 * d, 0.75 * d), 0.5 * d)

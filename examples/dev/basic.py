@@ -30,7 +30,7 @@ epsilon_xx[hole] = epsilon_yy[hole] = epsilon_zz[hole] = 1
 epsilon = bk.array([[epsilon_xx, z, z], [z, epsilon_yy, z], [z, z, epsilon_zz]])
 ms_aniso = lattice.Layer("Metasurface", thickness=0.5, epsilon=epsilon)
 ms = lattice.Layer("Metasurface", thickness=0.5, epsilon=epsilon_xx)
-pw = nn.PlaneWave(frequency=1.4, angles=(0, 0, 0 * nn.pi / 2))
+pw = nn.PlaneWave(wavelength=1 / 1.4, angles=(0, 0, 0 * nn.pi / 2))
 nh = 200
 sim = nn.Simulation([sup, ms, sub], pw, nh=nh, formulation=formulation)
 R, T = sim.diffraction_efficiencies()
@@ -45,7 +45,7 @@ epsilon_zz = 1 * o
 epsilon_xx[hole] = epsilon_yy[hole] = epsilon_zz[hole] = 1
 epsilon = bk.array([[epsilon_xx, z, z], [z, epsilon_yy, z], [z, z, epsilon_zz]])
 ms_aniso = lattice.Layer("Metasurface", thickness=0.5, epsilon=epsilon)
-pw = nn.PlaneWave(frequency=1.4, angles=(0, 0, 1 * nn.pi / 2))
+pw = nn.PlaneWave(wavelength=1 / 1.4, angles=(0, 0, 1 * nn.pi / 2))
 sim_aniso = nn.Simulation([sup, ms_aniso, sub], pw, nh=nh, formulation=formulation)
 R, T = sim_aniso.diffraction_efficiencies()
 print(R, T, R + T)

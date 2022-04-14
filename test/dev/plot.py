@@ -51,7 +51,7 @@ sub = lattice.Layer("Substrate", epsilon=4)
 lays.append(sub)
 
 
-pw = nn.PlaneWave(1.5)
+pw = nn.PlaneWave(0.75)
 sim = nn.Simulation(lays, pw)
 
 

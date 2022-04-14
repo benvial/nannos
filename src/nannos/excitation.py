@@ -6,8 +6,11 @@
 # See the documentation at nannos.gitlab.io
 
 from . import backend as bk
+from .constants import pi
 
 __all__ = ["PlaneWave"]
+
+_deg2rad = pi / 180
 
 
 class PlaneWave:
@@ -15,24 +18,27 @@ class PlaneWave:
 
     Parameters
     ----------
-    frequency : float
-        Frequency (the default is 1).
+    wavelength : float
+        Wavelength (the default is 1).
     angles : tuple
-        Incidence angles :math:`(\\theta,\phi,\psi)` (the default is (0, 0, 0)).
+        Incidence angles :math:`(\\theta,\phi,\psi)` in degrees (the default is (0, 0, 0)).
         :math:`\\theta`: polar angle,
         :math:`\phi`: azimuthal angle,
         :math:`\psi`: polarization angle.
 
     """
 
-    def __init__(self, frequency=1, angles=(0, 0, 0)):
-        self.frequency = bk.array(frequency)
-        self.angles = bk.array(angles, dtype=bk.float64)
+    def __init__(self, wavelength=1, angles=(0, 0, 0)):
+        self.wavelength = bk.array(wavelength)
+        self.angles_deg = bk.array(angles, dtype=bk.float64)
+        self.angles = self.angles_deg * _deg2rad
         self.theta = bk.array(angles[0], dtype=bk.float64)
         self.phi = bk.array(angles[1], dtype=bk.float64)
         self.psi = bk.array(angles[2], dtype=bk.float64)
+        self.frequency_scaled = 1 / self.wavelength
 
-        k0 = 2 * bk.pi * frequency
+        k0 = 2 * bk.pi * self.frequency_scaled
+
         self.wavenumber = k0
         self.wavevector = k0 * bk.array(
             [
@@ -45,48 +51,22 @@ class PlaneWave:
         cpsi = bk.cos(self.psi)  # p
         spsi = bk.sin(self.psi)  # s
 
-        cx = -spsi * bk.cos(self.theta) * bk.cos(self.phi) - cpsi * bk.sin(self.phi)
-        cy = -spsi * bk.cos(self.theta) * bk.sin(self.phi) + cpsi * bk.cos(self.phi)
-        cz = -cpsi * bk.sin(self.theta)
-
-        #
         # cx = cpsi * bk.cos(self.theta) * bk.cos(self.phi) - spsi * bk.sin(self.phi)
         # cy = cpsi * bk.cos(self.theta) * bk.sin(self.phi) + spsi * bk.cos(self.phi)
-        # cz = -cpsi * bk.sin(self.theta)
+        # cz = cpsi * bk.sin(self.theta)
+        cx = cpsi * bk.cos(self.theta) * bk.cos(self.phi) - spsi * bk.sin(self.phi)
+        cy = cpsi * bk.cos(self.theta) * bk.sin(self.phi) + spsi * bk.cos(self.phi)
+        cz = -cpsi * bk.sin(self.theta)
 
         self.amplitude = bk.array([cx, cy, cz])
 
-
-class CircPolPlaneWave(PlaneWave):
-    def __init__(self, frequency=1, angles=(0, 0, 0), orientation="right"):
-        super().__init__(frequency, angles)
-        angles_rotated = bk.copy(angles).astype(float)
-        angles_rotated[-1] += bk.pi / 2
-
-        H = PlaneWave(frequency, angles)
-        V = PlaneWave(frequency, angles_rotated)
-
-        sign = +1 if orientation == "left" else -1
-
-        self.amplitude = (H.amplitude + sign * 1j * V.amplitude) / 2**0.5
-
-
-#
-# frequency=1
-# angles=(0, 0, 0)
-# angles_rotated = bk.copy(angles).astype(float)
-# angles_rotated[-1] += bk.pi/2
-#
-# H = PlaneWave(frequency, angles)
-# V = PlaneWave(frequency, angles_rotated)
-# print(H.amplitude)
-# print(V.amplitude)
-#
-#
-# R = CircPolPlaneWave(orientation="right")
-# L = CircPolPlaneWave(orientation="left")
-#
-#
-#
-# print(R.amplitude)
-# print(L.amplitude)
+        kt = self.wavevector
+        omega = k0
+        K = bk.array([[kt[1] ** 2, -kt[0] * kt[1]], [-kt[0] * kt[1], kt[0] ** 2]])
+        Q = omega**2 * bk.eye(2) - K
+        q = (omega**2 - kt[0] ** 2 - kt[1] ** 2) ** 0.5
+        C = bk.linalg.inv(Q) * (omega * q)
+        et = bk.array([-self.amplitude[1], self.amplitude[0]])
+        self.a0 = C @ et
+        # self.a0 = -self.amplitude[1], self.amplitude[0]
+        # self.a0 = self.amplitude[0], self.amplitude[1]

@@ -129,7 +129,7 @@ class Lattice:
         return bk.tensordot(self.matrix, bk.stack(xy), axes=(1, 0))
 
     def ones(self):
-        return bk.ones(self.discretization, dtype=complex)
+        return bk.ones(self.discretization, dtype=bk.complex128)
 
     def geometry_mask(self, geom):
         return geometry_mask(geom, self, *self.discretization)

@@ -77,7 +77,7 @@ def simulation(mat, slab_flag=False):
     pressure = []
     for f in freqs:
         w = h * c / e / f * 1e6
-        pw = nn.PlaneWave(frequency=f, angles=(0, 0, 0))
+        pw = nn.PlaneWave(wavelength=w, angles=(0, 0, 0))
         if mat == "GaP":
             eps_sub = epsilon_GaP(w)
         else:
@@ -150,7 +150,7 @@ def simulation_angle(eps_sup, eps_sub, angle):
     sub = lattice.Layer("Substrate", epsilon=eps_sub)
     pressure = []
     for theta in angle:
-        pw = nn.PlaneWave(frequency=0.01, angles=(theta, 0, np.pi / 2))
+        pw = nn.PlaneWave(wavelength=1 / 0.01, angles=(theta, 0, 90))
         sim = nn.Simulation([sup, slab, sub], pw, 1)
         sim.solve()
         T1x, T1y, T1z = sim.get_z_stress_tensor_integral("Slab")
@@ -161,7 +161,7 @@ def simulation_angle(eps_sup, eps_sub, angle):
 #########################################################################
 # Figure 6
 
-angle = np.linspace(0, np.pi / 2 * 0.99, 500)
+angle = np.linspace(0, 90 * 0.99, 500)
 
 plt.figure()
 for eps_sup, eps_sub in zip([8, 9, 10, 10], [9, 9, 9, 9 + 0.1j]):

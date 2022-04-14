@@ -27,12 +27,12 @@ def test_para():
 
     res = []
     timing = []
-    F = [1.1, 1.2, 1.3, 1.4]
+    WL = [0.6, 0.7, 0.8, 0.9]
 
     for n_jobs in [1, 2]:
 
         @nn.parloop(n_jobs=n_jobs)
-        def sim(f):
+        def sim(wl):
             lattice = nn.Lattice(([1, 0], [0, 1]))
             xa = nn.backend.reshape(x, (Nx, Ny))
             eps_pattern = 2 + 1 * xa
@@ -40,12 +40,12 @@ def test_para():
             sub = lattice.Layer("Substrate")
             ms = lattice.Layer("ms", 1)
             ms.epsilon = eps_pattern
-            sim = nn.Simulation([sup, ms, sub], nn.PlaneWave(f), 50)
+            sim = nn.Simulation([sup, ms, sub], nn.PlaneWave(wl), 50)
             R, T = sim.diffraction_efficiencies()
             return R
 
         t0 = nn.tic()
-        res.append(sim(F))
+        res.append(sim(WL))
         t1 = nn.toc(t0)
         timing.append(t1)
 

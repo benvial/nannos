@@ -75,8 +75,7 @@ stack = [sup, slab, sub]
 
 def compute_transmission(fev):
     w = h * c / e / (fev * 1e-6)
-    f = 1 / w
-    pw = nn.PlaneWave(frequency=f, angles=(0, 0, np.pi / 2))
+    pw = nn.PlaneWave(wavelength=w, angles=(0, 0, 90))
     sim = nn.Simulation(stack, pw, 100, formulation="tangent")
     R, T = sim.diffraction_efficiencies()
     print(f"f = {fev}eV")
@@ -106,8 +105,8 @@ plt.tight_layout()
 
 fev = 2.456
 w = h * c / e / (fev * 1e-6)  # /1000
-f = 1 / w
-pw = nn.PlaneWave(frequency=f, angles=(0, 0, np.pi / 2))
+
+pw = nn.PlaneWave(wavelength=w, angles=(0, 0, 90))
 sim = nn.Simulation(stack, pw, 151, formulation="tangent")
 E, H = sim.get_field_grid("Superstrate", shape=(N, N))
 

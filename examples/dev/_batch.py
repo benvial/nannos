@@ -17,9 +17,9 @@ def simu(nn, nh):
     L2 = [0, 1.0]
     freq = 1.4
     bk = nn.backend
-    theta = 30.0 * bk.pi / 180
-    phi = 0.0 * bk.pi / 180
-    psi = 0.0 * bk.pi / 180
+    theta = 30.0
+    phi = 0.0
+    psi = 0.0
     Nx = 2**9
     Ny = 2**9
     eps_sup = 1.0
@@ -42,7 +42,7 @@ def simu(nn, nh):
     pattern = nn.Pattern(epsgrid, name="hole")
     ms.add_pattern(pattern)
 
-    pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+    pw = nn.PlaneWave(wavelength=1 / freq, angles=(theta, phi, psi))
     stack = [sup, ms, sub]
     sim = nn.Simulation(stack, pw, nh)
 

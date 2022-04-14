@@ -45,7 +45,7 @@ def test_grad(formulation):
             ms.epsilon = eps_pattern
             sim = nn.Simulation(
                 [sup, ms, sub],
-                nn.PlaneWave(1.1),
+                nn.PlaneWave(0.9),
                 10,
                 formulation=formulation,
             )

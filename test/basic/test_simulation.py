@@ -53,14 +53,12 @@ def build_pattern(anisotropic=False):
     return epsgrid, mugrid
 
 
-@pytest.mark.parametrize("freq", [0.7, 1.1])
+@pytest.mark.parametrize("wl", [0.9, 1.1])
 @pytest.mark.parametrize("theta", [0, 30])
 @pytest.mark.parametrize("phi", [0, 30])
 @pytest.mark.parametrize("psi", [0, 30])
-def test_uniform(freq, theta, phi, psi):
-    pw = nn.PlaneWave(
-        frequency=freq, angles=(theta * pi / 180, phi * pi / 180, psi * pi / 180)
-    )
+def test_uniform(wl, theta, phi, psi):
+    pw = nn.PlaneWave(wavelength=wl, angles=(theta, phi, psi))
     # eps = np.diag([2, 3, 4])
     # mu = np.diag([5, 6, 7])
     eps = 4
@@ -105,15 +103,13 @@ def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
 formulations = ["original", "tangent", "jones", "pol"]
 
 
-@pytest.mark.parametrize("freq", [0.7, 1.1])
+@pytest.mark.parametrize("wl", [0.9, 1.1])
 @pytest.mark.parametrize("theta", [0, 30])
 @pytest.mark.parametrize("phi", [0, 30])
 @pytest.mark.parametrize("psi", [0, 30])
 @pytest.mark.parametrize("formulation", formulations)
-def test_fft(freq, theta, phi, psi, formulation):
-    pw = nn.PlaneWave(
-        frequency=freq, angles=(theta * pi / 180, phi * pi / 180, psi * pi / 180)
-    )
+def test_fft(wl, theta, phi, psi, formulation):
+    pw = nn.PlaneWave(wavelength=wl, angles=(theta, phi, psi))
 
     epsgrid, mugrid = build_pattern(anisotropic=False)
     sim = hole_array(epsgrid, mugrid, pw, formulation=formulation)

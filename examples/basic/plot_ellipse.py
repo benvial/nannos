@@ -30,11 +30,9 @@ def array_ellipse(nh, formulation, psi):
     Nx = 2**9
     Ny = 2**9
     lattice = nn.Lattice(([d, 0], [0, d]), discretization=(Nx, Ny))
-
-    freq = 1 / wl
-    pw = nn.PlaneWave(frequency=freq, angles=(0, 0, psi))
+    pw = nn.PlaneWave(wavelength=wl, angles=(0, 0, psi))
     epsgrid = lattice.ones() * (1.75 + 1.5j) ** 2
-    ell = lattice.ellipse((0.5 * d, 0.5 * d), (1000 / 2, 500 / 2), rotate=nn.pi / 4)
+    ell = lattice.ellipse((0.5 * d, 0.5 * d), (1000 / 2, 500 / 2), rotate=45)
     epsgrid[ell] = 1
 
     sup = lattice.Layer("Superstrate", epsilon=1)
@@ -101,7 +99,7 @@ colors = {
 
 plt.ion()
 
-for psi in [nn.pi / 4, -nn.pi / 4]:
+for psi in [45, -45]:
     nhs, rs = run_convergence(psi)
     plt.figure(figsize=(2, 2))
 
@@ -118,8 +116,8 @@ for psi in [nn.pi / 4, -nn.pi / 4]:
     plt.legend()
     plt.xlabel("number of Fourier harmonics $n_h$")
     plt.ylabel("$R_{0,0}$")
-    t = "" if psi == nn.pi / 4 else "-"
-    plt.title(rf"$\psi = {t}\pi/4$")
+    t = "" if psi == 45 else "-"
+    plt.title(rf"$\psi = {t}45\degree$")
     plt.ylim(0.16, 0.2)
     plt.tight_layout()
     plt.show()

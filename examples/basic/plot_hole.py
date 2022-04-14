@@ -65,7 +65,7 @@ plt.show()
 ##############################################################################
 # Define the incident plane wave
 
-pw = nn.PlaneWave(frequency=1.4, angles=(0, 0, 0))
+pw = nn.PlaneWave(wavelength=1 / 1.4, angles=(0, 0, 0))
 
 ##############################################################################
 # Define the simulation
@@ -128,7 +128,7 @@ plt.show()
 
 
 def compute_transmission(fn):
-    pw = nn.PlaneWave(frequency=fn, angles=(0, 0, 0))
+    pw = nn.PlaneWave(wavelength=1 / fn, angles=(0, 0, 0))
     sim = nn.Simulation(stack, pw, 100)
     R, T = sim.diffraction_efficiencies()
     print(f"f = {fn} (normalized)")

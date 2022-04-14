@@ -103,7 +103,7 @@ def test_simulations(backend, device):
         TIMES_NH = []
         for ifreq, freq in enumerate(frequencies):
             pw = nn.PlaneWave(
-                frequency=freq,
+                wavelength=1 / freq,
             )
             t0 = nn.tic()
             sim = nn.Simulation(

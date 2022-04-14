@@ -35,9 +35,9 @@ nh = 51
 L1 = [1.0, 0]
 L2 = [0, 1.0]
 freq = 1.1
-theta = 0.0 * np.pi / 180
-phi = 0.0 * np.pi / 180
-psi = 0.0 * np.pi / 180
+theta = 0.0
+phi = 0.0
+psi = 0.0
 
 Nx = 2**7
 Ny = 2**7
@@ -72,7 +72,7 @@ def run(density, proj_level=None, rfilt=0, freq=1, nh=nh):
     ##############################################################################
     # Define the incident plane wave
 
-    pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+    pw = nn.PlaneWave(wavelength=1 / freq, angles=(theta, phi, psi))
 
     ##############################################################################
     # Define the layers

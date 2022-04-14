@@ -55,7 +55,7 @@ stack = [sup, phc_slab, sub]
 
 
 def compute_transmission(fn):
-    pw = nn.PlaneWave(frequency=fn, angles=(0, 0, 0))
+    pw = nn.PlaneWave(wavelength=1 / fn, angles=(0, 0, 0))
     sim = nn.Simulation(stack, pw, nh)
     R, T = sim.diffraction_efficiencies()
     print(f"f = {fn} (normalized)")
@@ -97,7 +97,7 @@ for i, sep in enumerate(seps):
     stack = [sup, phc_slab_top, spacer, phc_slab_bot, sub]
 
     def compute_transmission(fn):
-        pw = nn.PlaneWave(frequency=fn, angles=(0, 0, 0))
+        pw = nn.PlaneWave(wavelength=1 / fn, angles=(0, 0, 0))
         sim = nn.Simulation(stack, pw, nh)
         R, T = sim.diffraction_efficiencies()
         print(f"f = {fn} (normalized)")

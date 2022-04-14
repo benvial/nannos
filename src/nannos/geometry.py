@@ -135,7 +135,7 @@ def ellipse(center, radii, lattice, Nx, Ny, rotate=0):
     circ = cent.buffer(radius_x)
     ell = sa.scale(circ, xfact=1.0, yfact=radius_y / radius_x, zfact=1.0, origin=cent)
     if rotate != 0:
-        ell = sa.rotate(ell, rotate, origin=cent, use_radians=True)
+        ell = sa.rotate(ell, rotate, origin=cent, use_radians=False)
     return geometry_mask(ell, lattice, Nx, Ny)
 
 
@@ -147,7 +147,7 @@ def rectangle(center, widths, lattice, Nx, Ny, rotate=0):
     rect = sg.Polygon(vertices)
     cent = sg.Point(*center)
     if rotate != 0:
-        rect = sa.rotate(rect, rotate, origin=cent, use_radians=True)
+        rect = sa.rotate(rect, rotate, origin=cent, use_radians=False)
     return geometry_mask(rect, lattice, Nx, Ny)
 
 

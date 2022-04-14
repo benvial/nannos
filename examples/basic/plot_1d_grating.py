@@ -39,7 +39,7 @@ def run(form, psi, Nh):
         phc_slab = lattice.Layer("PC slab", thickness=1)
         phc_slab.epsilon = epsgrid
         stack = [sup, phc_slab, sub]
-        pw = nn.PlaneWave(frequency=1, angles=(30 * nn.pi / 180, 0, psi))
+        pw = nn.PlaneWave(wavelength=1, angles=(30, 0, psi))
         sim = nn.Simulation(stack, pw, nh, formulation=form)
         R, T = sim.diffraction_efficiencies()
         Ri, Ti = sim.diffraction_efficiencies(orders=True)
@@ -81,7 +81,7 @@ def plot(psi):
 ##############################################################################
 # For TE polarization the two formulations are equivalent:
 
-plot(nn.pi / 2)
+plot(0)
 
 
 ##############################################################################
@@ -90,4 +90,4 @@ plot(nn.pi / 2)
 # ``tangent`` formulation.
 
 
-plot(0)
+plot(90)

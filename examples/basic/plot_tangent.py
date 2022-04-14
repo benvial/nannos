@@ -34,7 +34,7 @@ grid[rect] = 1
 
 st = lattice.Layer("pat", thickness=1, epsilon=grid)
 lays = [lattice.Layer("sup"), st, lattice.Layer("sub")]
-pw = nn.PlaneWave(1.2)
+pw = nn.PlaneWave(wavelength=1 / 1.2)
 sim = nn.Simulation(lays, pw, nh)
 
 

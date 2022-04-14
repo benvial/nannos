@@ -28,7 +28,7 @@ epsilon_zz = 4 * o
 epsilon = bk.array([[epsilon_xx, z, z], [z, epsilon_yy, z], [z, z, epsilon_zz]])
 
 ms = lattice.Layer("Metasurface", thickness=0.5, epsilon=epsilon)
-pw = nn.PlaneWave(frequency=1.4, angles=(0, 0, 0 * nn.pi / 2))
+pw = nn.PlaneWave(wavelength=1 / 1.4, angles=(0, 0, 0 * nn.pi / 2))
 sim = nn.Simulation([sup, ms, sub], pw, nh=nh, formulation=formulation)
 t = nn.tic()
 sim.solve()
@@ -45,7 +45,7 @@ epsilon_yy = 3
 epsilon_zz = 4
 epsilon = bk.array([[epsilon_xx, z, z], [z, epsilon_yy, z], [z, z, epsilon_zz]])
 ms = lattice.Layer("Metasurface", thickness=0.5, epsilon=epsilon)
-pw = nn.PlaneWave(frequency=1.4, angles=(0, 0, 0 * nn.pi / 2))
+pw = nn.PlaneWave(wavelength=1 / 1.4, angles=(0, 0, 0 * nn.pi / 2))
 sim = nn.Simulation([sup, ms, sub], pw, nh=nh, formulation=formulation)
 t = nn.tic()
 sim.solve()

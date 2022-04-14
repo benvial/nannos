@@ -80,7 +80,7 @@ class Simulation:
         self.harmonics, self.nh = self.lattice.get_harmonics(
             self.nh0, method=self.truncation
         )
-        self.omega = 2 * bk.pi * self.excitation.frequency
+        self.omega = 2 * bk.pi * self.excitation.frequency_scaled
         self.k0para = (
             bk.array(self.excitation.wavevector[:2])
             * (self.layers[0].epsilon * self.layers[0].mu) ** 0.5
@@ -106,9 +106,9 @@ class Simulation:
         self.a0 = []
         for i in range(self.nh * 2):
             if i == 0:
-                a0 = self.excitation.amplitude[0]
+                a0 = self.excitation.a0[0]
             elif i == self.nh:
-                a0 = self.excitation.amplitude[1]
+                a0 = self.excitation.a0[1]
             else:
                 a0 = 0
             self.a0.append(a0)
@@ -122,6 +122,11 @@ class Simulation:
 
         if not unique(self._layer_names):
             raise ValueError("Layers must have different names")
+
+        self.incident_flux = bk.real(
+            bk.cos(self.excitation.theta)
+            / bk.sqrt(self.layers[0].epsilon * self.layers[0].mu)
+        )
 
     def _get_layer(self, id):
         if isinstance(id, str):
@@ -149,6 +154,12 @@ class Simulation:
                 layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
             else:
                 layer.solve_eigenproblem(layer.matrix)
+
+                # ## normalize
+                # phi = layer.eigenvectors
+                # out = bk.conj(layer.eigenvectors).T @ layer.Qeps @ layer.eigenvectors
+                # layer.eigenvectors /= bk.diag(out)**0.5
+
             layers_solved.append(layer)
         self.layers = layers_solved
         self.is_solved = True
@@ -235,14 +246,14 @@ class Simulation:
             self.solve()
         q, phi = layer.eigenvalues, bk.array(layer.eigenvectors)
         A = layer.Qeps @ phi @ bk.diag(1 / (self.omega * q))
-        pa, pb = phi @ an, phi @ bn
+        phia, phib = phi @ an, phi @ bn
         Aa, Ab = A @ an, A @ bn
-        cross_term = 0.5 * (bk.conj(pb) * Aa - bk.conj(Ab) * pa)
-        forward_xy = bk.real(bk.conj(Aa) * pa) + cross_term
-        backward_xy = -bk.real(bk.conj(Ab) * pb) + bk.conj(cross_term)
+        cross_term = 0.5 * (bk.conj(phib) * Aa - bk.conj(Ab) * phia)
+        forward_xy = bk.real(bk.conj(Aa) * phia) + cross_term
+        backward_xy = -bk.real(bk.conj(Ab) * phib) + bk.conj(cross_term)
         forward = forward_xy[: self.nh] + forward_xy[self.nh :]
         backward = backward_xy[: self.nh] + backward_xy[self.nh :]
-        return forward, backward
+        return bk.real(forward), bk.real(backward)
 
     def get_field_fourier(self, layer_index, z=0):
         if not self.is_solved:
@@ -250,7 +261,7 @@ class Simulation:
 
         layer, layer_index = self._get_layer(layer_index)
         ai0, bi0 = self._get_amplitudes(layer_index, translate=False)
-        # Z = [z] if bk.isscalar(z) else z
+
         Z = z if hasattr(z, "__len__") else [z]
 
         fields = bk.zeros((len(Z), 2, 3, self.nh), dtype=bk.complex128)
@@ -347,12 +358,8 @@ class Simulation:
         fwd_in, bwd_in = self.get_z_poynting_flux(self.layers[0], self.a0, b0)
         fwd_out, bwd_out = self.get_z_poynting_flux(self.layers[-1], aN, self.bN)
 
-        F0 = bk.cos(self.excitation.theta) / bk.sqrt(
-            self.layers[0].epsilon * self.layers[0].mu
-        )
-
-        R = bk.real(-bwd_in / F0)
-        T = bk.real(fwd_out / F0)
+        R = -bwd_in / self.incident_flux
+        T = fwd_out / self.incident_flux
         if not orders:
             R = bk.sum(R)
             T = bk.sum(T)
@@ -474,7 +481,6 @@ class Simulation:
             # Pmu = bk.eye(self.nh * 2)
             Pmu = block([[mu * self.IdG, self.ZeroG], [self.ZeroG, mu * self.IdG]])
 
-            Qeps = self.omega**2 * Pmu - Keps
         else:
             epsilon_zz = epsilon[2, 2] if layer.is_epsilon_anisotropic else epsilon
             mu_zz = mu[2, 2] if layer.is_mu_anisotropic else mu
@@ -523,11 +529,11 @@ class Simulation:
 
             # Qeps = self.omega ** 2 * bk.eye(self.nh * 2) - Keps
             # matrix = Peps @ Qeps - Kmu
-            Qeps = self.omega**2 * Pmu - Keps
             matrix = self.omega**2 * Peps @ Pmu - (Peps @ Keps + Kmu @ Pmu)
 
             layer.matrix = matrix
             layer.Kmu = Kmu
+            layer.Pmu = Pmu
             layer.eps_hat = eps_hat
             layer.eps_hat_inv = eps_hat_inv
             layer.mu_hat = mu_hat
@@ -535,6 +541,7 @@ class Simulation:
             layer.Keps = Keps
             layer.Peps = Peps
 
+        Qeps = self.omega**2 * Pmu - Keps
         layer.Qeps = Qeps
 
         return layer
@@ -673,13 +680,6 @@ class Simulation:
     ):
         return plot_structure(self, p, nper, dz, null_thickness, **kwargs)
 
-    def plot_dragon(self):
-        mesh = pyvista.examples.download_dragon()
-        mesh["scalars"] = mesh.points[:, 1]
-        mesh.plot(
-            cpos="xy", cmap="plasma", pbr=True, metallic=1.0, roughness=0.6, zoom=1.7
-        )
-
 
 def phasor(q, z):
     return bk.exp(1j * q * z)
@@ -719,10 +719,33 @@ def _build_Mmatrix(layer):
     return block([[a, -a], [phi, phi]])
 
 
+# TODO: check orthogonality of eigenvectors to compute M^-1
+# cf: D. M. Whittaker and I. S. Culshaw, Scattering-matrix treatment of
+# patterned multilayer photonic structures
+# PHYSICAL REVIEW B, VOLUME 60, NUMBER 4, 1999
+#
+def _build_Mmatrix_inverse(layer):
+    phi = layer.eigenvectors
+
+    def matmuldiag(A, B):
+        return bk.einsum("ik,k->ik", bk.array(A), B)
+
+    # b = matmuldiag(phiT,layer.eigenvalues)
+    b = bk.diag(layer.eigenvalues) @ bk.conj(phi.T)
+    c = bk.conj(phi.T) @ layer.Qeps
+    return 0.5 * block([[b, c], [-b, c]])
+
+
 def _build_Imatrix(layer1, layer2):
+    # if layer1.is_uniform:
+    #     a1 = _build_Mmatrix(layer1)
+    #     inv_a1 = _inv(a1)
+    # else:
+    #     inv_a1 = _build_Mmatrix_inverse(layer1)
     a1 = _build_Mmatrix(layer1)
+    inv_a1 = _inv(a1)
     a2 = _build_Mmatrix(layer2)
-    return _inv(a1) @ a2
+    return inv_a1 @ a2
 
 
 def _translate_amplitudes(layer, z, ai, bi):

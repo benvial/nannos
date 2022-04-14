@@ -75,9 +75,9 @@ L1 = [1.1, 0]
 L2 = [0, 1.1]
 rat_unit_cel = L1[0] / L2[1]
 # ------ angles ------
-theta = 0.0 * bk.pi / 180
-phi = 0.0 * bk.pi / 180
-psi = 0.0 * bk.pi / 180
+theta = 0.0
+phi = 0.0
+psi = 0.0
 # ------ patterns ------
 Nx = 2**6
 Ny = 2**6
@@ -156,7 +156,7 @@ def run(density, proj_level=None, rfilt=0, freq=1, nh=nh, psi=0, nn=nn):
     L1 = (a, 0)
     L2 = (0, a)
     lattice = nn.Lattice((L1, L2))
-    pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+    pw = nn.PlaneWave(wavelength=1 / freq, angles=(theta, phi, psi))
     sup = nn.Layer("Superstrate", epsilon=eps_sup)  # input medium
     # lay = nn.Layer(
     #     "Layer", epsilon=eps_layer, thickness=h_layer
@@ -219,27 +219,13 @@ def fun(density, proj_level, rfilt):
 
         nn.set_backend(backend)
         bk = nn.backend
-        sim_TM = run(density, proj_level, rfilt, freq=1 / wl, psi=nn.pi / 2)
+        sim_TM = run(density, proj_level, rfilt, freq=1 / wl, psi=90)
         _, T_TM = sim_TM.diffraction_efficiencies(orders=True)
         tar_TM = sim_TM.get_order(T_TM, order_target)
         return tar_TM
 
     tars_TE = spec_TE(wls_opt)
     tars_TM = spec_TM(wls_opt)
-
-    #
-    # for wl in wls:
-    #     # print(f"wavelength = ", wl)
-    #     freq_target = 1 / wl
-    #     sim_TE = run(density, proj_level, rfilt, freq=freq_target, psi=0)
-    #     _, T_TE = sim_TE.diffraction_efficiencies(orders=True)
-    #
-    #     sim_TM = run(density, proj_level, rfilt, freq=freq_target, psi=nn.pi / 2)
-    #     _, T_TM = sim_TM.diffraction_efficiencies(orders=True)
-    #     tar_TE = sim_TE.get_order(T_TE, order_target)
-    #     tar_TM = sim_TM.get_order(T_TM, order_target)
-    #     tars_TE.append(tar_TE)
-    #     tars_TM.append(tar_TM)
 
     if tars_TE[0].grad_fn is not None:
         print("wavelength = ", format_tensor(wls_opt))
@@ -601,7 +587,7 @@ def spec(wl):
     nn.set_backend(backend)
     bk = nn.backend
     TT = []
-    for psi in [0, nn.pi / 2]:
+    for psi in [0, 90]:
         sim = run(x_opt_bin, None, 0, freq=1 / wl, psi=psi, nh=51, nn=nn)
         R, T = sim.diffraction_efficiencies(orders=True)
         print("Σ R = ", float(sum(R)))

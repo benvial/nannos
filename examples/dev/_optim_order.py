@@ -42,9 +42,9 @@ nh = 100
 L1 = [1.087, 0]
 L2 = [0, 0.525]
 rat_unit_cel = L1[0] / L2[1]
-theta = 0.0 * bk.pi / 180
-phi = 0.0 * bk.pi / 180
-psi = 0.0 * bk.pi / 180
+theta = 0.0
+phi = 0.0
+psi = 0.0
 
 Nx = 2**7
 Ny = 2**7
@@ -70,7 +70,7 @@ def run(density, proj_level=None, rfilt=0, freq=1, nh=nh, psi=0):
     )
     epsgrid = no.simp(density_fp, eps_min, eps_max, p=1)
     lattice = nn.Lattice((L1, L2))
-    pw = nn.PlaneWave(frequency=freq, angles=(theta, phi, psi))
+    pw = nn.PlaneWave(wavelength=1 / freq, angles=(theta, phi, psi))
     sup = nn.Layer("Superstrate", epsilon=eps_sup)
     sub = nn.Layer("Substrate", epsilon=eps_sub)
     ms = nn.Layer("Metasurface", epsilon=1, thickness=h_ms)
