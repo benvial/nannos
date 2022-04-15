@@ -39,8 +39,8 @@ def norm(v):
 
 
 def block(a):
-    l1 = bk.array(bk.hstack([a[0][0], a[0][1]]))
-    l2 = bk.array(bk.hstack([a[1][0], a[1][1]]))
+    l1 = bk.array(bk.hstack([bk.array(a[0][0]), bk.array(a[0][1])]))
+    l2 = bk.array(bk.hstack([bk.array(a[1][0]), bk.array(a[1][1])]))
     return bk.vstack([l1, l2])
 
 
