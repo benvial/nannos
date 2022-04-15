@@ -63,7 +63,7 @@ class PlaneWave:
         kt = self.wavevector
         omega = k0
         K = bk.array([[kt[1] ** 2, -kt[0] * kt[1]], [-kt[0] * kt[1], kt[0] ** 2]])
-        Q = omega**2 * bk.eye(2) - K
+        Q = omega**2 * bk.array(bk.eye(2)) - K
         q = (omega**2 - kt[0] ** 2 - kt[1] ** 2) ** 0.5
         C = bk.linalg.inv(Q) * (omega * q)
         et = bk.array([-self.amplitude[1], self.amplitude[0]])
