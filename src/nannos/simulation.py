@@ -696,7 +696,7 @@ def phasor(q, z):
 
 def _build_Kmatrix(u, Kx, Ky):
     def matmuldiag(A, B):
-        return bk.einsum("i,ik->ik", bk.array(bk.diag(A)), B)
+        return bk.einsum("i,ik->ik", bk.array(bk.diag(A)), bk.array(B))
 
     kxu = matmuldiag(Kx, u)
     kyu = matmuldiag(Ky, u)

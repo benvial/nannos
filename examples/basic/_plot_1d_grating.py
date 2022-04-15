@@ -36,9 +36,9 @@ def run(form, psi, Nh):
         epsgrid[hole] = eps_metal
         sup = lattice.Layer("Superstrate")
         sub = lattice.Layer("Substrate", epsilon=eps_metal)
-        phc_slab = lattice.Layer("PC slab", thickness=1)
-        phc_slab.epsilon = epsgrid
-        stack = [sup, phc_slab, sub]
+        grating = lattice.Layer("Grating", thickness=1)
+        grating.epsilon = epsgrid
+        stack = [sup, grating, sub]
         pw = nn.PlaneWave(wavelength=1, angles=(30, 0, psi))
         sim = nn.Simulation(stack, pw, nh, formulation=form)
         R, T = sim.diffraction_efficiencies()
