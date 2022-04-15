@@ -39,7 +39,7 @@ plt.show()
 
 lat = nn.Lattice(basis_vectors=[[1, 0], [0.5, 0.5]], discretization=2**9)
 epsilon = lat.ones()
-scat = lat.ellipse(center=(0.75, 0.25), radii=(0.4, 0.1), rotate=nn.pi / 12)
+scat = lat.ellipse(center=(0.75, 0.25), radii=(0.4, 0.1), rotate=15)
 epsilon[scat] = 3 - 1j
 
 lay = lat.Layer(name="grating", thickness=1.3, epsilon=epsilon)

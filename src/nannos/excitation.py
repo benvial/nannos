@@ -35,7 +35,7 @@ class PlaneWave:
         self.theta = bk.array(angles[0], dtype=bk.float64)
         self.phi = bk.array(angles[1], dtype=bk.float64)
         self.psi = bk.array(angles[2], dtype=bk.float64)
-        self.frequency_scaled = 1 / self.wavelength
+        self.frequency_scaled = bk.array(1 / self.wavelength)
 
         k0 = 2 * bk.pi * self.frequency_scaled
 

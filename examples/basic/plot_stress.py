@@ -120,7 +120,7 @@ plt.plot(freqs, ref_GaP, label="$r$ (GaP, bulk)", lw=1, c="#77addf")
 plt.plot(freqs, ref_Al_slab, "--", label="$r$ (Al, 400nm)", c="#635a5e")
 plt.plot(freqs, trans_Al_slab, "--", label="$t$ (Al, 400nm)", c="#e77d7d")
 plt.xlabel("frequency (eV)")
-plt.ylabel("Itensity")
+plt.ylabel("Intensity")
 plt.legend()
 plt.tight_layout()
 
