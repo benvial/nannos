@@ -23,7 +23,7 @@ import nannos as nn
 # We will study the 1D metallic grating as in :cite:p:`Li1993`.
 
 
-def run(form, psi, Nh):
+def convergence_study(form, psi, Nh):
     ts0 = []
     tsm1 = []
     ns = []
@@ -43,22 +43,22 @@ def run(form, psi, Nh):
         sim = nn.Simulation(stack, pw, nh, formulation=form)
         R, T = sim.diffraction_efficiencies()
         Ri, Ti = sim.diffraction_efficiencies(orders=True)
-        R0 = sim.get_order(Ri, (0, 0))
-        Rm1 = sim.get_order(Ri, (-1, 0))
+        R0 = sim.get_order(Ri, 0)
+        Rm1 = sim.get_order(Ri, -1)
         ts0.append(R0)
         tsm1.append(Rm1)
         ns.append(sim.nh)
     return np.array(ns), 100 * np.array(ts0), 100 * np.array(tsm1)
 
 
-def plot(psi):
-    Nh = range(5, 75, 2)
+def run(psi):
+    Nh = range(5, 125, 2)
     fig, ax = plt.subplots(2, 1, figsize=(2.0, 3.0))
     title = "TM" if psi == 0 else "TE"
-    ns, ts0, tsm1 = run("original", psi, Nh)
+    ns, ts0, tsm1 = convergence_study("original", psi, Nh)
     ax[0].plot(ns, ts0, "-o", label="original", c="#dd803d", ms=1)
     ax[1].plot(ns, tsm1, "-o", label="original", c="#dd803d", ms=1)
-    ns_tan, ts0_tan, tsm1_tan = run("tangent", psi, Nh)
+    ns_tan, ts0_tan, tsm1_tan = convergence_study("tangent", psi, Nh)
     ax[0].plot(
         ns_tan, ts0_tan, "--s", label="tangent", c="#4a4082", ms=2, mew=0.4, mfc="None"
     )
@@ -73,7 +73,6 @@ def plot(psi):
     ax[0].set_ylabel("diffraction efficiency (%)")
     ax[1].set_ylabel("diffraction efficiency (%)")
     plt.suptitle(title, weight="bold", size=8)
-    # plt.ylim(0, 1)
     plt.tight_layout()
     plt.pause(0.1)
 
@@ -81,7 +80,7 @@ def plot(psi):
 ##############################################################################
 # For TE polarization the two formulations are equivalent:
 
-plot(0)
+run(psi=0)
 
 
 ##############################################################################
@@ -90,4 +89,4 @@ plot(0)
 # ``tangent`` formulation.
 
 
-plot(90)
+run(psi=90)

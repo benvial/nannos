@@ -416,7 +416,12 @@ class Simulation:
         try:
             len(order) == 2
         except:
-            raise ValueError("order must be a tuple of length 2")
+            if self.lattice.is_1D and isinstance(order, int):
+                order = (order, 0)
+            else:
+                raise ValueError(
+                    "order must be a tuple of integers length 2 for bi-periodic gratings"
+                )
         return [
             k for k, i in enumerate(self.harmonics.T) if bk.allclose(i, bk.array(order))
         ][0]
