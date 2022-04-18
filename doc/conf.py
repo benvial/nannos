@@ -394,7 +394,7 @@ sphinx_gallery_conf = {
         "org": "nannos",
         "repo": "nannos.gitlab.io",
         "branch": "doc",
-        "binderhub_url": "https://mybinder.org",
+        "binderhub_url": "https://gke.mybinder.org",
         "dependencies": "../environment.yml",
         "notebooks_dir": "notebooks",
         "use_jupyter_lab": False,

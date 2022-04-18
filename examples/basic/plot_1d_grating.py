@@ -80,7 +80,7 @@ def run(psi):
 ##############################################################################
 # For TE polarization the two formulations are equivalent:
 
-run(psi=0)
+run(psi=90)
 
 
 ##############################################################################
@@ -89,4 +89,4 @@ run(psi=0)
 # ``tangent`` formulation.
 
 
-run(psi=90)
+run(psi=0)

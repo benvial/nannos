@@ -80,6 +80,14 @@ class Simulation:
         self.harmonics, self.nh = self.lattice.get_harmonics(
             self.nh0, method=self.truncation
         )
+
+        maxN = bk.max(self.harmonics)
+        if (
+            self.lattice.discretization[0] <= 2 * maxN
+            or self.lattice.discretization[1] <= 2 * maxN
+        ):
+            raise ValueError(f"lattice discretization must be > {2*maxN}")
+
         self.omega = 2 * bk.pi * self.excitation.frequency_scaled
         self.k0para = (
             bk.array(self.excitation.wavevector[:2])
@@ -285,12 +293,12 @@ class Simulation:
             else:
                 ez = layer.eps_hat_inv @ ez
 
-            set_index(fields, [iz, 0, 0], ex)
-            set_index(fields, [iz, 0, 1], ey)
-            set_index(fields, [iz, 0, 2], ez)
-            set_index(fields, [iz, 1, 0], hx)
-            set_index(fields, [iz, 1, 1], hy)
-            set_index(fields, [iz, 1, 2], hz)
+            fields = set_index(fields, [iz, 0, 0], ex)
+            fields = set_index(fields, [iz, 0, 1], ey)
+            fields = set_index(fields, [iz, 0, 2], ez)
+            fields = set_index(fields, [iz, 1, 0], hx)
+            fields = set_index(fields, [iz, 1, 1], hy)
+            fields = set_index(fields, [iz, 1, 2], hz)
 
         self.fields_fourier = bk.array(fields)
         return self.fields_fourier
@@ -300,7 +308,7 @@ class Simulation:
         s = 0
         for i in range(self.nh):
             f = bk.zeros(shape, dtype=bk.complex128)
-            set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
+            f = set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
             a = u[i]
             s += a * f
         ft = fft.inverse_fourier_transform(s, axes=axes)
@@ -315,7 +323,7 @@ class Simulation:
         s = 0
         for i in range(self.nh):
             f = bk.zeros(shape + (amplitudes.shape[0],), dtype=bk.complex128)
-            set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
+            f = set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
             # f[self.harmonics[0, i], self.harmonics[1, i], :] = 1.0
             a = amplitudes[:, i]
             s += a * f
@@ -336,7 +344,7 @@ class Simulation:
         H = bk.stack([self.get_ifft_amplitudes(fh[:, i, :], shape) for i in range(3)])
         return E, H
 
-    def diffraction_efficiencies(self, orders=False):
+    def diffraction_efficiencies(self, orders=False, complex=False):
         """Compute the diffraction efficiencies.
 
         Parameters
@@ -354,16 +362,46 @@ class Simulation:
         # if not hasattr(self, "S"):
         # self.get_S_matrix()
 
-        aN, b0 = self._solve_ext()
-        fwd_in, bwd_in = self.get_z_poynting_flux(self.layers[0], self.a0, b0)
-        fwd_out, bwd_out = self.get_z_poynting_flux(self.layers[-1], aN, self.bN)
+        if complex:
+            R, T = self._get_complex_orders()
+            if not orders:
+                R = bk.sum(R, axis=1)
+                T = bk.sum(T, axis=1)
+        else:
+            aN, b0 = self._solve_ext()
+            fwd_in, bwd_in = self.get_z_poynting_flux(self.layers[0], self.a0, b0)
+            fwd_out, bwd_out = self.get_z_poynting_flux(self.layers[-1], aN, self.bN)
 
-        R = -bwd_in / self.incident_flux
-        T = fwd_out / self.incident_flux
-        if not orders:
-            R = bk.sum(R)
-            T = bk.sum(T)
+            R = -bwd_in / self.incident_flux
+            T = fwd_out / self.incident_flux
+            if not orders:
+                R = bk.sum(R)
+                T = bk.sum(T)
         return R, T
+
+    def _get_complex_orders(self):
+        nin = (self.layers[0].epsilon * self.layers[0].mu) ** 0.5
+        nout = (self.layers[-1].epsilon * self.layers[-1].mu) ** 0.5
+        gamma_in0 = (
+            self.omega**2 * nin**2 - self.k0para[0] ** 2 - self.k0para[1] ** 2
+        ) ** 0.5
+        gamma_out0 = (
+            self.omega**2 * nout**2 - self.k0para[0] ** 2 - self.k0para[1] ** 2
+        ) ** 0.5
+        gamma_in = (self.omega**2 * nin**2 - self.kx**2 - self.ky**2) ** 0.5
+        gamma_out = (self.omega**2 * nout**2 - self.kx**2 - self.ky**2) ** 0.5
+        norma_t2 = nin**2 * (gamma_out / gamma_in0)
+        norma_r2 = nin**2 * (gamma_in / gamma_in0)
+
+        norma_t = (norma_t2.real) ** 0.5
+        norma_r = (norma_r2.real) ** 0.5
+
+        t = self.get_field_fourier("Substrate")[0, 0] * norma_t
+        bx0 = self.get_field_fourier("Superstrate")[0, 0] * norma_r
+        o0 = bk.zeros(self.nh)
+        o0 = set_index(o0, [0], 1)
+        r = bk.stack([b - o0 * c for b, c in zip(bx0, self.excitation.amplitude)])
+        return r, t
 
     def get_z_stress_tensor_integral(self, layer_index, z=0):
         layer, layer_index = self._get_layer(layer_index)
@@ -377,7 +415,6 @@ class Simulation:
         ex = e[0]
         ey = e[1]
         ez = e[2]
-
         hx = h[0]
         hy = h[1]
         hz = h[2]
@@ -681,9 +718,9 @@ class Simulation:
         return Peps
 
     def plot_structure(
-        self, p=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwargs
+        self, plotter=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwargs
     ):
-        return plot_structure(self, p, nper, dz, null_thickness, **kwargs)
+        return plot_structure(self, plotter, nper, dz, null_thickness, **kwargs)
 
 
 def phasor(q, z):

@@ -37,6 +37,7 @@ def set_index_2d(mat, val, idx1=(None, None), idx2=(None, None)):
         mat = mat.at[idx].set(val)
     else:
         mat[idx] = val
+    return mat
 
 
 def shape_mask(shp, x, y, m=None):
@@ -60,16 +61,16 @@ def shape_mask(shp, x, y, m=None):
     >>> y = np.linspace(-5,5,100)
     >>> mask = shape_mask(poly, x, y)
     """
-    rect = _bbox_to_rect(_grid_bbox(y, x))
+    rect = _bbox_to_rect(_grid_bbox(x, y))
 
     if m is None:
-        m = bk.zeros((len(x), len(y)), dtype=bool)
+        m = bk.zeros((len(y), len(x)), dtype=bool)
 
     if not shp.intersects(rect):
-        set_index_2d(m, False)
+        m = set_index_2d(m, False)
 
     elif shp.contains(rect):
-        set_index_2d(m, True)
+        m = set_index_2d(m, True)
 
     else:
         k, l = m.shape
@@ -77,31 +78,31 @@ def shape_mask(shp, x, y, m=None):
         if k == 1 and l == 1:
 
             val = shp.contains(sg.Point(x[0], y[0]))
-            set_index_2d(m, val)
+            m = set_index_2d(m, val)
 
         elif k == 1:
 
             val = shape_mask(shp, x[: l // 2], y, m[:, : l // 2])
-            set_index_2d(m, val, idx2=(None, l // 2))
+            m = set_index_2d(m, val, idx2=(None, l // 2))
             val = shape_mask(shp, x[l // 2 :], y, m[:, l // 2 :])
-            set_index_2d(m, val, idx2=(l // 2, None))
+            m = set_index_2d(m, val, idx2=(l // 2, None))
 
         elif l == 1:
             val = shape_mask(shp, x, y[: k // 2], m[: k // 2])
-            set_index_2d(m, val, idx1=(None, k // 2))
+            m = set_index_2d(m, val, idx1=(None, k // 2))
             val = shape_mask(shp, x, y[k // 2 :], m[k // 2 :])
-            set_index_2d(m, val, idx1=(k // 2, None))
+            m = set_index_2d(m, val, idx1=(k // 2, None))
 
         else:
             val = shape_mask(shp, x[: l // 2], y[: k // 2], m[: k // 2, : l // 2])
 
-            set_index_2d(m, val, (None, k // 2), (None, l // 2))
+            m = set_index_2d(m, val, (None, k // 2), (None, l // 2))
             val = shape_mask(shp, x[l // 2 :], y[: k // 2], m[: k // 2, l // 2 :])
-            set_index_2d(m, val, (None, k // 2), (l // 2, None))
+            m = set_index_2d(m, val, (None, k // 2), (l // 2, None))
             val = shape_mask(shp, x[: l // 2], y[k // 2 :], m[k // 2 :, : l // 2])
-            set_index_2d(m, val, (k // 2, None), (None, l // 2))
+            m = set_index_2d(m, val, (k // 2, None), (None, l // 2))
             val = shape_mask(shp, x[l // 2 :], y[k // 2 :], m[k // 2 :, l // 2 :])
-            set_index_2d(m, val, (k // 2, None), (l // 2, None))
+            m = set_index_2d(m, val, (k // 2, None), (l // 2, None))
 
     return m
 
@@ -115,7 +116,7 @@ def geometry_mask(geom, lattice, Nx, Ny):
     invM = bk.linalg.inv(lattice.matrix)
     matrix = invM.ravel().tolist() + [0, 0]
     geom = sa.affine_transform(geom, matrix)
-    mask = shape_mask(geom, x, y)
+    mask = shape_mask(geom, x, y).T
     return mask
 
 

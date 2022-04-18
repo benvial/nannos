@@ -13,7 +13,7 @@ import nannos as nn
 
 pi = npo.pi
 
-np = nn.backend
+bk = nn.backend
 
 nh = 51
 L1 = [1.0, 0]
@@ -27,29 +27,29 @@ mu_hole = 1.0
 h = 2
 
 lattice = nn.Lattice((L1, L2), discretization=Nx)
-sup = lattice.Layer("Superstrate", epsilon=1, mu=1)
-sub = lattice.Layer("Substrate", epsilon=1, mu=1)
+sup = lattice.Layer("Superstrate", epsilon=1.3, mu=1)
+sub = lattice.Layer("Substrate", epsilon=2.7, mu=1)
 
 
 def build_pattern(anisotropic=False):
     radius = 0.25
     hole = lattice.circle((0.5, 0.5), radius)
 
-    ids = np.ones((Nx, Ny), dtype=np.complex128)
-    zs = np.zeros_like(ids)
+    ids = bk.ones((Nx, Ny), dtype=bk.complex128)
+    zs = bk.zeros_like(ids)
 
     if anisotropic:
-        exx = np.where(hole, ids * eps_hole, ids * eps_pattern)
-        eyy = np.where(hole, ids * eps_hole, ids * eps_pattern * 1)
-        ezz = np.where(hole, ids * eps_hole, ids * eps_pattern * 2)
-        epsgrid = np.array([[exx, zs, zs], [zs, eyy, zs], [zs, zs, ezz]])
-        mxx = np.where(hole, ids * mu_hole, ids * mu_pattern)
-        myy = np.where(hole, ids * mu_hole, ids * mu_pattern)
-        mzz = np.where(hole, ids * mu_hole, ids * mu_pattern)
-        mugrid = np.array([[mxx, zs, zs], [zs, mxx, zs], [zs, zs, mzz]])
+        exx = bk.where(hole, ids * eps_hole, ids * eps_pattern)
+        eyy = bk.where(hole, ids * eps_hole, ids * eps_pattern * 1)
+        ezz = bk.where(hole, ids * eps_hole, ids * eps_pattern * 2)
+        epsgrid = bk.array([[exx, zs, zs], [zs, eyy, zs], [zs, zs, ezz]])
+        mxx = bk.where(hole, ids * mu_hole, ids * mu_pattern)
+        myy = bk.where(hole, ids * mu_hole, ids * mu_pattern)
+        mzz = bk.where(hole, ids * mu_hole, ids * mu_pattern)
+        mugrid = bk.array([[mxx, zs, zs], [zs, mxx, zs], [zs, zs, mzz]])
     else:
-        epsgrid = np.where(hole, ids * eps_hole, ids * eps_pattern)
-        mugrid = np.where(hole, ids * mu_hole, ids * mu_pattern)
+        epsgrid = bk.where(hole, ids * eps_hole, ids * eps_pattern)
+        mugrid = bk.where(hole, ids * mu_hole, ids * mu_pattern)
     return epsgrid, mugrid
 
 
@@ -59,8 +59,8 @@ def build_pattern(anisotropic=False):
 @pytest.mark.parametrize("psi", [0, 30])
 def test_uniform(wl, theta, phi, psi):
     pw = nn.PlaneWave(wavelength=wl, angles=(theta, phi, psi))
-    # eps = np.diag([2, 3, 4])
-    # mu = np.diag([5, 6, 7])
+    # eps = bk.diag([2, 3, 4])
+    # mu = bk.diag([5, 6, 7])
     eps = 4
     mu = 1
     eps_sup, eps_sub = 1.0, 1.0
@@ -108,7 +108,7 @@ formulations = ["original", "tangent", "jones", "pol"]
 @pytest.mark.parametrize("phi", [0, 30])
 @pytest.mark.parametrize("psi", [0, 30])
 @pytest.mark.parametrize("formulation", formulations)
-def test_fft(wl, theta, phi, psi, formulation):
+def test_structured(wl, theta, phi, psi, formulation):
     pw = nn.PlaneWave(wavelength=wl, angles=(theta, phi, psi))
 
     epsgrid, mugrid = build_pattern(anisotropic=False)
@@ -121,6 +121,14 @@ def test_fft(wl, theta, phi, psi, formulation):
     print("R = ", R)
     print("R + T = ", B)
     assert npo.allclose(B, 1, atol=1e-1)
+
+    Ri, Ti = sim.diffraction_efficiencies(orders=True)
+    ri, ti = sim.diffraction_efficiencies(orders=True, complex=True)
+    #
+    assert npo.allclose(bk.sum(bk.abs(ti) ** 2, axis=0), Ti)
+    assert npo.allclose(bk.sum(bk.abs(ri) ** 2, axis=0), Ri)
+    assert npo.allclose(bk.sum(bk.abs(ti) ** 2), T)
+    assert npo.allclose(bk.sum(bk.abs(ri) ** 2), R)
 
     a, b = sim._get_amplitudes(1, z=0.1)
     field_fourier = sim.get_field_fourier(1, z=0.1)

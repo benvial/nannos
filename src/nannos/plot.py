@@ -11,12 +11,13 @@ import pyvista
 from . import backend as bk
 
 pyvista.set_jupyter_backend("pythreejs")
+pyvista.set_plot_theme("document")
 pyvista.global_theme.background = "white"
 # pyvista.global_theme.window_size = [600, 400]
-pyvista.global_theme.axes.show = False
+pyvista.global_theme.axes.show = True
 # pyvista.global_theme.smooth_shading = True
 # pyvista.global_theme.antialiasing = True
-# pyvista.set_plot_theme("document")
+# pyvista.global_theme.axes.box = True
 
 
 def plot_line(ax, point1, point2, cellstyle="k-"):
@@ -88,43 +89,52 @@ def plot_layer(
     return ims
 
 
-def plot_structure(sim, p=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwargs):
-    p = p or pyvista.Plotter()
+def plot_structure(
+    sim, plotter=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwargs
+):
+    p = plotter or pyvista.Plotter()
     name = r"permittivity (Re)"
     null_thickness = null_thickness or bk.max([layer.thickness for layer in sim.layers])
     bvs = sim.lattice.basis_vectors
 
+    transform_matrix = bk.array(
+        [
+            [bvs[0][0], bvs[1][0], 0, 0],
+            [bvs[0][1], bvs[1][1], 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ]
+    )
     for jx in range(nper[0]):
 
         for jy in range(nper[1]):
             z = 0
-            x0, y0 = bvs[0][0] * jx, bvs[1][1] * jy
+            x0, y0 = jx, jy
 
-            for layer in bk.flipud(sim.layers):
+            for layer in sim.layers:
                 thickness = layer.thickness
                 if thickness == 0:
-                    if float(layer.epsilon.real) != 1:
-                        thickness = null_thickness or bk.max()
+                    thickness = null_thickness
+                    # if float(layer.epsilon.real) != 1:
+                    #     thickness = null_thickness
                 if layer.is_uniform:
-                    if thickness != 0:
+                    if float(layer.epsilon.real) != 1:
                         grid = pyvista.UniformGrid()
                         grid.dimensions = (2, 2, 2)
                         grid.origin = (
                             x0,
                             y0,
-                            0,
                             z,
                         )  # The bottom left corner of the data set
                         grid.spacing = (
-                            bvs[0][0],
-                            bvs[1][1],
+                            1,
+                            1,
                             thickness,
                         )  # These are the cell sizes along each axis
-                        grid.cell_data[name] = bk.array(
-                            [layer.epsilon.real]
-                        )  # Flatten the array!
-                        # grid.plot()
+                        val = layer.epsilon.real
+                        grid.cell_data[name] = bk.array(val)
                         mesh = grid.extract_surface()
+                        mesh = mesh.transform(transform_matrix)
                         p.add_mesh(mesh, **kwargs)
                         # p.add_mesh(
                         #     mesh,
@@ -139,19 +149,22 @@ def plot_structure(sim, p=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwar
                         epsgrid = layer.epsilon.real
                     except:
                         epsgrid = layer.epsilon
-                    # values = bk.linspace(0, 10, 1000).reshape((20, 5, 10))
                     Nx, Ny = epsgrid.shape
-                    values = bk.reshape(epsgrid, (Nx, Ny, 1))
+                    # values = bk.reshape(epsgrid, (Nx, Ny, 1))
+                    epsgrid = epsgrid.T
+                    values = epsgrid[:, :, None]
                     # Create the spatial reference
                     grid = pyvista.UniformGrid()
                     grid.dimensions = bk.array(values.shape) + 1
                     grid.origin = (x0, y0, z)  # The bottom left corner of the data set
-                    grid.spacing = (bvs[0][0] / Nx, bvs[1][1] / Ny, thickness)
+                    grid.spacing = (1 / Nx, 1 / Ny, thickness)
                     grid.cell_data[name] = values.flatten()  # Flatten the array!
                     vals = bk.unique(epsgrid)
                     for v in vals:
                         if v != 1:
                             threshed = grid.threshold([v - 1e-7 * v, v + 1e-7 * v])
+
+                            threshed = threshed.transform(transform_matrix)
 
                             p.add_mesh(threshed, **kwargs)
 
@@ -168,9 +181,3 @@ def plot_structure(sim, p=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwar
                 z += thickness + dz
 
     return p
-
-
-# #
-# p = pyvista.Plotter()
-# p = plot_struc(sim, p, nper=(5, 5), dz=0, opacity=1)
-# p.show()

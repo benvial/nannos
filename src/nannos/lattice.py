@@ -117,7 +117,9 @@ class Lattice:
     def no1d(func):
         def inner(self, *args, **kwargs):
             if self.is_1D:
-                raise ValueError(f"Cannot use {func._name__} for 1D gratings")
+                raise ValueError(
+                    f"Cannot use method {func.__name__} for 1D gratings, please use stripe"
+                )
             return func(self, *args, **kwargs)
 
         return inner
@@ -231,8 +233,6 @@ def _circular_truncation(nh, Lk):
     xG, yG = [bk.array(bk.arange(-q, q + 1)) for q in u_extent]
     G = bk.meshgrid(xG, yG, indexing="ij")
     G = [g.flatten() for g in G]
-
-    # print(u[])get_device()
 
     Gl2 = bk.array(
         G[0] ** 2 * u[0] ** 2 + G[1] ** 2 * u[0] ** 2 + 2 * G[0] * G[1] * udot

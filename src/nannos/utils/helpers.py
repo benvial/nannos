@@ -22,6 +22,7 @@ def set_index(mat, idx, val):
     else:
         idx += [None]
         mat[tuple(idx)] = val
+    return mat
 
 
 def next_power_of_2(x):

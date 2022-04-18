@@ -26,7 +26,7 @@ txy_maxim = np.array((outy[1:][:, head == "T0_Ex"]), dtype=complex).ravel()
 tyy_maxim = np.array((outy[1:][:, head == "T0_Ey"]), dtype=complex).ravel()
 
 
-nh = 90
+nh = 60
 bk = nn.backend
 # formulation = "tangent"
 formulation = "original"
@@ -36,48 +36,24 @@ P = 350
 L = 190
 W = 100
 
-# eps_Si = (3.87870 + 0.019221j) ** 2
-eps_Si = (3.87 + 0.02j) ** 2
-# eps_Si = (4.2 + 1j*0.3)**2
-
-
+eps_Si = (3.87 + 1 * 0.02j) ** 2
 eps_SiO2 = 1.4573**2
-
-# thicknesses = [200]
-
-
-def get_order_comp(self, A, order, comp):
-    c = 0 if comp == "x" else self.nh
-    return A[c + self.get_order_index(order)]
-
 
 plt.clf()
 
-thicknesses_maxim = np.linspace(200, 500, 40)
-
-for ih, H in enumerate(thicknesses_maxim):
-    txx = txx_maxim[ih]
-    tyx = tyx_maxim[ih]
-    txy = txy_maxim[ih]
-    tyy = tyy_maxim[ih]
-    Jmaxim = 0.5 * np.array(
-        [
-            [txx + tyy + 1j * (tyx - txy), txx - tyy - 1j * (txy + tyx)],
-            [txx - tyy + 1j * (tyx + txy), txx + tyy - 1j * (txy - tyx)],
-        ]
-    )
-    # CEmaxim = np.abs((Jmaxim[0,0] - Jmaxim[0,1])/2)**2
-
-    CEmaxim = np.abs((tyy - txx) / 2) ** 2
-
-    plt.plot(H, CEmaxim, "+b")
-    plt.pause(0.01)
-
-thicknesses = np.linspace(200, 500, 61)
+# thicknesses_maxim = np.linspace(200, 500, 40)
+#
+# for ih, H in enumerate(thicknesses_maxim):
+#     txx = txx_maxim[ih]
+#     tyx = tyx_maxim[ih]
+#     txy = txy_maxim[ih]
+#     tyy = tyy_maxim[ih]
+#     CEmaxim = np.abs((tyy - txx) / 2) ** 2
+#     plt.plot(H, CEmaxim, "+b")
+#     plt.pause(0.01)
 
 
-for ih, H in enumerate(thicknesses):
-
+def simu(H, angles):
     lattice = nn.Lattice([[P, 0], [0, P]], discretization=2**9)
     sup = lattice.Layer("Superstrate", epsilon=eps_SiO2)
     sub = lattice.Layer("Substrate", epsilon=1)
@@ -85,52 +61,62 @@ for ih, H in enumerate(thicknesses):
     metaatom = lattice.rectangle((0.5 * P, 0.5 * P), (W, L))
     epsilon[metaatom] = eps_Si
     ms = lattice.Layer("Metasurface", thickness=H, epsilon=epsilon)
-    pwx = nn.PlaneWave(wavelength=1 / 1 / wl, angles=(0, 0, 0 * nn.pi / 2))
-    simx = nn.Simulation([sup, ms, sub], pwx, nh=nh, formulation=formulation)
-    pwy = nn.PlaneWave(wavelength=1 / 1 / wl, angles=(0, 0, 1 * nn.pi / 2))
-    simy = nn.Simulation([sup, ms, sub], pwy, nh=nh, formulation=formulation)
+    pw = nn.PlaneWave(wavelength=wl, angles=angles)
+    return nn.Simulation([sup, ms, sub], pw, nh=nh, formulation=formulation)
 
-    # axN, bx0 = simx._get_amplitudes("Substrate",translate=True)
-    #
-    # simx.get_S_matrix()
-    # axN = simx.S @ simx.a0
-    # txx = get_order_comp(simx, axN[0][0], (0, 0), "x")*norma
-    # tyx = get_order_comp(simx, axN[0][0], (0, 0), "y")*norma
-    #
-    #
-    # simy.get_S_matrix()
-    # ayN = simy.S @ simy.a0
-    # # ayN, by0 = simy._get_amplitudes("Substrate",translate=True)
-    # txy = get_order_comp(simy, ayN[0][0], (0, 0), "x")*norma
-    # tyy = get_order_comp(simy, ayN[0][0], (0, 0), "y")*norma
-    Rx, Tx = simx.diffraction_efficiencies()
-    print(Tx)
 
-    Ry, Ty = simy.diffraction_efficiencies()
-    print(Ty)
+nb_thick = 60
+thicknesses = np.linspace(200, 500, nb_thick)
+# thicknesses = [400]  #
+conv_effs = np.zeros(nb_thick)
+for ih, H in enumerate(thicknesses):
+    if ih == 0:
+        simx = simu(H, (0, 0, 0))
+    else:
+        simx.layers[1].thickness = H
+        simx.get_S_matrix()
+    # Rx, Tx = simx.diffraction_efficiencies()
+    # print(Rx, Tx, Rx + Tx)
+    # # print(Ry, Ty, Ry + Ty)
+    # r1i, t1i = get_complex_orders(simx)
+    # T1i = np.sum(np.abs(t1i) ** 2,axis=0)
+    # R1i = np.sum(np.abs(r1i) ** 2,axis=0)
+    # Rxi, Txi = simx.diffraction_efficiencies(orders=True)
+    # assert np.allclose(R1i,Rxi)
+    # assert np.allclose(T1i,Txi)
+    # R1 = np.sum(R1i)
+    # T1 = np.sum(T1i)
+    # print(R1, T1, R1 + T1)
+    # assert np.allclose(R1,Rx)
+    # assert np.allclose(T1,Tx)
 
-    nin = (simx.layers[0].epsilon * simx.layers[0].mu) ** 0.5
-    nout = (simx.layers[-1].epsilon * simx.layers[-1].mu) ** 0.5
-    norma_t = 1 / (nout * nin) ** 0.5
+    rxi, txi = simx.diffraction_efficiencies(orders=True, complex=True)
+    txx = simx.get_order(txi[0], (0, 0))
 
-    axN = simx.get_field_fourier("Substrate")[0, 0, 0:2]
-    txx = simx.get_order(axN[0], (0, 0)) / norma_t
-    tyx = simx.get_order(axN[1], (0, 0)) / norma_t
-
-    ayN = simy.get_field_fourier("Substrate")[0, 0, 0:2]
-    txy = simy.get_order(ayN[0], (0, 0)) / norma_t
-    tyy = simy.get_order(ayN[1], (0, 0)) / norma_t
-
-    J = 0.5 * np.array(
-        [
-            [txx + tyy + 1j * (tyx - txy), txx - tyy - 1j * (txy + tyx)],
-            [txx - tyy + 1j * (tyx + txy), txx + tyy - 1j * (txy - tyx)],
-        ]
-    )
-    CE = np.abs((J[0, 0] - J[0, 1]) / 2) ** 2
+    if ih == 0:
+        simy = simu(H, (0, 0, 90))
+    else:
+        simy.layers[1].thickness = H
+        simy.get_S_matrix()
+    ryi, tyi = simy.diffraction_efficiencies(orders=True, complex=True)
+    tyy = simy.get_order(tyi[1], (0, 0))
     CE = np.abs((tyy - txx) / 2) ** 2
+    conv_effs[ih] = CE
 
     plt.plot(H, CE, "or")
-    # plt.plot(H,Tx,"or")
-    # plt.plot(H,Ty,"sg")
     plt.pause(0.1)
+
+#
+# plt.clf()
+# plt.plot(thicknesses, conv_effs)
+# plt.xlabel("H (nm)")
+# plt.ylabel("conversion efficiency")
+# plt.tight_layout()
+# plt.show()
+#
+# ms.plot()
+# plt.show()
+# p = simx.plot_structure(pbr=True, nper=(2, 2))
+# p.show_axes()
+# p.view_xy()
+# p.show()
