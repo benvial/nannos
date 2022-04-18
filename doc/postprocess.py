@@ -97,13 +97,13 @@ def process_html(fn, lines):
         )
 
         line = line.replace(
-            "https://mybinder.org/v2/gh/nannos/nannos",
-            "https://mybinder.org/v2/gl/nannos%2Fnannos",
+            "mybinder.org/v2/gh/nannos/nannos",
+            "mybinder.org/v2/gl/nannos%2Fnannos",
         )
 
         line = line.replace(
-            "https://mybinder.org/v2/gl/nannos%2Fnannos/doc?filepath=notebooks/examples/",
-            "https://mybinder.org/v2/gl/nannos%2Fnannos/doc?filepath=notebooks/",
+            "mybinder.org/v2/gl/nannos%2Fnannos/doc?filepath=notebooks/examples/",
+            "mybinder.org/v2/gl/nannos%2Fnannos/doc?filepath=notebooks/",
         )
         line = line.replace("binder_badge_logo1.svg", "binder_badge_logo.svg")
         line = line.replace("binder_badge_logo2.svg", "binder_badge_logo.svg")

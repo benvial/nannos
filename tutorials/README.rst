@@ -59,7 +59,7 @@ Create the simulation.
 
 .. jupyter-execute::
 
-  sim = nn.Simulation(stack, pw, nh=100)
+  sim = nn.Simulation(stack, pw, nh=200)
 
 
 Plot the unit cell.
@@ -69,18 +69,13 @@ Plot the unit cell.
 
   p = sim.plot_structure()
 
-.. jupyter-execute::
-  :hide-code:
-  :hide-output:
-
-  p.show()
-
 
 Render it.
 
 .. jupyter-execute::
-
-  p.show()
+  
+  p.show_axes()
+  p.show(jupyter_backend='panel')
 
 
 Compute the reflection and transmission:

@@ -19,28 +19,44 @@ def _isscalar(z):
 
 
 class Lattice:
-    """A lattice object.
+    """A lattice object defining the unit cell.
 
     Parameters
     ----------
     basis_vectors : tuple
         The lattice vectors :math:`((u_x,u_y),(v_x,v_y))`.
-        For 1D lattices, specify the x-periodicity with a float `a`,
-        :math:`((a,0),(0,0))`.
+        For mono-periodic gratings, specify the x-periodicity with a float `a`.
 
+    discretization : int or tuple of length 2
+        Spatial discretization of the lattice. If given an integer N, the
+        discretization will be (N, N).
+
+    truncation : str
+        The truncation method, available values are "circular" and "parallelogrammic" (the default is "circular").
+        This has no effect for mono-periodic gratings.
 
     """
 
-    def __init__(self, basis_vectors, discretization=(2**8, 2**8)):
+    def __init__(
+        self, basis_vectors, discretization=(2**8, 2**8), truncation="circular"
+    ):
         if _isscalar(discretization):
             discretization = [discretization, discretization]
         else:
             discretization = list(discretization)
+
+        if truncation not in ["circular", "parallelogrammic"]:
+            raise ValueError(
+                f"Unknown truncation method '{truncation}', please choose between 'circular' and 'parallelogrammic'."
+            )
+
         self.is_1D = _isscalar(basis_vectors)
         if self.is_1D:
+            self.truncation = "1D"
             self.basis_vectors = (basis_vectors, 0), (0, 1)
             self.discretization = (discretization[0], 1)
         else:
+            self.truncation = truncation
             self.basis_vectors = basis_vectors
             self.discretization = tuple(discretization)
 
@@ -76,43 +92,30 @@ class Lattice:
         """
         return 2 * pi * bk.linalg.inv(self.matrix).T
 
-    def get_harmonics(self, nh, method="circular"):
-        """Short summary.
+    def get_harmonics(self, nh):
+        """Get the harmonics with a given truncation method.
 
         Parameters
         ----------
         nh : int
             Number of harmonics.
-        method : str
-            The truncation method, available values are "circular" and "parallelogrammic"
-            (the default is "circular").
 
         Returns
         -------
-        type
-            Description of returned object.
+        G : list of tuple of integers of length 2
+            Harmonics (i1, i2).
+        nh : int
+            The number of harmonics after truncation.
 
         """
         if not int(nh) == nh:
             raise ValueError("nh must be integer.")
-        if method == "circular":
+        if self.truncation == "circular":
             return _circular_truncation(nh, self.reciprocal)
-        elif method == "parallelogrammic":
+        elif self.truncation == "parallelogrammic":
             return _parallelogramic_truncation(nh, self.reciprocal)
-        elif method == "1D":
-            return _one_dim_truncation(nh)
         else:
-            raise ValueError(
-                f"Unknown truncation method '{method}', please choose between 'circular', 'parallelogrammic' or '1D'."
-            )
-
-    def unit_grid(self):
-        Nx, Ny = self.discretization
-        x0 = bk.linspace(0, 1.0, Nx)
-        y0 = bk.linspace(0, 1.0, Ny)
-        x_, y_ = bk.meshgrid(x0, y0, indexing="ij")
-        grid = bk.stack([x_, y_])
-        return grid
+            return _one_dim_truncation(nh)
 
     def no1d(func):
         def inner(self, *args, **kwargs):
@@ -124,16 +127,76 @@ class Lattice:
 
         return inner
 
-    def grid(self):
-        return self.transform(self.unit_grid())
+    @property
+    def unit_grid(self):
+        """Unit grid in cartesian coordinates.
 
-    def transform(self, xy):
-        return bk.tensordot(self.matrix, bk.stack(xy), axes=(1, 0))
+        Returns
+        -------
+        array like
+            The unit grid of size equal to the attribute `discretization`.
+
+        """
+        Nx, Ny = self.discretization
+        x0 = bk.linspace(0, 1.0, Nx)
+        y0 = bk.linspace(0, 1.0, Ny)
+        x_, y_ = bk.meshgrid(x0, y0, indexing="ij")
+        grid = bk.stack([x_, y_])
+        return grid
+
+    @property
+    def grid(self):
+        """Grid in lattice vectors basis.
+
+        Returns
+        -------
+        array like
+            The grid of size equal to the attribute `discretization`.
+
+        """
+        return self.transform(self.unit_grid)
+
+    def transform(self, grid):
+        """Transform from cartesian to lattice coordinates.
+
+        Parameters
+        ----------
+        grid : tuple of array like
+            Input grid, typically obtained by meshgrid.
+
+        Returns
+        -------
+        array like
+            Transformed grid in lattice vectors basis.
+
+        """
+        return bk.tensordot(self.matrix, bk.stack(grid), axes=(1, 0))
 
     def ones(self):
+        """Return a new array filled with ones.
+
+        Returns
+        -------
+        array like
+            A uniform complex 2D array with shape ``self.discretization``.
+
+        """
         return bk.ones(self.discretization, dtype=bk.complex128)
 
     def geometry_mask(self, geom):
+        """Return a geametry boolean mask discretized on the lattice grid.
+
+        Parameters
+        ----------
+        geom : Shapely object
+            The geometry.
+
+        Returns
+        -------
+        array of bool
+            The shape mask.
+
+        """
         return geometry_mask(geom, self, *self.discretization)
 
     @no1d
@@ -157,7 +220,7 @@ class Lattice:
         return rectangle(center, widths, self, *self.discretization, rotate=rotate)
 
     def stripe(self, center, width):
-        return abs(self.grid()[0] - center) <= width / 2
+        return abs(self.grid[0] - center) <= width / 2
 
     def Layer(
         self,

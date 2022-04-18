@@ -54,7 +54,7 @@ def plot_layer(
     elif hasattr(nper, "__len__") and len(nper) == 2:
         nperx, npery = nper
     else:
-        raise ValueError(f"Wrong type for nper {nper}")
+        raise ValueError(f"Wrong type for nper: {nper}")
 
     bv = lattice.basis_vectors
     ims = []
@@ -92,6 +92,19 @@ def plot_layer(
 def plot_structure(
     sim, plotter=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwargs
 ):
+    if "layer_colors" in kwargs:
+        layer_colors = kwargs.pop("layer_colors")
+    else:
+        layer_colors = None
+    if "layer_metallic" in kwargs:
+        layer_metallic = kwargs.pop("layer_metallic")
+    else:
+        layer_metallic = None
+    if "layer_roughness" in kwargs:
+        layer_roughness = kwargs.pop("layer_roughness")
+    else:
+        layer_roughness = None
+
     p = plotter or pyvista.Plotter()
     name = r"permittivity (Re)"
     null_thickness = null_thickness or bk.max([layer.thickness for layer in sim.layers])
@@ -111,7 +124,7 @@ def plot_structure(
             z = 0
             x0, y0 = jx, jy
 
-            for layer in sim.layers:
+            for ilayer, layer in enumerate(sim.layers):
                 thickness = layer.thickness
                 if thickness == 0:
                     thickness = null_thickness
@@ -135,6 +148,14 @@ def plot_structure(
                         grid.cell_data[name] = bk.array(val)
                         mesh = grid.extract_surface()
                         mesh = mesh.transform(transform_matrix)
+                        if layer_colors is not None:
+                            kwargs["color"] = layer_colors[ilayer]
+                        if layer_metallic is not None:
+                            kwargs["metallic"] = layer_metallic[ilayer]
+
+                        if layer_roughness is not None:
+                            kwargs["roughness"] = layer_roughness[ilayer]
+
                         p.add_mesh(mesh, **kwargs)
                         # p.add_mesh(
                         #     mesh,
@@ -160,12 +181,19 @@ def plot_structure(
                     grid.spacing = (1 / Nx, 1 / Ny, thickness)
                     grid.cell_data[name] = values.flatten()  # Flatten the array!
                     vals = bk.unique(epsgrid)
-                    for v in vals:
+                    for ival, v in enumerate(vals):
                         if v != 1:
                             threshed = grid.threshold([v - 1e-7 * v, v + 1e-7 * v])
 
                             threshed = threshed.transform(transform_matrix)
 
+                            if layer_colors is not None:
+                                kwargs["color"] = layer_colors[ilayer][ival]
+
+                            if layer_metallic is not None:
+                                kwargs["metallic"] = layer_metallic[ilayer][ival]
+                            if layer_roughness is not None:
+                                kwargs["roughness"] = layer_roughness[ilayer][ival]
                             p.add_mesh(threshed, **kwargs)
 
                             # p.add_mesh(
@@ -179,5 +207,8 @@ def plot_structure(
                             # )
 
                 z += thickness + dz
-
+    p.show_axes()
+    p.camera.azimuth -= 180
+    p.camera.elevation -= 180
+    p.camera.roll += 180
     return p

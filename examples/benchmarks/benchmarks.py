@@ -87,8 +87,6 @@ def test_simulations(backend, device):
     st = nn.Layer("Structured", h)
     st.add_pattern(pattern)
 
-    truncation = "circular"
-
     # nfreq = 11
     frequencies = nn.backend.ones(nfreq) * 1.1
 
@@ -112,7 +110,6 @@ def test_simulations(backend, device):
                 pw,
                 nh,
                 formulation=formulation,
-                truncation=truncation,
             )
             R, T = sim.diffraction_efficiencies()
             t1 = nn.toc(t0)

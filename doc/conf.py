@@ -381,6 +381,7 @@ sphinx_gallery_conf = {
     #     "import matplotlib\n" "mpl.style.use('nannos')\n" "%matplotlib inline"
     # ),
     # "image_scrapers": ("matplotlib", PNGScraper()),
+    "image_scrapers": ("pyvista", "matplotlib"),
     # Modules for which function level galleries are created.
     "doc_module": package.__name__,
     "thumbnail_size": (800, 800),
@@ -394,7 +395,7 @@ sphinx_gallery_conf = {
         "org": "nannos",
         "repo": "nannos.gitlab.io",
         "branch": "doc",
-        "binderhub_url": "https://gke.mybinder.org",
+        "binderhub_url": "https://mybinder.org",
         "dependencies": "../environment.yml",
         "notebooks_dir": "notebooks",
         "use_jupyter_lab": False,

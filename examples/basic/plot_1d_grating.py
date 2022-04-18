@@ -13,6 +13,7 @@ One dimensional grating
 Convergence.
 """
 
+# sphinx_gallery_thumbnail_number = -1
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,8 +29,7 @@ def convergence_study(form, psi, Nh):
     tsm1 = []
     ns = []
     for nh in Nh:
-        Nx = 2**9
-        lattice = nn.Lattice(1, Nx)
+        lattice = nn.Lattice(1, 2**9)
         eps_metal = (0.22 + 6.71j) ** 2
         epsgrid = lattice.ones() * 1
         hole = lattice.stripe(0.5, 0.5)

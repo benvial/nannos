@@ -33,9 +33,6 @@ class Simulation:
     formulation : str
         Formulation type.  (the default is ``'original'``).
         Available formulations are ``'original'``, ``'tangent'``, ``'jones'`` and ``'pol'``.
-    truncation : str
-        Truncation method.  (the default is ``'circular'``).
-        Available methods are ``'circular'`` and ``'parallelogrammic'``.
 
     """
 
@@ -45,7 +42,6 @@ class Simulation:
         excitation=None,
         nh=100,
         formulation="original",
-        truncation="circular",
     ):
         self.layers = layers or []
 
@@ -72,19 +68,11 @@ class Simulation:
             )
         self.formulation = formulation
 
-        if self.lattice.is_1D:
-            self.truncation = "1D"
-        else:
-            self.truncation = truncation
-
-        self.harmonics, self.nh = self.lattice.get_harmonics(
-            self.nh0, method=self.truncation
-        )
+        self.harmonics, self.nh = self.lattice.get_harmonics(self.nh0)
 
         maxN = bk.max(self.harmonics)
-        if (
-            self.lattice.discretization[0] <= 2 * maxN
-            or self.lattice.discretization[1] <= 2 * maxN
+        if self.lattice.discretization[0] <= 2 * maxN or (
+            self.lattice.discretization[1] <= 2 * maxN and not self.lattice.is_1D
         ):
             raise ValueError(f"lattice discretization must be > {2*maxN}")
 
@@ -157,7 +145,7 @@ class Simulation:
         """Solve the grating problem."""
         layers_solved = []
         for layer in self.layers:
-            layer = self._build_matrix(layer)
+            layer = self.build_matrix(layer)
             if layer.is_uniform:
                 layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
             else:
@@ -179,7 +167,7 @@ class Simulation:
 
         # @parloop(n_jobs=1)
         def solve_structured_layers(layer, self=self):
-            layer = self._build_matrix(layer)
+            layer = self.build_matrix(layer)
             layer.solve_eigenproblem(layer.matrix)
             return layer
 
@@ -190,7 +178,7 @@ class Simulation:
         i = 0
         for layer in self.layers:
             if layer.is_uniform:
-                layer = self._build_matrix(layer)
+                layer = self.build_matrix(layer)
                 layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
             else:
                 layer = layers_structured[i]
@@ -478,7 +466,7 @@ class Simulation:
             delta = self.harmonics[:, jx] - self.harmonics[:, jy]
             return uft[delta[0, :], delta[1, :]]
 
-    def _build_matrix(self, layer):
+    def build_matrix(self, layer):
         layer, layer_index = self._get_layer(layer)
         if layer.iscopy:
             layer.matrix = layer.original.matrix
@@ -590,12 +578,16 @@ class Simulation:
 
     def get_epsilon(self, layer_id, axes=(0, 1)):
         # TODO: check formulation and anisotropy
+
         layer, layer_index = self._get_layer(layer_id)
         if layer.is_uniform:
             return layer.epsilon
-        out = self.get_ifft(
-            layer.eps_hat[0, :], shape=self.lattice.discretization, axes=axes
+
+        epsilon_zz = (
+            layer.epsilon[2, 2] if layer.is_epsilon_anisotropic else layer.epsilon
         )
+        eps_hat = self._get_toeplitz_matrix(epsilon_zz)
+        out = self.get_ifft(eps_hat[:, 0], shape=self.lattice.discretization, axes=axes)
         return out
         # if inv:
         #     u = layer.eps_hat_inv ## nu_hat

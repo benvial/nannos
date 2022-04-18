@@ -20,7 +20,7 @@ import shapely.geometry as sg
 
 import nannos as nn
 
-N = 2**9
+N = 2**10
 lattice = nn.Lattice([[1, 0], [0, 1]], N)
 epsilon = lattice.ones()
 
@@ -91,7 +91,7 @@ mask = lattice.geometry_mask(srr)
 epsilon[mask] = 6
 
 layer = lattice.Layer(epsilon=epsilon)
-
+plt.figure()
 ims = layer.plot()
 plt.colorbar(ims[0])
 plt.show()
@@ -135,9 +135,84 @@ for i, (c, r) in enumerate(zip(centers, radii)):
     epsilon[mask] = 7 + i
 
 
-plt.show()
 layer = lattice.Layer(epsilon=epsilon)
-
+plt.figure()
 ims = layer.plot()
 plt.colorbar(ims[0])
 plt.show()
+
+
+####################################################################
+# A crescent using built in nannos geometry and boolean logic
+
+
+epsilon = lattice.ones()
+
+circle0 = lattice.circle(center=(0.5, 0.7), radius=0.4)
+circle1 = lattice.circle(center=(0.5, 0.5), radius=0.4)
+diff = (circle0 ^ circle1) & circle1
+epsilon[diff] = 4
+
+
+layer = lattice.Layer(epsilon=epsilon)
+plt.figure()
+ims = layer.plot(cmap="Reds")
+plt.colorbar(ims[0])
+plt.show()
+
+
+####################################################################
+# Read an image file
+
+im = plt.imread("../doc/_assets/nannos.png")
+im = np.rot90(im, axes=(1, 0))
+
+s = np.shape(im)[:2]
+
+N = np.max(s)
+M = int(0.2 * N)
+N += M
+im_bin = im[:, :, -1]
+im_bin[im_bin < 0.5] = 0
+im_bin[im_bin >= 0.5] = 1
+im_bin = np.array(im_bin, dtype=bool)
+im_pat = np.zeros((N, N), dtype=bool)
+n0 = int(M / 2)
+im_pat[n0 : n0 + s[0], n0 : n0 + s[1]] = im_bin
+
+
+####################################################################
+# Define a simulation
+
+
+lattice = nn.Lattice([[1.0, 0], [0, 1.0]], discretization=N)
+sup = lattice.Layer("Superstrate", epsilon=1)
+sub = lattice.Layer("Substrate", epsilon=1, thickness=1)
+lay = lattice.Layer("Film", epsilon=2, thickness=0.2)
+epsilon = lattice.ones()
+epsilon[im_pat] = 3
+ms = lattice.Layer("Metasurface", thickness=0.1, epsilon=epsilon)
+pw = nn.PlaneWave(wavelength=1.2, angles=(0, 0, 0))
+sim = nn.Simulation([sup, lay, ms, sub], pw, nh=100)
+R, T = sim.diffraction_efficiencies()
+
+
+####################################################################
+# Plot unit cell
+
+p = sim.plot_structure(cmap="Blues")
+# p.show()
+
+
+####################################################################
+# Get and plot the electric field
+
+E, H = sim.get_field_grid("Metasurface")
+
+Enorm2 = np.sum(np.abs(E) ** 2, axis=0) ** 0.5
+plt.figure()
+plt.pcolormesh(*lattice.grid, Enorm2[:, :, 0], cmap="inferno")
+plt.colorbar()
+ms.plot(alpha=0.1, cmap="Greys")
+plt.axis("off")
+plt.tight_layout()

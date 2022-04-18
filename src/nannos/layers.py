@@ -84,7 +84,7 @@ class Layer:
         toplot = self.epsilon.real if comp == "re" else self.epsilon.imag
         return plot_layer(
             lattice,
-            lattice.grid(),
+            lattice.grid,
             toplot,
             nper,
             ax,

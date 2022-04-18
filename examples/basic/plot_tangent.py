@@ -25,7 +25,7 @@ from nannos.formulations.tangent import get_tangent_field
 nh = 151
 lattice = nn.Lattice(([1, 0], [0, 1]), discretization=2**9)
 
-x, y = lattice.grid()
+x, y = lattice.grid
 circ = lattice.circle((0.3, 0.3), 0.25)
 rect = lattice.rectangle((0.7, 0.7), (0.2, 0.5))
 grid = lattice.ones() * (3 + 0.01j)
