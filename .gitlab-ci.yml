@@ -4,6 +4,10 @@ image: continuumio/miniconda3:latest
 
 variables:
   TERM: xterm
+  DISPLAY: :99.0
+  PYVISTA_OFF_SCREEN: True
+  
+
 
 before_script:
   ## install os tools
@@ -13,6 +17,14 @@ before_script:
   - conda env create -f environment.yml
   - source activate nannos
   - python -V  # Print out python version for debugging
+  # pyvista config for x server
+  # see https://github.com/pyvista/gl-ci-helpers/blob/master/travis/setup_headless_display.sh
+  # - export DISPLAY=:99.0
+  # - export PYVISTA_OFF_SCREEN=True
+  - which Xvfb
+  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+  - sleep 3
+  
 
 
 # stages:
