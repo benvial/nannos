@@ -69,11 +69,11 @@ Plot the unit cell.
 
   p = sim.plot_structure()
 
-
+.. The pythreejs backend seems to have issues for building the doc so we use panel instead here
 Render it.
 
 .. jupyter-execute::
-  
+
   p.show_axes()
   p.show(jupyter_backend='panel')
 

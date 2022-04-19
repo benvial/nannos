@@ -19,6 +19,9 @@ dependencies:
   - magma
   - cudatoolkit=10.2
   - pyvista
+  - pythreejs
+  - ipyvtklink
+  - panel
   - pip:
     - autograd-latest
     - git+https://gitlab.com/nannos/nannos.git

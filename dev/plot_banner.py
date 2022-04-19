@@ -29,7 +29,7 @@ sub = lattice.Layer("Substrate", epsilon=1)
 ms.epsilon = lattice.ones() * 12.0
 circ = lattice.circle(center=(0.5, 0.5), radius=0.2)
 ms.epsilon[circ] = 1
-pw = nn.PlaneWave(frequency=1.4, angles=(0, 0, 0))
+pw = nn.PlaneWave(wavelength=1 / 1.4, angles=(0, 0, 0))
 stack = [sup, ms, sub]
 sim = nn.Simulation(stack, pw, nh=51)
 R, T = sim.diffraction_efficiencies()
