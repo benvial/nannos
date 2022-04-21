@@ -10,11 +10,12 @@ __all__ = ["Simulation"]
 from . import backend as bk
 from . import jit, logger
 from .formulations import fft
-from .lattice import Layer
+from .layers import _get_layer
 from .plot import plot_structure, pyvista
 from .utils import block, block2list, get_block, inv2by2block, norm, set_index
 from .utils import time as timer
 from .utils import unique
+from .utils.helpers import _reseter
 
 # from .parallel import parloop
 
@@ -27,9 +28,9 @@ class Simulation:
     Parameters
     ----------
     layers : list
-        A list of :class:`~nannos.Layer` objects (the default is ``None``).
+        A list of :class:`~nannos.Layer` objects.
     excitation : :class:`~nannos.PlaneWave`
-        A plane wave excitation (the default is ``None``).
+        A plane wave excitation .
     nh : int
         Number of Fourier harmonics (the default is ``100``).
     formulation : str
@@ -40,26 +41,35 @@ class Simulation:
 
     def __init__(
         self,
-        layers=[],
-        excitation=None,
+        layers,
+        excitation,
         nh=100,
         formulation="original",
     ):
-        self.layers = layers or []
-
-        assert self.layers
+        # Layers
+        self.layers = layers
+        self.layer_names = [l.name for l in self.layers]
+        if not unique(self.layer_names):
+            raise ValueError("Layers must have different names")
+        # check if all layers share the same lattice
         lattice0 = self.layers[0].lattice
         for l in self.layers:
             assert l.lattice == lattice0, ValueError(
                 "lattice must be the same for all layers"
             )
-
         self.lattice = lattice0
-
-        self.excitation = excitation
+        # nh0 is the number of harmonics required as input that might be different
+        # from the one used after truncation
         self.nh0 = int(nh)
-        if self.nh0 == 1:
-            self.nh0 = 2
+        nh0 = int(nh)
+        # this is to avoid error when truncating to a single harmonic for example
+        # when all layers are uniform
+        if bk.all(bk.array([s.is_uniform for s in self.layers])) and nh0 != 1:
+            nh0 = 1
+            logger.info("All layers are uniform, setting nh=1")
+        if nh0 == 1:
+            nh0 = 2
+        # Check formulation
         if formulation not in ["original", "tangent", "jones", "pol"]:
             raise ValueError(
                 f"Unknown formulation {formulation}. Please choose between 'original', 'tangent', 'jones' or 'pol'"
@@ -70,15 +80,24 @@ class Simulation:
             )
         self.formulation = formulation
 
-        self.harmonics, self.nh = self.lattice.get_harmonics(self.nh0)
-
+        # Get the harmonics
+        self.harmonics, self.nh = self.lattice.get_harmonics(nh0)
+        # Check if nh and resolution satisfy Nyquist criteria
         maxN = bk.max(self.harmonics)
         if self.lattice.discretization[0] <= 2 * maxN or (
             self.lattice.discretization[1] <= 2 * maxN and not self.lattice.is_1D
         ):
             raise ValueError(f"lattice discretization must be > {2*maxN}")
 
+        # Set the excitation (plane wave)
+        self.excitation = excitation
         self.omega = 2 * bk.pi * self.excitation.frequency_scaled
+        self.incident_flux = bk.real(
+            bk.cos(self.excitation.theta)
+            / bk.sqrt(self.layers[0].epsilon * self.layers[0].mu)
+        )
+
+        # Buid lattice vectors
         self.k0para = (
             bk.array(self.excitation.wavevector[:2])
             * (self.layers[0].epsilon * self.layers[0].mu) ** 0.5
@@ -96,11 +115,12 @@ class Simulation:
         )
         self.Kx = bk.diag(self.kx)
         self.Ky = bk.diag(self.ky)
+
+        # Some useful matrices
         self.IdG = bk.array(bk.eye(self.nh, dtype=bk.complex128))
         self.ZeroG = bk.array(bk.zeros_like(self.IdG, dtype=bk.complex128))
 
-        self.a0 = bk.zeros(2 * self.nh, dtype=bk.complex128)
-
+        # Initialize amplitudes
         self.a0 = []
         for i in range(self.nh * 2):
             if i == 0:
@@ -111,39 +131,34 @@ class Simulation:
                 a0 = 0
             self.a0.append(a0)
         self.a0 = bk.array(self.a0, dtype=bk.complex128)
-
         self.bN = bk.array(bk.zeros(2 * self.nh, dtype=bk.complex128))
 
+        # This is a boolean checking that the eigenproblems are solved for all layers
+        # TODO: This is to avoid solving again, but could be confusing
         self.is_solved = False
-
-        self._layer_names = [l.name for l in self.layers]
-
-        if not unique(self._layer_names):
-            raise ValueError("Layers must have different names")
-
-        self.incident_flux = bk.real(
-            bk.cos(self.excitation.theta)
-            / bk.sqrt(self.layers[0].epsilon * self.layers[0].mu)
-        )
-
+        # dictionary to store intermediate S-matrices
+        # TODO: check memory consumption of doing that, maybe make it optional.
         self._intermediate_S = dict()
 
-    def _get_layer(self, id):
-        if isinstance(id, str):
-            if id in self._layer_names:
-                for i, l in enumerate(self.layers):
-                    if l.name == id:
-                        return l, i
-            else:
-                raise ValueError(f"Unknown layer name {id}")
-        elif isinstance(id, int):
-            return self.layers[id], id
-        elif isinstance(id, Layer):
-            return self._get_layer(id.name)
-        else:
-            raise ValueError(
-                f"Wrong id for layer: {id}. Please use an integrer specifying the layer index or a string for the layer name"
-            )
+    def get_layer(self, id):
+        """Helper to get layer index and name.
+
+        Parameters
+        ----------
+        id : int or str
+            The index of the layer or its name.
+
+        Returns
+        -------
+        layer : nannos.Layer
+            The layer object.
+        index : nannos.Layer
+            The layer index in the stack.
+        """
+        return _get_layer(id, self.layers, self.layer_names)
+
+    def get_layer_by_name(self, id):
+        return self.get_layer(id)[0]
 
     def solve(self):
         """Solve the grating problem."""
@@ -174,6 +189,16 @@ class Simulation:
         self.is_solved = True
         _t1 = timer.toc(_t0, verbose=False)
         logger.info(f"Done solving in {_t1:0.3e}s")
+
+    def reset(self, param="all"):
+        if param == "S":
+            _reseter(self, "S")
+            self._intermediate_S = {}
+        if param == "solve":
+            self.is_solved = False
+        if param == "all":
+            self.reset("S")
+            self.reset("solve")
 
     def get_S_matrix(self, indices=None):
         """Compute the scattering matrix.
@@ -255,46 +280,33 @@ class Simulation:
         return bk.real(forward), bk.real(backward)
 
     def get_field_fourier(self, layer_index, z=0):
-        layer, layer_index = self._get_layer(layer_index)
+        layer, layer_index = self.get_layer(layer_index)
         _t0 = timer.tic()
         logger.info(f"Retrieving fields in k-space for layer {layer}")
         if not self.is_solved:
             self.solve()
-
         ai0, bi0 = self._get_amplitudes(layer_index, translate=False)
-
         Z = z if hasattr(z, "__len__") else [z]
-
         fields = bk.zeros((len(Z), 2, 3, self.nh), dtype=bk.complex128)
-
         for iz, z_ in enumerate(Z):
             ai, bi = _translate_amplitudes(layer, z_, ai0, bi0)
-
             ht_fourier = layer.eigenvectors @ (ai + bi)
             hx, hy = ht_fourier[: self.nh], ht_fourier[self.nh :]
-
             A = (ai - bi) / (self.omega * layer.eigenvalues)
             B = layer.eigenvectors @ A
             et_fourier = layer.Qeps @ B
             ey, ex = -et_fourier[: self.nh], et_fourier[self.nh :]
-
             hz = (self.kx * ey - self.ky * ex) / self.omega
-
             ez = (self.ky * hx - self.kx * hy) / self.omega
             if layer.is_uniform:
                 ez = ez / layer.epsilon
             else:
                 ez = layer.eps_hat_inv @ ez
-
-            fields = set_index(fields, [iz, 0, 0], ex)
-            fields = set_index(fields, [iz, 0, 1], ey)
-            fields = set_index(fields, [iz, 0, 2], ez)
-            fields = set_index(fields, [iz, 1, 0], hx)
-            fields = set_index(fields, [iz, 1, 1], hy)
-            fields = set_index(fields, [iz, 1, 2], hz)
-
+            for i, comp in enumerate([ex, ey, ez]):
+                fields = set_index(fields, [iz, 0, i], comp)
+            for i, comp in enumerate([hx, hy, hz]):
+                fields = set_index(fields, [iz, 1, i], comp)
         fields_fourier = bk.array(fields)
-
         _t1 = timer.toc(_t0, verbose=False)
         logger.info(
             f"Done retrieving fields in k-space for layer {layer} in {_t1:0.3e}s"
@@ -344,7 +356,7 @@ class Simulation:
                 f"Wrong component argument, must be `all`, `x`, `y` or `z`"
             )
 
-        layer, layer_index = self._get_layer(layer_index)
+        layer, layer_index = self.get_layer(layer_index)
         _t0 = timer.tic()
         logger.info(f"Retrieving fields in real-space for layer {layer}")
         shape = shape or layer.epsilon.shape
@@ -400,6 +412,16 @@ class Simulation:
         )
         return out
 
+    def get_Efield_grid(self, layer_index, z=0, shape=None, component="all"):
+        return self.get_field_grid(
+            layer_index, z=z, shape=shape, field="E", component=component
+        )
+
+    def get_Hfield_grid(self, layer_index, z=0, shape=None, component="all"):
+        return self.get_field_grid(
+            layer_index, z=z, shape=shape, field="H", component=component
+        )
+
     def diffraction_efficiencies(self, orders=False, complex=False):
         """Compute the diffraction efficiencies.
 
@@ -415,8 +437,8 @@ class Simulation:
             The reflection and transmission ``R`` and ``T``.
 
         """
-        # if not hasattr(self, "S"):
-        # self.get_S_matrix()
+        if not hasattr(self, "S"):
+            self.get_S_matrix()
 
         if complex:
             R, T = self._get_complex_orders()
@@ -460,7 +482,7 @@ class Simulation:
         return r, t
 
     def get_z_stress_tensor_integral(self, layer_index, z=0):
-        layer, layer_index = self._get_layer(layer_index)
+        layer, layer_index = self.get_layer(layer_index)
         fields_fourier = self.get_field_fourier(layer_index, z=z)
         e = fields_fourier[0, 0]
         h = fields_fourier[0, 1]
@@ -531,7 +553,7 @@ class Simulation:
 
     def build_matrix(self, layer):
         _t0 = timer.tic()
-        layer, layer_index = self._get_layer(layer)
+        layer, layer_index = self.get_layer(layer)
         logger.info(f"Building matrix for layer {layer}")
         if layer.iscopy:
             layer.matrix = layer.original.matrix
@@ -647,7 +669,7 @@ class Simulation:
     def get_epsilon(self, layer_id, axes=(0, 1)):
         # TODO: check formulation and anisotropy
 
-        layer, layer_index = self._get_layer(layer_id)
+        layer, layer_index = self.get_layer(layer_id)
         if layer.is_uniform:
             return layer.epsilon
 
@@ -662,14 +684,11 @@ class Simulation:
         #     out = self.get_ifft(u[0,:], shape=self.lattice.discretization, axes=axes)
         #     return _inv(out)
 
-    def get_layer(self, id):
-        return self._get_layer(id)[0]
-
     def _get_amplitudes(self, layer_index, z=0, translate=True):
         _t0 = timer.tic()
         logger.info(f"Retrieving amplitudes")
 
-        layer, layer_index = self._get_layer(layer_index)
+        layer, layer_index = self.get_layer(layer_index)
         n_interfaces = len(self.layers) - 1
         if layer_index == 0:
             aN, b0 = self._solve_ext()
@@ -687,7 +706,7 @@ class Simulation:
         return ai, bi
 
     def _solve_int(self, layer_index):
-        layer, layer_index = self._get_layer(layer_index)
+        layer, layer_index = self.get_layer(layer_index)
         n_interfaces = len(self.layers) - 1
         S = self.get_S_matrix(indices=(0, layer_index))
         P = self.get_S_matrix(indices=(layer_index, n_interfaces))
@@ -826,7 +845,7 @@ def _build_Mmatrix(layer):
     return block([[a, -a], [phi, phi]])
 
 
-# TODO: check orthogonality of eigenvectors to compute M^-1
+# TODO: check orthogonality of eigenvectors to compute M^-1 without inverting it for potential speedup
 # cf: D. M. Whittaker and I. S. Culshaw, Scattering-matrix treatment of
 # patterned multilayer photonic structures
 # PHYSICAL REVIEW B, VOLUME 60, NUMBER 4, 1999

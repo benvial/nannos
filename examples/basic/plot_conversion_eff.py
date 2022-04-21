@@ -63,7 +63,7 @@ for ih, H in enumerate(thicknesses):
         simx = simu(H, 0)
     else:
         simx.layers[1].thickness = H
-        simx.get_S_matrix()
+        simx.reset("S")
     rxi, txi = simx.diffraction_efficiencies(orders=True, complex=True)
     txx = simx.get_order(txi[0], (0, 0))
 
@@ -72,7 +72,8 @@ for ih, H in enumerate(thicknesses):
         simy = simu(H, 90)
     else:
         simy.layers[1].thickness = H
-        simy.get_S_matrix()
+        # print(self.is_solved)
+        simy.reset("S")
     ryi, tyi = simy.diffraction_efficiencies(orders=True, complex=True)
     tyy = simy.get_order(tyi[1], (0, 0))
 

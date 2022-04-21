@@ -10,7 +10,7 @@
 Geometry tools
 ==============
 
-Defining patterns using shapely.
+Defining patterns using shapely, or built in functions.
 """
 
 
@@ -187,13 +187,12 @@ im_pat[n0 : n0 + s[0], n0 : n0 + s[1]] = im_bin
 
 lattice = nn.Lattice([[1.0, 0], [0, 1.0]], discretization=N)
 sup = lattice.Layer("Superstrate", epsilon=1)
-sub = lattice.Layer("Substrate", epsilon=1, thickness=1)
-lay = lattice.Layer("Film", epsilon=2, thickness=0.2)
+sub = lattice.Layer("Substrate", epsilon=2, thickness=0.2)
 epsilon = lattice.ones()
 epsilon[im_pat] = 3
 ms = lattice.Layer("Metasurface", thickness=0.1, epsilon=epsilon)
 pw = nn.PlaneWave(wavelength=1.2, angles=(0, 0, 0))
-sim = nn.Simulation([sup, lay, ms, sub], pw, nh=100)
+sim = nn.Simulation([sup, ms, sub], pw, nh=100)
 R, T = sim.diffraction_efficiencies()
 
 
@@ -201,14 +200,18 @@ R, T = sim.diffraction_efficiencies()
 # Plot unit cell
 
 p = sim.plot_structure(cmap="Blues")
-# p.show()
+cpos = [
+    (1.1192477879430005, -1.2748586620193856, -0.9994028480242046),
+    (0.5184051413665429, 0.39573269350113394, 0.47559144020172595),
+    (-0.03201639930679419, 0.6550248171539488, -0.7549287642472394),
+]
+p.show(cpos=cpos)
 
 
 ####################################################################
 # Get and plot the electric field
 
-E, H = sim.get_field_grid("Metasurface")
-
+E = sim.get_field_grid("Metasurface", field="E", component="all")
 Enorm2 = np.sum(np.abs(E) ** 2, axis=0) ** 0.5
 plt.figure()
 plt.pcolormesh(*lattice.grid, Enorm2[:, :, 0], cmap="inferno")

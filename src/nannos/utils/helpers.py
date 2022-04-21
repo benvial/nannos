@@ -73,6 +73,19 @@ def inv2by2block(T, N):
     )
 
 
+def _reseter(prop, attr=None):
+    if attr is None:
+        try:
+            del prop
+        except:
+            pass
+    else:
+        try:
+            delattr(prop, attr)
+        except:
+            pass
+
+
 def _apply_filter(x, rfilt):
     if rfilt == 0:
         return x

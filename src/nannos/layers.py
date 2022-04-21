@@ -17,6 +17,7 @@ from .formulations.jones import get_jones_field
 from .formulations.tangent import get_tangent_field
 from .plot import *
 from .utils import block
+from .utils.helpers import _reseter
 
 
 class Layer:
@@ -93,6 +94,20 @@ class Layer:
             cellstyle,
             **kwargs,
         )
+
+    @property
+    def is_solved(self):
+        return hasattr(self, "eigenvalues") and hasattr(self, "eigenvectors")
+
+    def reset(self, param="all"):
+        if param == "eig":
+            _reseter(self, "eigenvalues")
+            _reseter(self, "eigenvectors")
+        if param == "matrix":
+            _reseter(self, "matrix")
+        if param == "all":
+            self.reset("eig")
+            self.reset("matrix")
 
     def solve_uniform(self, omega, kx, ky, nh):
         """Solve for eigenmodes and eigenvalues of a uniform layer.
@@ -266,3 +281,39 @@ class Layer:
 
 def is_anisotropic(f):
     return f.shape[:2] == (3, 3)
+
+
+def _get_layer(id, layers, layer_names):
+    """Helper to get layer index and name.
+
+    Parameters
+    ----------
+    id : int or str
+        The index of the layer or its name.
+    layers : list of Layers objects
+        The layer list (stack).
+    id : list of str
+        Names of the layers.
+
+    Returns
+    -------
+    layer : nannos.Layer
+        The layer object.
+    index : nannos.Layer
+        The layer index in the stack.
+    """
+    if isinstance(id, str):
+        if id in layer_names:
+            for i, l in enumerate(layers):
+                if l.name == id:
+                    return l, i
+        else:
+            raise ValueError(f"Unknown layer name {id}")
+    elif isinstance(id, int):
+        return layers[id], id
+    elif isinstance(id, Layer):
+        return _get_layer(id.name, layers, layer_names)
+    else:
+        raise ValueError(
+            f"Wrong id for layer: {id}. Please use an integrer specifying the layer index or a string for the layer name."
+        )
