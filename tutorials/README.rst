@@ -41,18 +41,19 @@ Create the permittivity pattern for the structured layer.
   ms.epsilon[circ] = 1
 
 
-Define the incident plane wave.
-
-.. jupyter-execute::
-
-  pw = nn.PlaneWave(wavelength=0.9, angles=(0, 0, 0))
-
 
 Define the layer stack as a list from input medium to output medium.
 
 .. jupyter-execute::
 
   stack = [sup, ms, sub]
+
+
+Define the incident plane wave.
+
+.. jupyter-execute::
+
+  pw = nn.PlaneWave(wavelength=0.9, angles=(0, 0, 0))
 
 
 Create the simulation.
@@ -64,16 +65,10 @@ Create the simulation.
 
 Plot the unit cell.
 
-
+.. The pythreejs backend seems to have issues for building the doc so we use panel instead here
 .. jupyter-execute::
 
   p = sim.plot_structure()
-
-.. The pythreejs backend seems to have issues for building the doc so we use panel instead here
-Render it.
-
-.. jupyter-execute::
-
   p.show_axes()
   p.show(jupyter_backend='panel')
 

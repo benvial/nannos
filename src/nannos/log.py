@@ -6,7 +6,7 @@
 # See the documentation at nannos.gitlab.io
 
 
-__all__ = ["set_log_level", "log"]
+__all__ = ["set_log_level", "logger"]
 
 
 import logging
@@ -22,19 +22,18 @@ LEVELS = dict(
 )
 
 
-def set_log_level(level="INFO"):
+def set_log_level(level):
     """Sets the log level.
 
     Parameters
     ----------
     level : str
         The verbosity level.
-        Valid values are ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR`` or ``CRITICAL``
-        (the default is ``INFO``).
+        Valid values are ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR`` or ``CRITICAL``.
 
     """
 
-    global log
+    global logger
     LOG_LEVEL = LEVELS[level]
     LOGFORMAT = (
         "  %(log_color)s%(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s"
@@ -45,11 +44,10 @@ def set_log_level(level="INFO"):
     stream = logging.StreamHandler()
     stream.setLevel(LOG_LEVEL)
     stream.setFormatter(formatter)
-    log = logging.getLogger("pythonConfig")
-    log.setLevel(LOG_LEVEL)
-    # if not log.hasHandlers():
-    [log.removeHandler(h) for h in log.handlers]
-    log.addHandler(stream)
+    logger = logging.getLogger("pythonConfig")
+    logger.setLevel(LOG_LEVEL)
+    [logger.removeHandler(h) for h in logger.handlers]
+    logger.addHandler(stream)
 
 
-set_log_level("INFO")
+set_log_level("WARNING")

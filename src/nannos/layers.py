@@ -66,7 +66,7 @@ class Layer:
             )
 
     def __repr__(self):
-        return f"Layer {self.name}"
+        return f"{self.name}"
 
     def plot(
         self,

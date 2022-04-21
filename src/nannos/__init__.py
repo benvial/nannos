@@ -52,28 +52,28 @@ def use_gpu(boolean):
     if boolean:
 
         if BACKEND not in ["torch"]:
-            log.info(f"Cannot use GPU with {BACKEND} backend.")
+            logger.debug(f"Cannot use GPU with {BACKEND} backend.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
         else:
             if not HAS_TORCH:
-                log.info("pytorch not found. Cannot use GPU.")
+                logger.warning("pytorch not found. Cannot use GPU.")
                 _delvar("_GPU_DEVICE")
                 _CPU_DEVICE = True
             elif not HAS_CUDA:
-                log.info("cuda not found. Cannot use GPU.")
+                logger.warning("cuda not found. Cannot use GPU.")
                 _delvar("_GPU_DEVICE")
                 _CPU_DEVICE = True
             else:
                 DEVICE = "cuda"
-                log.info("Using GPU.")
+                logger.debug("Using GPU.")
                 _delvar("_CPU_DEVICE")
                 _GPU_DEVICE = True
     else:
         _CPU_DEVICE = True
         _delvar("_GPU_DEVICE")
         DEVICE = "cpu"
-        log.info("Using CPU.")
+        logger.debug("Using CPU.")
     _reload_package()
 
 
@@ -124,32 +124,32 @@ def set_backend(backend):
     #             backend = _backend_env_var
 
     if backend == "autograd":
-        log.info("Setting autograd backend")
+        logger.debug("Setting autograd backend")
         _AUTOGRAD = True
         _delvar("_JAX")
         _delvar("_TORCH")
         _delvar("_SCIPY")
     elif backend == "scipy":
-        log.info("Setting scipy backend")
+        logger.debug("Setting scipy backend")
         _SCIPY = True
         _delvar("_JAX")
         _delvar("_TORCH")
         _delvar("_AUTOGRAD")
     elif backend == "jax":
-        log.info("Setting jax backend")
+        logger.debug("Setting jax backend")
         _JAX = True
         _delvar("_SCIPY")
         _delvar("_TORCH")
         _delvar("_AUTOGRAD")
     elif backend == "torch":
         _TORCH = True
-        log.info("Setting torch backend")
+        logger.debug("Setting torch backend")
         _delvar("_SCIPY")
         _delvar("_JAX")
         _delvar("_AUTOGRAD")
     elif backend == "numpy":
         _NUMPY = True
-        log.info("Setting numpy backend")
+        logger.debug("Setting numpy backend")
         _delvar("_SCIPY")
         _delvar("_JAX")
         _delvar("_AUTOGRAD")
@@ -254,7 +254,7 @@ elif "_TORCH" in globals():
             return df
 
     else:
-        log.info("pytorch not found. Falling back to default numpy backend.")
+        logger.warning("pytorch not found. Falling back to default numpy backend.")
         set_backend("numpy")
 else:
     import numpy
@@ -273,7 +273,7 @@ _backend_env_var = os.environ.get("NANNOS_BACKEND")
 
 if _backend_env_var in available_backends and _backend_env_var is not None:
     if BACKEND != _backend_env_var and not "_FORCE_BACKEND" in globals():
-        log.info(f"Found environment variable NANNOS_BACKEND={_backend_env_var}")
+        logger.debug(f"Found environment variable NANNOS_BACKEND={_backend_env_var}")
         set_backend(_backend_env_var)
 
 from .constants import *

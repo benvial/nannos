@@ -8,11 +8,13 @@
 __all__ = ["Simulation"]
 
 from . import backend as bk
-from . import jit
+from . import jit, logger
 from .formulations import fft
 from .lattice import Layer
 from .plot import plot_structure, pyvista
-from .utils import block, block2list, get_block, inv2by2block, norm, set_index, unique
+from .utils import block, block2list, get_block, inv2by2block, norm, set_index
+from .utils import time as timer
+from .utils import unique
 
 # from .parallel import parloop
 
@@ -124,6 +126,8 @@ class Simulation:
             / bk.sqrt(self.layers[0].epsilon * self.layers[0].mu)
         )
 
+        self._intermediate_S = dict()
+
     def _get_layer(self, id):
         if isinstance(id, str):
             if id in self._layer_names:
@@ -143,8 +147,12 @@ class Simulation:
 
     def solve(self):
         """Solve the grating problem."""
+        _t0 = timer.tic()
+        logger.info(f"Solving")
         layers_solved = []
         for layer in self.layers:
+            _t0lay = timer.tic()
+            logger.info(f"Computing eigenpairs for layer {layer}")
             layer = self.build_matrix(layer)
             if layer.is_uniform:
                 layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
@@ -157,35 +165,15 @@ class Simulation:
                 # layer.eigenvectors /= bk.diag(out)**0.5
 
             layers_solved.append(layer)
+
+            _t1lay = timer.toc(_t0lay, verbose=False)
+            logger.info(
+                f"Done computing eigenpairs for layer {layer} in {_t1lay:0.3e}s"
+            )
         self.layers = layers_solved
         self.is_solved = True
-
-    def _solve_parallel(self):
-        """Solve the grating problem."""
-
-        layers_structured = [layer for layer in self.layers if not layer.is_uniform]
-
-        # @parloop(n_jobs=1)
-        def solve_structured_layers(layer, self=self):
-            layer = self.build_matrix(layer)
-            layer.solve_eigenproblem(layer.matrix)
-            return layer
-
-        # layers_structured = solve_structured_layers(layers_structured)
-
-        layers_structured = [solve_structured_layers(l) for l in layers_structured]
-        layers_solved = []
-        i = 0
-        for layer in self.layers:
-            if layer.is_uniform:
-                layer = self.build_matrix(layer)
-                layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
-            else:
-                layer = layers_structured[i]
-                i += 1
-            layers_solved.append(layer)
-        self.layers = layers_solved
-        self.is_solved = True
+        _t1 = timer.toc(_t0, verbose=False)
+        logger.info(f"Done solving in {_t1:0.3e}s")
 
     def get_S_matrix(self, indices=None):
         """Compute the scattering matrix.
@@ -202,8 +190,11 @@ class Simulation:
             The scattering matrix ``[[S11, S12], [S21,S22]]``.
 
         """
+
         if not self.is_solved:
             self.solve()
+
+        _t0 = timer.tic()
 
         S11 = bk.array(bk.eye(2 * self.nh, dtype=bk.complex128))
         S12 = bk.zeros_like(S11)
@@ -213,28 +204,40 @@ class Simulation:
         if indices is None:
             n_interfaces = len(self.layers) - 1
             stack = range(n_interfaces)
+            logger.info(f"Computing total S-matrix")
         else:
             stack = range(indices[0], indices[1])
+            logger.info(f"Computing S-matrix for indices {indices}")
 
-        for i in stack:
-            layer, layer_next = self.layers[i], self.layers[i + 1]
-            z = layer.thickness or 0
-            z_next = layer_next.thickness or 0
-            f, f_next = bk.diag(phasor(layer.eigenvalues, z)), bk.diag(
-                phasor(layer_next.eigenvalues, z_next)
-            )
-            I_ = _build_Imatrix(layer, layer_next)
-            I = [[get_block(I_, i, j, 2 * self.nh) for j in range(2)] for i in range(2)]
-            A = I[0][0] - f @ S12 @ I[1][0]
-            B = _inv(A)
-            S11 = B @ f @ S11
-            S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
-            S21 = S22 @ I[1][0] @ S11 + S21
-            S22 = S22 @ I[1][0] @ S12 + S22 @ I[1][1] @ f_next
-        S = [[S11, S12], [S21, S22]]
+        try:
+            S = self._intermediate_S[f"{stack[0]},{stack[-1]}"]
+        except:
+
+            for i in stack:
+                layer, layer_next = self.layers[i], self.layers[i + 1]
+                z = layer.thickness or 0
+                z_next = layer_next.thickness or 0
+                f, f_next = bk.diag(phasor(layer.eigenvalues, z)), bk.diag(
+                    phasor(layer_next.eigenvalues, z_next)
+                )
+                I_ = _build_Imatrix(layer, layer_next)
+                I = [
+                    [get_block(I_, i, j, 2 * self.nh) for j in range(2)]
+                    for i in range(2)
+                ]
+                A = I[0][0] - f @ S12 @ I[1][0]
+                B = _inv(A)
+                S11 = B @ f @ S11
+                S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
+                S21 = S22 @ I[1][0] @ S11 + S21
+                S22 = S22 @ I[1][0] @ S12 + S22 @ I[1][1] @ f_next
+                S = [[S11, S12], [S21, S22]]
+                self._intermediate_S[f"{stack[0]},{i}"] = S
         if indices is None:
             self.S = S
 
+        _t1 = timer.toc(_t0, verbose=False)
+        logger.info(f"Done computing S-matrix {_t1:0.3e}s")
         return S
 
     def get_z_poynting_flux(self, layer, an, bn):
@@ -252,10 +255,12 @@ class Simulation:
         return bk.real(forward), bk.real(backward)
 
     def get_field_fourier(self, layer_index, z=0):
+        layer, layer_index = self._get_layer(layer_index)
+        _t0 = timer.tic()
+        logger.info(f"Retrieving fields in k-space for layer {layer}")
         if not self.is_solved:
             self.solve()
 
-        layer, layer_index = self._get_layer(layer_index)
         ai0, bi0 = self._get_amplitudes(layer_index, translate=False)
 
         Z = z if hasattr(z, "__len__") else [z]
@@ -288,8 +293,13 @@ class Simulation:
             fields = set_index(fields, [iz, 1, 1], hy)
             fields = set_index(fields, [iz, 1, 2], hz)
 
-        self.fields_fourier = bk.array(fields)
-        return self.fields_fourier
+        fields_fourier = bk.array(fields)
+
+        _t1 = timer.toc(_t0, verbose=False)
+        logger.info(
+            f"Done retrieving fields in k-space for layer {layer} in {_t1:0.3e}s"
+        )
+        return fields_fourier
 
     def get_ifft(self, u, shape, axes=(0, 1)):
         u = bk.array(u)
@@ -303,6 +313,8 @@ class Simulation:
         return ft
 
     def get_ifft_amplitudes(self, amplitudes, shape, axes=(0, 1)):
+        _t0 = timer.tic()
+        logger.info(f"Inverse Fourier transforming amplitudes")
 
         amplitudes = bk.array(amplitudes)
         if len(amplitudes.shape) == 1:
@@ -317,10 +329,24 @@ class Simulation:
             s += a * f
 
         ft = fft.inverse_fourier_transform(s, axes=axes)
+        _t1 = timer.toc(_t0, verbose=False)
+        logger.info(f"Done inverse Fourier transforming amplitudes in {_t1:0.3e}s")
         return ft
 
-    def get_field_grid(self, layer_index, z=0, shape=None):
+    def get_field_grid(
+        self, layer_index, z=0, shape=None, field="all", component="all"
+    ):
+
+        if field not in ["all", "E", "H"]:
+            raise ValueError(f"Wrong field argument, must be `all`, `E` or `H`")
+        if component not in ["all", "x", "y", "z"]:
+            raise ValueError(
+                f"Wrong component argument, must be `all`, `x`, `y` or `z`"
+            )
+
         layer, layer_index = self._get_layer(layer_index)
+        _t0 = timer.tic()
+        logger.info(f"Retrieving fields in real-space for layer {layer}")
         shape = shape or layer.epsilon.shape
 
         fields_fourier = self.get_field_fourier(layer_index, z)
@@ -328,9 +354,51 @@ class Simulation:
         fe = fields_fourier[:, 0]
         fh = fields_fourier[:, 1]
 
-        E = bk.stack([self.get_ifft_amplitudes(fe[:, i, :], shape) for i in range(3)])
-        H = bk.stack([self.get_ifft_amplitudes(fh[:, i, :], shape) for i in range(3)])
-        return E, H
+        def _get_field(f, i):
+            return self.get_ifft_amplitudes(f[:, i, :], shape)
+
+        if component == "all":
+            if field == "all":
+                E = bk.stack([_get_field(fe, i) for i in range(3)])
+                H = bk.stack([_get_field(fh, i) for i in range(3)])
+                out = E, H
+            elif field == "H":
+                out = bk.stack([_get_field(fh, i) for i in range(3)])
+            elif field == "E":
+                out = bk.stack([_get_field(fe, i) for i in range(3)])
+        elif component == "x":
+            if field == "all":
+                E = _get_field(fe, 0)
+                H = _get_field(fh, 0)
+                out = E, H
+            elif field == "H":
+                out = _get_field(fh, 0)
+            elif field == "E":
+                out = _get_field(fe, 0)
+        elif component == "y":
+            if field == "all":
+                E = _get_field(fe, 1)
+                H = _get_field(fh, 1)
+                out = E, H
+            elif field == "H":
+                out = _get_field(fh, 1)
+            elif field == "E":
+                out = _get_field(fe, 1)
+        elif component == "z":
+            if field == "all":
+                E = _get_field(fe, 2)
+                H = _get_field(fh, 2)
+                out = E, H
+            elif field == "H":
+                out = _get_field(fh, 2)
+            elif field == "E":
+                out = _get_field(fe, 2)
+
+        _t1 = timer.toc(_t0, verbose=False)
+        logger.info(
+            f"Done retrieving fields in real space for layer {layer} in {_t1:0.3e}s"
+        )
+        return out
 
     def diffraction_efficiencies(self, orders=False, complex=False):
         """Compute the diffraction efficiencies.
@@ -393,20 +461,15 @@ class Simulation:
 
     def get_z_stress_tensor_integral(self, layer_index, z=0):
         layer, layer_index = self._get_layer(layer_index)
-        if not hasattr(self, "fields_fourier"):
-            self.get_field_fourier(layer_index, z=z)
-        # ex, ey, ez = self.fields_fourier[0, 0,:,:]
-        # hx, hy, hz = self.fields_fourier[0, 1,:,:]
-
-        e = self.fields_fourier[0, 0]
-        h = self.fields_fourier[0, 1]
+        fields_fourier = self.get_field_fourier(layer_index, z=z)
+        e = fields_fourier[0, 0]
+        h = fields_fourier[0, 1]
         ex = e[0]
         ey = e[1]
         ez = e[2]
         hx = h[0]
         hy = h[1]
         hz = h[2]
-
         dz = (self.ky * hx - self.kx * hy) / self.omega
         if layer.is_uniform:
             dx = ex * layer.epsilon
@@ -467,7 +530,9 @@ class Simulation:
             return uft[delta[0, :], delta[1, :]]
 
     def build_matrix(self, layer):
+        _t0 = timer.tic()
         layer, layer_index = self._get_layer(layer)
+        logger.info(f"Building matrix for layer {layer}")
         if layer.iscopy:
             layer.matrix = layer.original.matrix
             layer.Kmu = layer.original.Kmu
@@ -574,6 +639,9 @@ class Simulation:
         Qeps = self.omega**2 * Pmu - Keps
         layer.Qeps = Qeps
 
+        _t1 = timer.toc(_t0, verbose=False)
+        logger.info(f"Done building matrix for layer {layer} in {_t1:0.3e}s")
+
         return layer
 
     def get_epsilon(self, layer_id, axes=(0, 1)):
@@ -598,6 +666,9 @@ class Simulation:
         return self._get_layer(id)[0]
 
     def _get_amplitudes(self, layer_index, z=0, translate=True):
+        _t0 = timer.tic()
+        logger.info(f"Retrieving amplitudes")
+
         layer, layer_index = self._get_layer(layer_index)
         n_interfaces = len(self.layers) - 1
         if layer_index == 0:
@@ -611,6 +682,8 @@ class Simulation:
             layer = self.layers[layer_index]
         if translate:
             ai, bi = _translate_amplitudes(self.layers[layer_index], z, ai, bi)
+        _t1 = timer.toc(_t0, verbose=False)
+        logger.info(f"Done retrieving amplitudes in {_t1:0.3e}s")
         return ai, bi
 
     def _solve_int(self, layer_index):
