@@ -18,7 +18,7 @@ def test_layer():
     l = nn.layers.Layer("test", 1)
     assert l.name == "test"
     assert l.thickness == 1
-    assert l.__repr__() == "Layer test"
+    assert l.__repr__() == "test"
 
     matrix = npo.random.rand(N, N) + 1j * npo.random.rand(N, N)
     matrix = nn.backend.array(matrix)
