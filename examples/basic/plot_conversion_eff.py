@@ -95,6 +95,4 @@ plt.show()
 
 p = simx.plot_structure()
 p.show_axes()
-
-# use the following line to plot interactively
-# p.show()
+p.show()

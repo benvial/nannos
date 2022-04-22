@@ -15,12 +15,20 @@ import os
 import sys
 from datetime import date
 
+import pyvista
 import sphinx_gallery
 from pybtex.plugin import register_plugin
 from pybtex.style.formatting.unsrt import Style as UnsrtStyle
 from pybtex.style.labels import BaseLabelStyle
 
 import nannos as package
+
+# necessary when building the sphinx gallery
+pyvista.BUILDING_GALLERY = True
+pyvista.OFF_SCREEN = True
+
+# Optional - set parameters like theme or window size
+pyvista.set_plot_theme("document")
 
 # -- General configuration ------------------------------------------------
 
