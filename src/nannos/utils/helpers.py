@@ -16,6 +16,10 @@ def unique(x):
     return not any(i in seen or seen.append(i) for i in x)
 
 
+def is_scalar(z):
+    return not hasattr(z, "__len__")
+
+
 def set_index(mat, idx, val):
     if get_backend() == "jax":
         mat = mat.at[tuple(idx)].set(val)

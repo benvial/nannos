@@ -12,10 +12,7 @@ from . import get_backend
 from .constants import pi
 from .geometry import *
 from .layers import Layer
-
-
-def _isscalar(z):
-    return not hasattr(z, "__len__")
+from .utils import is_scalar
 
 
 class Lattice:
@@ -40,7 +37,7 @@ class Lattice:
     def __init__(
         self, basis_vectors, discretization=(2**8, 2**8), truncation="circular"
     ):
-        if _isscalar(discretization):
+        if is_scalar(discretization):
             discretization = [discretization, discretization]
         else:
             discretization = list(discretization)
@@ -50,7 +47,7 @@ class Lattice:
                 f"Unknown truncation method '{truncation}', please choose between 'circular' and 'parallelogrammic'."
             )
 
-        self.is_1D = _isscalar(basis_vectors)
+        self.is_1D = is_scalar(basis_vectors)
         if self.is_1D:
             self.truncation = "1D"
             self.basis_vectors = (basis_vectors, 0), (0, 1)
