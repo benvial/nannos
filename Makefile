@@ -36,7 +36,7 @@ endif
 
 message = @make -s printmessage RULE=${1}
 
-printmessage: 
+printmessage:
 	@sed -n -e "/^## / { \
 		h; \
 		s/.*//; \
@@ -71,7 +71,7 @@ printmessage:
 		} \
 		printf "%s ", col_off; \
 		printf "\n"; \
-	}' 
+	}'
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -110,13 +110,13 @@ req:
 ## Install Python dependencies for dev and test
 dev:
 	@$(PYTHON_INTERPRETER) -m pip install -r dev/requirements.txt
-	
+
 ## Clean generated files
 cleangen:
 	$(call message,${@})
 	@find . -not -path "./test/data/*" | grep -E "(__pycache__|\.pyc|\.ipynb_checkpoints|\.pyo$\)" | xargs rm -rf
 	@rm -rf .pytest_cache  build/ dist/ tmp/ htmlcov/ #src/nannos.egg-info/
-	
+
 ## Clean documentation
 cleandoc:
 	$(call message,${@})
@@ -176,7 +176,7 @@ gl:
 	@read -p "Enter commit message: " MSG; \
 	git commit -a -m "$$MSG"
 	@git push origin $(BRANCH)
-	
+
 
 ## Show gitlab repository
 repo:
@@ -187,7 +187,7 @@ repo:
 ## Clean, reformat and push to gitlab
 save: style gl
 	$(call message,${@})
-	
+
 
 ## Push to gitlab (skipping continuous integration)
 gl-noci:
@@ -196,13 +196,13 @@ gl-noci:
 	@read -p "Enter commit message: " MSG; \
 	git commit -a -m "$$MSG [skip ci]"
 	@git push origin $(BRANCH)
-	
-	
+
+
 
 ## Clean, reformat and push to gitlab (skipping continuous integration)
 save-noci: style gl-noci
 	$(call message,${@})
-	
+
 
 
 ## Make documentation css
@@ -217,7 +217,7 @@ watch-less:
 	$(call message,${@})
 	while inotifywait -e close_write ./doc/_custom/static/css/less/*.less; do make -s less; done
 
-	
+
 ## Install requirements for building documentation
 doc-req:
 	$(call message,${@})
@@ -239,17 +239,17 @@ doc-noplot: less
 show-doc:
 	$(call message,${@})
 	@cd doc && make -s show
-	
+
 ## Show locally built pdf documentation
 show-pdf:
 	$(call message,${@})
 	@cd doc && make -s show-pdf
-	
+
 ## Build pdf documentation (only updated examples)
 pdf:
 	$(call message,${@})
 	@cd doc && make -s latexpdf
-	
+
 ## Build pdf documentation (without examples)
 pdf-noplot:
 	$(call message,${@})
@@ -260,7 +260,7 @@ cleantest:
 	$(call message,${@})
 	@rm -rf .coverage* htmlcov coverage.xml
 
-	
+
 ## Install requirements for testing
 test-req:
 	$(call message,${@})
@@ -269,11 +269,11 @@ test-req:
 
 
 define runtest
-		@echo 
+		@echo
 		@echo "-----------------------------------------------------------------------------"
 		@echo "-----------------------    testing $(1) backend    --------------------------"
 		@echo "-----------------------------------------------------------------------------"
-		@echo 
+		@echo
 		@export MPLBACKEND=agg && export NANNOS_BACKEND=$(1) && \
 		pytest ./test/basic \
 		--cov=src/$(PROJECT_NAME) --cov-append --cov-report term \
@@ -296,13 +296,13 @@ test-scipy:
 test-autograd:
 	$(call message,${@})
 	$(call	runtest,autograd)
-	
+
 
 ## Run the test suite with jax backend only
 test-jax:
 	$(call message,${@})
 	$(call	runtest,jax)
-	
+
 
 ## Run the test suite with torch backend only
 test-torch:
@@ -323,25 +323,25 @@ test-common:
 ## Run the test suite
 test: cleantest test-allbk test-common
 	$(call message,${@})
-	
-	
+
+
 ## Run the test suite (parallel)
 testpara: cleantest
 	$(call message,${@})
 	@export OMP_NUM_THREADS=1 && make -s test TEST_PARALLEL=1
-	
+
 ## Copy the coverage html into documentation
 covdoc:
 	$(call message,${@})
 	@ls doc/_build/html/ || make doc
 	@ls htmlcov/ || make -s test && mv htmlcov/ doc/_build/html/coverage/
-	
+
 ## Install locally
 install:
 	$(call message,${@})
 	pip install -e .
-	
-	
+
+
 ## Tag and push tags
 tag: clean style
 	$(call message,${@})
@@ -352,14 +352,14 @@ tag: clean style
 	@git push origin $(BRANCH)
 	@git tag v$(VERSION) || echo Ignoring tag since it already exists
 	@git push --tags || echo Ignoring tag since it already exists on the remote
-	
+
 ## Create a release
 release:
 	$(call message,${@})
 	@if [ "$(shell git rev-parse --abbrev-ref HEAD)" != "master" ]; then exit 1; fi
 	@gitlab project-release create --project-id $(GITLAB_PROJECT_ID) \
 	--name "version $(VERSION)" --tag-name "v$(VERSION)" --description "Released version $(VERSION)"
-                                     
+
 
 ## Create python package
 package:
@@ -391,7 +391,7 @@ conda: checksum
 publish: tag release pypi conda
 	$(call message,${@})
 
-	
+
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
