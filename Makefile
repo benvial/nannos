@@ -391,6 +391,10 @@ conda: checksum
 publish: tag release pypi conda
 	$(call message,${@})
 
+## Update header text
+header:
+	$(call message,${@})
+	@cd dev && python update_header.py
 
 #################################################################################
 # Self Documenting Commands                                                     #

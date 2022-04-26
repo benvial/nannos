@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Benjamin Vial
-# This file is part of refidx
+# This file is part of nannos
 # License: GPLv3
-# See the documentation at benvial.gitlab.io/refidx
+# See the documentation at nannos.gitlab.io
 
 
 def test_metadata(monkeypatch):

@@ -5,6 +5,7 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
+all = ["local_hardware_info", "VersionTable"]
 
 import distutils.core
 import os
@@ -47,7 +48,7 @@ class VersionTable(Magics):
     @line_magic
     def nannos_version_table(self, line="", cell=None):
         """
-        Print an HTML-formatted table with version numbers for Gyptis and its
+        Print an HTML-formatted table with version numbers for Nannos and its
         dependencies. This should make it possible to reproduce the environment
         and the calculation later on.
         """

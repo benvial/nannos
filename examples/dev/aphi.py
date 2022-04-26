@@ -1,23 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Benjamin Vial
-# License: MIT
-#
-# @article{ou_high_2018,
-# 	title = {High efficiency focusing vortex generation and detection with polarization-insensitive dielectric metasurfaces},
-# 	volume = {10},
-# 	issn = {2040-3372},
-# 	doi = {10.1039/C8NR07480A},
-# 	language = {en},
-# 	number = {40},
-# 	urldate = {2022-04-10},
-# 	journal = {Nanoscale},
-# 	author = {Ou, Kai and Li, Guanhai and Li, Tianxin and Yang, Hui and Yu, Feilong and Chen, Jin and Zhao, Zengyue and Cao, Guangtao and Chen, Xiaoshuang and Lu, Wei},
-# 	month = oct,
-# 	year = {2018},
-# 	note = {Publisher: The Royal Society of Chemistry},
-# 	pages = {19154--19161},
-# }
+# This file is part of nannos
+# License: GPLv3
+# See the documentation at nannos.gitlab.io
 
 import matplotlib.pyplot as plt
 import numpy as np

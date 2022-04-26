@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Benjamin Vial
-# License: MIT
+# This file is part of nannos
+# License: GPLv3
+# See the documentation at nannos.gitlab.io
 
 # Simulation of a chiral metasurface. (a) Unit cell configuration consisting
 # of a Z-shaped Si structure. Circularly-polarized light is normally incident from

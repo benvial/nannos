@@ -5,6 +5,20 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
+all = [
+    "unique",
+    "is_scalar",
+    "set_index",
+    "next_power_of_2",
+    "next_power_of_2",
+    "norm",
+    "block",
+    "get_block",
+    "blockmatmul",
+    "block2list",
+    "inv2by2block",
+    "apply_filter",
+]
 
 from .. import backend as bk
 from .. import get_backend, jit
