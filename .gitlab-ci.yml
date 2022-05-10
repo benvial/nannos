@@ -60,6 +60,7 @@ test:
     - make test-req
     - make test
     - coverage xml
+  coverage: '/TOTAL.*\s([.\d]+)%/'
   artifacts:
     reports:
       coverage_report:
