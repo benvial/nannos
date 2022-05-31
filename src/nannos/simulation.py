@@ -251,9 +251,12 @@ class Simulation:
                     for i in range(2)
                 ]
                 A = I[0][0] - f @ S12 @ I[1][0]
-                B = _inv(A)
-                S11 = B @ f @ S11
-                S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
+
+                S11 = bk.linalg.solve(A, f @ S11)
+                S12 = bk.linalg.solve(A, (f @ S12 @ I[1][1] - I[0][1]) @ f_next)
+                # B = _inv(A)
+                # S11 = B @ f @ S11
+                # S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
                 S21 = S22 @ I[1][0] @ S11 + S21
                 S22 = S22 @ I[1][0] @ S12 + S22 @ I[1][1] @ f_next
                 S = [[S11, S12], [S21, S22]]
@@ -301,7 +304,8 @@ class Simulation:
             if layer.is_uniform:
                 ez = ez / layer.epsilon
             else:
-                ez = layer.eps_hat_inv @ ez
+                # ez = layer.eps_hat_inv @ ez
+                ez = bk.linalg.solve(layer.eps_hat, ez)
             for i, comp in enumerate([ex, ey, ez]):
                 fields = set_index(fields, [iz, 0, i], comp)
             for i, comp in enumerate([hx, hy, hz]):
@@ -710,8 +714,10 @@ class Simulation:
         n_interfaces = len(self.layers) - 1
         S = self.get_S_matrix(indices=(0, layer_index))
         P = self.get_S_matrix(indices=(layer_index, n_interfaces))
-        q = _inv(bk.array(bk.eye(self.nh * 2)) - bk.matmul(S[0][1], P[1][0]))
-        ai = bk.matmul(q, bk.matmul(S[0][0], self.a0))
+        # q = _inv(bk.array(bk.eye(self.nh * 2)) - bk.matmul(S[0][1], P[1][0]))
+        # ai = bk.matmul(q, bk.matmul(S[0][0], self.a0))
+        Q = bk.array(bk.eye(self.nh * 2)) - bk.matmul(S[0][1], P[1][0])
+        ai = bk.linalg.solve(Q, bk.matmul(S[0][0], self.a0))
         bi = bk.matmul(P[1][0], ai)
         return ai, bi
 
@@ -869,9 +875,10 @@ def _build_Imatrix(layer1, layer2):
     # else:
     #     inv_a1 = _build_Mmatrix_inverse(layer1)
     a1 = _build_Mmatrix(layer1)
-    inv_a1 = _inv(a1)
     a2 = _build_Mmatrix(layer2)
-    return inv_a1 @ a2
+    return bk.linalg.solve(a1, a2)
+    # inv_a1 = _inv(a1)
+    # return inv_a1 @ a2
 
 
 def _translate_amplitudes(layer, z, ai, bi):
