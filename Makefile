@@ -19,6 +19,7 @@ URL=$(shell python3 -c "import nannos; print(nannos.__website__)")
 LESSC=$(PROJECT_DIR)/doc/node_modules/less/bin/lessc
 GITLAB_PROJECT_ID=28703132
 GITLAB_GROUP_ID=12956132
+LINT_FLAGS=E501,F401,F403,F405,W503,E402,E203
 
 ifeq (,$(shell which conda))
 HAS_CONDA=False
@@ -126,11 +127,15 @@ cleandoc:
 clean: cleantest cleangen cleanreport cleandoc
 	$(call message,${@})
 
-
-## Lint using flake8
+## Lint using flake8 (sources only)
 lint:
 	$(call message,${@})
-	@flake8 --exit-zero --ignore=E501 setup.py src/$(PROJECT_NAME)/ test/*.py examples/
+	@flake8 --exit-zero --ignore=$(LINT_FLAGS) src/$(PROJECT_NAME)
+	
+## Lint using flake8
+lint-all:
+	$(call message,${@})
+	@flake8 --exit-zero --ignore=$(LINT_FLAGS) src/$(PROJECT_NAME) test/ examples/ --exclude "dev*"
 
 ## Check for duplicated code
 dup:
@@ -160,14 +165,15 @@ rad:
 	@radon cc src/$(PROJECT_NAME) -a -nb
 
 ## Run all code checks
-lint-all: lint dup dcstr rad
+code-check: lint dup dcstr rad
 	$(call message,${@})
 
 ## Reformat code
 style:
 	$(call message,${@})
-	@isort .
-	@black .
+	@isort -l 88 .
+	@black -l 88 .
+
 
 ## Push to gitlab
 gl:

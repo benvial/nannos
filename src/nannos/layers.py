@@ -136,21 +136,21 @@ class Layer:
             # TODO: anisotropic uniform layer
             raise NotImplementedError("Uniform layer material must be isotropic")
 
-        IdG = bk.eye(2 * nh)
-
-        I = bk.eye(nh)
+        Id = bk.eye(nh)
         if self.is_epsilon_anisotropic:
             _epsilon = block(
                 [
-                    [epsilon[0, 0] * I, epsilon[0, 1] * I],
-                    [epsilon[1, 0] * I, epsilon[1, 1] * I],
+                    [epsilon[0, 0] * Id, epsilon[0, 1] * Id],
+                    [epsilon[1, 0] * Id, epsilon[1, 1] * Id],
                 ]
             )
         else:
             _epsilon = epsilon
 
         if self.is_mu_anisotropic:
-            _mu = block([[mu[0, 0] * I, mu[0, 1] * I], [mu[1, 0] * I, mu[1, 1] * I]])
+            _mu = block(
+                [[mu[0, 0] * Id, mu[0, 1] * Id], [mu[1, 0] * Id, mu[1, 1] * Id]]
+            )
         else:
             _mu = mu
 

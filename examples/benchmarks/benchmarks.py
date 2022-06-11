@@ -13,12 +13,12 @@ import numpy as npo
 
 try:
     threads = int(sys.argv[1])
-except:
+except Exception:
     threads = 1
 
 try:
     nfreq = int(sys.argv[2])
-except:
+except Exception:
     nfreq = 2
 
 
@@ -56,9 +56,6 @@ def test_simulations(backend, device):
     Ny = 2**9
 
     eps_pattern = 4.0 + 0j
-    eps_hole = 1.0
-    mu_pattern = 1.0
-    mu_hole = 1.0
 
     h = 2
 
@@ -73,10 +70,6 @@ def test_simulations(backend, device):
     sup = nn.Layer("Superstrate", epsilon=1, mu=1)
     sub = nn.Layer("Substrate", epsilon=1, mu=1)
 
-    ids = nn.backend.ones((Nx, Ny), dtype=float)
-    zs = nn.backend.zeros_like(ids)
-
-    # epsgrid = ids * eps_pattern
     eps1 = nn.backend.array(eps_pattern, dtype=nn.backend.complex128)
     eps2 = nn.backend.array(1, dtype=nn.backend.complex128)
     epsgrid = nn.backend.where(hole, eps1, eps2)
@@ -120,7 +113,6 @@ def test_simulations(backend, device):
         TIMES_ALL.append(TIMES_NH)
 
         NH_real.append(sim.nh)
-    B = R + T
 
     npo.savez(
         f"benchmark_{backend}_{device}.npz",

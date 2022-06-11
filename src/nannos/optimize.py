@@ -10,10 +10,10 @@ import nlopt
 import numpy as npo
 from scipy.optimize import minimize
 
-from .. import DEVICE
-from .. import backend as bk
-from .. import get_backend, grad
-from ..utils import apply_filter, tic, toc
+from . import DEVICE
+from . import backend as bk
+from . import get_backend, grad
+from .utils import apply_filter, tic, toc
 
 
 def simp(x, eps_min, eps_max, p=1):
@@ -52,7 +52,6 @@ def multi_simp(x, epsilons, p=1):
             return sum(c * x ** (n * p) for n, c in enumerate(coefs))
 
         def mat(pts):
-            npt = len(pts)
             return bk.array([[_x ** (n * p) + 0j for n in range(npts)] for _x in pts])
 
         M = mat(pts)
@@ -112,9 +111,6 @@ class TopologyOptimizer:
     def print(self, s):
         if self.verbose:
             return print(s)
-
-    def min_function(self):
-        f = self.fun(x)
 
     def minimize(self):
 

@@ -48,13 +48,13 @@ class Simulation:
     ):
         # Layers
         self.layers = layers
-        self.layer_names = [l.name for l in self.layers]
+        self.layer_names = [layer.name for layer in self.layers]
         if not unique(self.layer_names):
             raise ValueError("Layers must have different names")
         # check if all layers share the same lattice
         lattice0 = self.layers[0].lattice
-        for l in self.layers:
-            assert l.lattice == lattice0, ValueError(
+        for layer in self.layers:
+            assert layer.lattice == lattice0, ValueError(
                 "lattice must be the same for all layers"
             )
         self.lattice = lattice0
@@ -163,11 +163,11 @@ class Simulation:
     def solve(self):
         """Solve the grating problem."""
         _t0 = timer.tic()
-        logger.info(f"Solving")
+        logger.info("Solving")
         layers_solved = []
         for layer in self.layers:
             _t0lay = timer.tic()
-            logger.info(f"Computing eigenpairs for layer {layer}")
+            logger.info("Computing eigenpairs for layer {layer}")
             layer = self.build_matrix(layer)
             if layer.is_uniform:
                 layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
@@ -229,14 +229,14 @@ class Simulation:
         if indices is None:
             n_interfaces = len(self.layers) - 1
             stack = range(n_interfaces)
-            logger.info(f"Computing total S-matrix")
+            logger.info("Computing total S-matrix")
         else:
             stack = range(indices[0], indices[1])
             logger.info(f"Computing S-matrix for indices {indices}")
 
         try:
             S = self._intermediate_S[f"{stack[0]},{stack[-1]}"]
-        except:
+        except Exception:
 
             for i in stack:
                 layer, layer_next = self.layers[i], self.layers[i + 1]
@@ -246,19 +246,19 @@ class Simulation:
                     phasor(layer_next.eigenvalues, z_next)
                 )
                 I_ = _build_Imatrix(layer, layer_next)
-                I = [
+                Imat = [
                     [get_block(I_, i, j, 2 * self.nh) for j in range(2)]
                     for i in range(2)
                 ]
-                A = I[0][0] - f @ S12 @ I[1][0]
+                A = Imat[0][0] - f @ S12 @ Imat[1][0]
 
                 S11 = bk.linalg.solve(A, f @ S11)
-                S12 = bk.linalg.solve(A, (f @ S12 @ I[1][1] - I[0][1]) @ f_next)
+                S12 = bk.linalg.solve(A, (f @ S12 @ Imat[1][1] - Imat[0][1]) @ f_next)
                 # B = _inv(A)
                 # S11 = B @ f @ S11
-                # S12 = B @ ((f @ S12 @ I[1][1] - I[0][1]) @ f_next)
-                S21 = S22 @ I[1][0] @ S11 + S21
-                S22 = S22 @ I[1][0] @ S12 + S22 @ I[1][1] @ f_next
+                # S12 = B @ ((f @ S12 @ Imat[1][1] - Imat[0][1]) @ f_next)
+                S21 = S22 @ Imat[1][0] @ S11 + S21
+                S22 = S22 @ Imat[1][0] @ S12 + S22 @ Imat[1][1] @ f_next
                 S = [[S11, S12], [S21, S22]]
                 self._intermediate_S[f"{stack[0]},{i}"] = S
         if indices is None:
@@ -330,7 +330,7 @@ class Simulation:
 
     def get_ifft_amplitudes(self, amplitudes, shape, axes=(0, 1)):
         _t0 = timer.tic()
-        logger.info(f"Inverse Fourier transforming amplitudes")
+        logger.info("Inverse Fourier transforming amplitudes")
 
         amplitudes = bk.array(amplitudes)
         if len(amplitudes.shape) == 1:
@@ -354,15 +354,13 @@ class Simulation:
     ):
 
         if field not in ["all", "E", "H"]:
-            raise ValueError(f"Wrong field argument, must be `all`, `E` or `H`")
+            raise ValueError("Wrong field argument, must be `all`, `E` or `H`")
         if component not in ["all", "x", "y", "z"]:
-            raise ValueError(
-                f"Wrong component argument, must be `all`, `x`, `y` or `z`"
-            )
+            raise ValueError("Wrong component argument, must be `all`, `x`, `y` or `z`")
 
         layer, layer_index = self.get_layer(layer_index)
         _t0 = timer.tic()
-        logger.info(f"Retrieving fields in real-space for layer {layer}")
+        logger.info("Retrieving fields in real-space for layer {layer}")
         shape = shape or layer.epsilon.shape
 
         fields_fourier = self.get_field_fourier(layer_index, z)
@@ -467,9 +465,9 @@ class Simulation:
         gamma_in0 = (
             self.omega**2 * nin**2 - self.k0para[0] ** 2 - self.k0para[1] ** 2
         ) ** 0.5
-        gamma_out0 = (
-            self.omega**2 * nout**2 - self.k0para[0] ** 2 - self.k0para[1] ** 2
-        ) ** 0.5
+        # gamma_out0 = (
+        #     self.omega**2 * nout**2 - self.k0para[0] ** 2 - self.k0para[1] ** 2
+        # ) ** 0.5
         gamma_in = (self.omega**2 * nin**2 - self.kx**2 - self.ky**2) ** 0.5
         gamma_out = (self.omega**2 * nout**2 - self.kx**2 - self.ky**2) ** 0.5
         norma_t2 = nin**2 * (gamma_out / gamma_in0)
@@ -529,7 +527,7 @@ class Simulation:
     def get_order_index(self, order):
         try:
             len(order) == 2
-        except:
+        except Exception:
             if self.lattice.is_1D and isinstance(order, int):
                 order = (order, 0)
             else:
@@ -578,25 +576,25 @@ class Simulation:
             epsilon = layer.epsilon
             mu = layer.mu
         if layer.is_uniform:
-            if layer.is_epsilon_anisotropic:
-                _epsilon = block(
-                    [
-                        [epsilon[0, 0] * self.IdG, epsilon[0, 1] * self.IdG],
-                        [epsilon[1, 0] * self.IdG, epsilon[1, 1] * self.IdG],
-                    ]
-                )
-            else:
-                _epsilon = epsilon
-
-            if layer.is_mu_anisotropic:
-                _mu = block(
-                    [
-                        [mu[0, 0] * self.IdG, mu[0, 1] * self.IdG],
-                        [mu[1, 0] * self.IdG, mu[1, 1] * self.IdG],
-                    ]
-                )
-            else:
-                _mu = mu
+            # if layer.is_epsilon_anisotropic:
+            #     _epsilon = block(
+            #         [
+            #             [epsilon[0, 0] * self.IdG, epsilon[0, 1] * self.IdG],
+            #             [epsilon[1, 0] * self.IdG, epsilon[1, 1] * self.IdG],
+            #         ]
+            #     )
+            # else:
+            #     _epsilon = epsilon
+            #
+            # if layer.is_mu_anisotropic:
+            #     _mu = block(
+            #         [
+            #             [mu[0, 0] * self.IdG, mu[0, 1] * self.IdG],
+            #             [mu[1, 0] * self.IdG, mu[1, 1] * self.IdG],
+            #         ]
+            #     )
+            # else:
+            #     _mu = mu
 
             Keps = _build_Kmatrix(1 / epsilon * self.IdG, Ky, -Kx)
             # Pmu = bk.eye(self.nh * 2)
@@ -604,7 +602,7 @@ class Simulation:
 
         else:
             epsilon_zz = epsilon[2, 2] if layer.is_epsilon_anisotropic else epsilon
-            mu_zz = mu[2, 2] if layer.is_mu_anisotropic else mu
+            # mu_zz = mu[2, 2] if layer.is_mu_anisotropic else mu
             # TODO: check if mu or epsilon is homogeneous, no need to compute the Toepliz matrix
 
             eps_hat = self._get_toeplitz_matrix(epsilon_zz)
@@ -690,7 +688,7 @@ class Simulation:
 
     def _get_amplitudes(self, layer_index, z=0, translate=True):
         _t0 = timer.tic()
-        logger.info(f"Retrieving amplitudes")
+        logger.info("Retrieving amplitudes")
 
         layer, layer_index = self.get_layer(layer_index)
         n_interfaces = len(self.layers) - 1
@@ -702,7 +700,6 @@ class Simulation:
             ai, bi = aN, self.bN
         else:
             ai, bi = self._solve_int(layer_index)
-            layer = self.layers[layer_index]
         if translate:
             ai, bi = _translate_amplitudes(self.layers[layer_index], z, ai, bi)
         _t1 = timer.toc(_t0, verbose=False)
@@ -852,7 +849,7 @@ def _build_Mmatrix(layer):
 
 
 # TODO: check orthogonality of eigenvectors to compute M^-1 without inverting it for potential speedup
-# cf: D. M. Whittaker and I. S. Culshaw, Scattering-matrix treatment of
+# cf: D. M. Whittaker and Imat. S. Culshaw, Scattering-matrix treatment of
 # patterned multilayer photonic structures
 # PHYSICAL REVIEW B, VOLUME 60, NUMBER 4, 1999
 #

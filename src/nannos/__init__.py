@@ -189,7 +189,7 @@ def get_backend():
         return "numpy"
 
 
-def grad(f):
+def _grad(f):
     raise NotImplementedError(f"grad is not implemented for {BACKEND} backend.")
 
 
@@ -197,6 +197,7 @@ if "_SCIPY" in globals():
 
     import numpy
 
+    grad = _grad
     backend = numpy
 elif "_AUTOGRAD" in globals():
     from autograd import grad, numpy
@@ -224,6 +225,7 @@ elif "_JAX" in globals():
     # from jax import grad, numpy
     from jax import numpy
 
+    grad = _grad
     backend = numpy
 elif "_TORCH" in globals():
     if HAS_TORCH:
@@ -259,6 +261,7 @@ elif "_TORCH" in globals():
 else:
     import numpy
 
+    grad = _grad
     backend = numpy
 
 
@@ -272,12 +275,12 @@ DEVICE = get_device()
 _backend_env_var = os.environ.get("NANNOS_BACKEND")
 
 if _backend_env_var in available_backends and _backend_env_var is not None:
-    if BACKEND != _backend_env_var and not "_FORCE_BACKEND" in globals():
+    if BACKEND != _backend_env_var and "_FORCE_BACKEND" not in globals():
         logger.debug(f"Found environment variable NANNOS_BACKEND={_backend_env_var}")
         set_backend(_backend_env_var)
 
+from . import optimize
 from .constants import *
-from .dev import _optimize as optimize
 from .excitation import *
 from .lattice import *
 from .parallel import *

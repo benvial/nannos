@@ -176,6 +176,6 @@ for eps_sup, eps_sub in zip([8, 9, 10, 10], [9, 9, 9, 9 + 0.1j]):
 
 plt.ylim(-60, 20)
 plt.legend()
-plt.xlabel("$\cos{\\theta}$")
+plt.xlabel(r"$\cos{\theta}$")
 plt.ylabel("pressure on III (SI units)")
 plt.tight_layout()

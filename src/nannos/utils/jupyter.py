@@ -67,7 +67,7 @@ class VersionTable(Magics):
             packages.append((f"<code>{pkg}</code>", ver))
 
         ver = pkg_resources.get_distribution("autograd_latest").version
-        packages.append((f"<code>autograd</code>", ver))
+        packages.append(("<code>autograd</code>", ver))
 
         for name, version in packages:
             html += f"<tr><td>{name}</td><td>{version}</td></tr>"

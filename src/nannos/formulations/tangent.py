@@ -78,12 +78,13 @@ def _get_tangent_field_min(
         from autograd import grad
         from autograd import numpy as npg
 
-        jit = lambda x: x
+        def jit(x):
+            return x
 
     from scipy.optimize import minimize
 
     def norm(v):
-        ## avoid division by 0
+        # avoid division by 0
         eps = npg.finfo(float).eps
         return npg.sqrt(eps + v[0] * npg.conj(v[0]) + v[1] * npg.conj(v[1]))
 
@@ -95,9 +96,6 @@ def _get_tangent_field_min(
     Nx, Ny = grid.shape
     Nx_ds = min(2**6, Nx)
     Ny_ds = min(2**6, Ny)
-    #
-    # Nx_ds =  Nx
-    # Ny_ds =  Ny
 
     downsample_x = int(Nx / Nx_ds)
     downsample_y = int(Ny / Ny_ds)
@@ -144,9 +142,8 @@ def _get_tangent_field_min(
         coef = x[:nh] + 1j * x[nh:]
         a = get_amps(coef)
         da = npg.array(npg.gradient(a))
-        I = npg.mean(npg.abs(da - dgrid_f[:, ::downsample_x, ::downsample_y]) ** 2)
-        # print(I)
-        return I
+        obj = npg.mean(npg.abs(da - dgrid_f[:, ::downsample_x, ::downsample_y]) ** 2)
+        return obj
 
     @jit
     def minifun_der(x):

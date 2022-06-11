@@ -27,8 +27,8 @@ def _grid_bbox(x, y):
 
 
 def _bbox_to_rect(bbox):
-    l, r, b, t = bbox
-    return sg.Polygon([(l, b), (r, b), (r, t), (l, t)])
+    left, right, bottom, top = bbox
+    return sg.Polygon([(left, bottom), (right, bottom), (right, top), (left, top)])
 
 
 def set_index_2d(mat, val, idx1=(None, None), idx2=(None, None)):
@@ -73,36 +73,36 @@ def shape_mask(shp, x, y, m=None):
         m = set_index_2d(m, True)
 
     else:
-        k, l = m.shape
+        lx, ly = m.shape
 
-        if k == 1 and l == 1:
+        if lx == 1 and ly == 1:
 
             val = shp.contains(sg.Point(x[0], y[0]))
             m = set_index_2d(m, val)
 
-        elif k == 1:
+        elif lx == 1:
 
-            val = shape_mask(shp, x[: l // 2], y, m[:, : l // 2])
-            m = set_index_2d(m, val, idx2=(None, l // 2))
-            val = shape_mask(shp, x[l // 2 :], y, m[:, l // 2 :])
-            m = set_index_2d(m, val, idx2=(l // 2, None))
+            val = shape_mask(shp, x[: ly // 2], y, m[:, : ly // 2])
+            m = set_index_2d(m, val, idx2=(None, ly // 2))
+            val = shape_mask(shp, x[ly // 2 :], y, m[:, ly // 2 :])
+            m = set_index_2d(m, val, idx2=(ly // 2, None))
 
-        elif l == 1:
-            val = shape_mask(shp, x, y[: k // 2], m[: k // 2])
-            m = set_index_2d(m, val, idx1=(None, k // 2))
-            val = shape_mask(shp, x, y[k // 2 :], m[k // 2 :])
-            m = set_index_2d(m, val, idx1=(k // 2, None))
+        elif ly == 1:
+            val = shape_mask(shp, x, y[: lx // 2], m[: lx // 2])
+            m = set_index_2d(m, val, idx1=(None, lx // 2))
+            val = shape_mask(shp, x, y[lx // 2 :], m[lx // 2 :])
+            m = set_index_2d(m, val, idx1=(lx // 2, None))
 
         else:
-            val = shape_mask(shp, x[: l // 2], y[: k // 2], m[: k // 2, : l // 2])
+            val = shape_mask(shp, x[: ly // 2], y[: lx // 2], m[: lx // 2, : ly // 2])
 
-            m = set_index_2d(m, val, (None, k // 2), (None, l // 2))
-            val = shape_mask(shp, x[l // 2 :], y[: k // 2], m[: k // 2, l // 2 :])
-            m = set_index_2d(m, val, (None, k // 2), (l // 2, None))
-            val = shape_mask(shp, x[: l // 2], y[k // 2 :], m[k // 2 :, : l // 2])
-            m = set_index_2d(m, val, (k // 2, None), (None, l // 2))
-            val = shape_mask(shp, x[l // 2 :], y[k // 2 :], m[k // 2 :, l // 2 :])
-            m = set_index_2d(m, val, (k // 2, None), (l // 2, None))
+            m = set_index_2d(m, val, (None, lx // 2), (None, ly // 2))
+            val = shape_mask(shp, x[ly // 2 :], y[: lx // 2], m[: lx // 2, ly // 2 :])
+            m = set_index_2d(m, val, (None, lx // 2), (ly // 2, None))
+            val = shape_mask(shp, x[: ly // 2], y[lx // 2 :], m[lx // 2 :, : ly // 2])
+            m = set_index_2d(m, val, (lx // 2, None), (None, ly // 2))
+            val = shape_mask(shp, x[ly // 2 :], y[lx // 2 :], m[lx // 2 :, ly // 2 :])
+            m = set_index_2d(m, val, (lx // 2, None), (ly // 2, None))
 
     return m
 

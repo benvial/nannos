@@ -46,7 +46,7 @@ def build_pattern(anisotropic=False):
         mxx = bk.where(hole, ids * mu_hole, ids * mu_pattern)
         myy = bk.where(hole, ids * mu_hole, ids * mu_pattern)
         mzz = bk.where(hole, ids * mu_hole, ids * mu_pattern)
-        mugrid = bk.array([[mxx, zs, zs], [zs, mxx, zs], [zs, zs, mzz]])
+        mugrid = bk.array([[mxx, zs, zs], [zs, myy, zs], [zs, zs, mzz]])
     else:
         epsgrid = bk.where(hole, ids * eps_hole, ids * eps_pattern)
         mugrid = bk.where(hole, ids * mu_hole, ids * mu_pattern)
@@ -131,7 +131,7 @@ def test_structured(wl, theta, phi, psi, formulation):
     assert npo.allclose(bk.sum(bk.abs(ri) ** 2), R)
 
     a, b = sim._get_amplitudes(1, z=0.1)
-    field_fourier = sim.get_field_fourier(1, z=0.1)
+    sim.get_field_fourier(1, z=0.1)
 
     sim.get_field_grid(1)
     sim.get_z_stress_tensor_integral(1)

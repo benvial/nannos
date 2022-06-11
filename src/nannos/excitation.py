@@ -14,14 +14,14 @@ _deg2rad = pi / 180
 
 
 class PlaneWave:
-    """A plane wave object
+    r"""A plane wave object
 
     Parameters
     ----------
     wavelength : float
         Wavelength (the default is 1).
     angles : tuple
-        Incidence angles :math:`(\\theta,\phi,\psi)` in degrees (the default is (0, 0, 0)).
+        Incidence angles :math:`(\theta,\phi,\psi)` in degrees (the default is (0, 0, 0)).
         :math:`\\theta`: polar angle,
         :math:`\phi`: azimuthal angle,
         :math:`\psi`: polarization angle.

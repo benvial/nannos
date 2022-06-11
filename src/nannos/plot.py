@@ -81,8 +81,8 @@ def plot_layer(
             im.set_transform(trans_data)
             ims.append(im)
     lx, ly = [bk.linalg.norm(v) for v in lattice.basis_vectors]
-    l = max(lx, ly)
-    delta = 0.1 * l
+    lmax = max(lx, ly)
+    delta = 0.1 * lmax
     ax.set_xlim(-delta, nperx * bv[0][0] + npery * bv[1][0] + delta)
     ax.set_ylim(-delta, nperx * bv[0][1] + npery * bv[1][1] + delta)
     if show_cell:
@@ -170,7 +170,7 @@ def plot_structure(
                 else:
                     try:
                         epsgrid = layer.epsilon.real
-                    except:
+                    except Exception:
                         epsgrid = layer.epsilon
                     Nx, Ny = epsgrid.shape
                     # values = bk.reshape(epsgrid, (Nx, Ny, 1))

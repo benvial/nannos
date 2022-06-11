@@ -250,7 +250,7 @@ def _one_dim_truncation(nh):
 
 
 def _parallelogramic_truncation(nh, Lk):
-    u = bk.array([bk.linalg.norm(l) for l in Lk])
+    u = bk.array([bk.linalg.norm(value) for value in Lk])
     udot = bk.dot(Lk[0], Lk[1])
 
     NGroot = int((nh) ** 0.5)
@@ -275,7 +275,7 @@ def _parallelogramic_truncation(nh, Lk):
 
 
 def _circular_truncation(nh, Lk):
-    u = bk.array([bk.linalg.norm(l) for l in Lk])
+    u = bk.array([bk.linalg.norm(value) for value in Lk])
     udot = bk.dot(Lk[0], Lk[1])
     ucross = bk.array(Lk[0][0] * Lk[1][1] - Lk[0][1] * Lk[1][0])
 

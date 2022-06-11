@@ -48,7 +48,7 @@ def next_power_of_2(x):
 
 
 def norm(v):
-    ## avoid division by 0
+    # avoid division by 0
     eps = bk.finfo(float).eps
     out = bk.array(
         0j + eps + bk.sqrt(v[0] * bk.conj(v[0]) + v[1] * bk.conj(v[1])),
@@ -95,38 +95,43 @@ def _reseter(prop, attr=None):
     if attr is None:
         try:
             del prop
-        except:
+        except Exception:
             pass
     else:
         try:
             delattr(prop, attr)
-        except:
+        except Exception:
             pass
 
 
-def _apply_filter(x, rfilt):
-    if rfilt == 0:
+def _apply_filter(x, rfilt, vectors=None):
+    if rfilt == 0 or rfilt == (0, 0):
         return x
     else:
-        Nx = x.shape[0]
-        # First a 1-D  Gaussian
-        # t = bk.linspace(0, Nx-1, Nx)
-        t = bk.array(bk.linspace(-Nx / 2, Nx / 2, Nx))
-        bump = bk.exp(-(t**2) / rfilt**2)
-        bump /= bk.trapz(bump)  # normalize the integral to 1
 
+        if is_scalar(rfilt):
+            rfilt = (rfilt, rfilt)
+        Nx, Ny = x.shape
+
+        if vectors is not None:
+            tx = bk.array(bk.linspace(-0.5 * vectors[0][0], 0.5 * vectors[0][0], Nx))
+            ty = bk.array(bk.linspace(-0.5 * vectors[1][1], 0.5 * vectors[1][1], Ny))
+        else:
+            tx = bk.array(bk.linspace(-Nx / 2, Nx / 2, Nx))
+            ty = bk.array(bk.linspace(-Ny / 2, Ny / 2, Ny))
+
+        bumpx = bk.exp(-(tx**2) / rfilt[0] ** 2)
+        bumpx /= bk.trapz(bumpx)  # normalize the integral to 1
+        bumpy = bk.exp(-(ty**2) / rfilt[1] ** 2)
+        bumpy /= bk.trapz(bumpy)  # normalize the integral to 1
         # make a 2-D kernel out of it
-        kernel = bump[:, None] * bump[None, :]
-
+        kernel = bumpx[:, None] * bumpy[None, :]
         kernel_ft = fourier_transform(kernel, s=x.shape[:2], axes=(0, 1))
         img_ft = fourier_transform(x, axes=(0, 1))
-
         # convolve
         img2_ft = kernel_ft * img_ft
-
         out = bk.real(inverse_fourier_transform(img2_ft, axes=(0, 1)))
-
-        return bk.fft.fftshift(out) * (Nx**2)
+        return bk.fft.fftshift(out) * (Nx * Ny)
 
 
 apply_filter = jit(_apply_filter, static_argnums=(1))
