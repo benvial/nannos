@@ -272,6 +272,10 @@ test-req:
 	$(call message,${@})
 	@cd test && pip install --upgrade -r requirements.txt
 
+	
+## Install Python package locally
+install:
+	@pip install -e .
 
 
 define runtest
@@ -349,7 +353,7 @@ install:
 
 
 ## Tag and push tags
-tag: clean style
+tag: clean style install
 	$(call message,${@})
 	@if [ "$(shell git rev-parse --abbrev-ref HEAD)" != "master" ]; then exit 1; fi
 	@echo "Version v$(VERSION)"
