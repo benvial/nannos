@@ -190,6 +190,7 @@ def setup(app):
 html_theme_options = {
     "show_toc_level": 3,
     "show_prev_next": False,
+    "navbar_end": ["navbar-icon-links"],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -232,6 +233,7 @@ html_favicon = "./_assets/nannos.png"
 
 html_sidebars = {
     "examples": [],
+    "tutorials": [],
     "changelog": [],
 }
 
@@ -242,6 +244,7 @@ html_additional_pages = {"index": "home.html"}
 
 # If false, no module index is generated.
 # html_domain_indices = True
+
 
 # If false, no index is generated.
 # html_use_index = True
