@@ -1,5 +1,5 @@
 
-.. image:: https://img.shields.io/endpoint?url=https://gitlab.com/nannos/nannos/-/jobs/artifacts/master/file/logobadge.json?job=badge"
+.. image:: https://img.shields.io/endpoint?url=https://gitlab.com/nannos/nannos/-/jobs/artifacts/master/file/logobadge.json?job=badge
   :target: https://gitlab.com/nannos/nannos/-/releases
   :alt: Release
 
