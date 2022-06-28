@@ -30,8 +30,10 @@ plt.ion()
 
 
 nwl = 81
-wl, n = np.loadtxt("GaP_Aspnes.csv", skiprows=1, delimiter=",", max_rows=nwl).T
-wl1, k = np.loadtxt("GaP_Aspnes.csv", skiprows=nwl + 2, delimiter=",", max_rows=nwl).T
+wl, n = np.loadtxt("GaP_Aspnes.csv", skiprows=1, delimiter=",", max_rows=nwl - 1).T
+wl1, k = np.loadtxt(
+    "GaP_Aspnes.csv", skiprows=nwl + 2, delimiter=",", max_rows=nwl - 1
+).T
 assert np.all(wl1 == wl)
 
 
@@ -172,7 +174,7 @@ for eps_sup, eps_sub in zip([8, 9, 10, 10], [9, 9, 9, 9 + 0.1j]):
         label = f"{eps_sup} | 1 | {eps_sub}"
     else:
         label = f"{eps_sup} | 1 | {eps_sub.real} + {eps_sub.imag}j"
-    plt.plot(np.cos(angle), pressure, label=label)
+    plt.plot(np.cos(angle * nn.pi / 180), pressure, label=label)
 
 plt.ylim(-60, 20)
 plt.legend()
