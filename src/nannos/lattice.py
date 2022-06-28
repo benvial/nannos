@@ -167,7 +167,10 @@ class Lattice:
             Transformed grid in lattice vectors basis.
 
         """
-        return bk.tensordot(self.matrix, bk.stack(grid), axes=(1, 0))
+        if get_backend() == "torch":
+            return bk.tensordot(self.matrix, grid.double(), dims=([1], [0]))
+        else:
+            return bk.tensordot(self.matrix, grid, axes=(1, 0))
 
     def ones(self):
         """Return a new array filled with ones.
