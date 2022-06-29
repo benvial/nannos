@@ -14,7 +14,6 @@ dependencies:
   - psutil
   - ipython
   - nlopt
-  - matplotlib-base
   - pytorch
   - magma
   - cudatoolkit=10.2

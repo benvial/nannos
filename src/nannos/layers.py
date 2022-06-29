@@ -311,7 +311,7 @@ def _get_layer(id, layers, layer_names):
             raise ValueError(f"Unknown layer name {id}")
     elif isinstance(id, int):
         return layers[id], id
-    elif isinstance(id, Layer):
+    elif hasattr(id, "name"):
         return _get_layer(id.name, layers, layer_names)
     else:
         raise ValueError(

@@ -12,10 +12,10 @@ def test_simulation():
     gpu = [False]
     if nn.HAS_CUDA:
         gpu.append(True)
-    for use_gpu in gpu:
-        nn.use_gpu(use_gpu)
-        for backend in nn.available_backends:
-            nn.set_backend(backend)
+    for backend in nn.available_backends:
+        nn.set_backend(backend)
+        for use_gpu in gpu:
+            nn.use_gpu(use_gpu)
             print(f"backend: {backend}, GPU: {use_gpu}")
             backend = nn.get_backend()
             bk = nn.backend

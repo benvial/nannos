@@ -31,6 +31,15 @@ def has_torch():
         return False
 
 
+def has_jax():
+    try:
+        import jax
+
+        return True
+    except ModuleNotFoundError:
+        return False
+
+
 def _has_cuda():
     try:
         import torch
@@ -42,6 +51,8 @@ def _has_cuda():
 
 HAS_TORCH = has_torch()
 HAS_CUDA = _has_cuda()
+
+HAS_JAX = has_jax()
 
 
 def use_gpu(boolean):
@@ -204,29 +215,34 @@ elif "_AUTOGRAD" in globals():
 
     backend = numpy
 elif "_JAX" in globals():
+    if HAS_JAX:
 
-    from jax.config import config
+        from jax.config import config
 
-    config.update("jax_platform_name", "cpu")
-    config.update("jax_enable_x64", True)
+        config.update("jax_platform_name", "cpu")
+        config.update("jax_enable_x64", True)
 
-    # TODO: jax eig not implemented on GPU
-    # see https://github.com/google/jax/issues/1259
+        # TODO: jax eig not implemented on GPU
+        # see https://github.com/google/jax/issues/1259
 
-    # TODO: support jax properly (is it faster than autograd? use jit?)
-    # jax does not support eig
-    # for autodif wrt eigenvectors yet.
-    # see: https://github.com/google/jax/issues/2748
+        # TODO: support jax properly (is it faster than autograd? use jit?)
+        # jax does not support eig
+        # for autodif wrt eigenvectors yet.
+        # see: https://github.com/google/jax/issues/2748
 
-    # if DEVICE == "cpu":
-    #     config.update("jax_platform_name", "cpu")
-    # else:
-    #     config.update("jax_platform_name", "gpu")
-    # from jax import grad, numpy
-    from jax import numpy
+        # if DEVICE == "cpu":
+        #     config.update("jax_platform_name", "cpu")
+        # else:
+        #     config.update("jax_platform_name", "gpu")
+        # from jax import grad, numpy
+        from jax import numpy
 
-    grad = _grad
-    backend = numpy
+        grad = _grad
+        backend = numpy
+
+    else:
+        logger.warning("jax not found. Falling back to default numpy backend.")
+        set_backend("numpy")
 elif "_TORCH" in globals():
     if HAS_TORCH:
         import numpy
