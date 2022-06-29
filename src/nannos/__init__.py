@@ -54,6 +54,12 @@ HAS_CUDA = _has_cuda()
 
 HAS_JAX = has_jax()
 
+if HAS_TORCH:
+    available_backends.append("torch")
+
+if HAS_JAX:
+    available_backends.append("jax")
+
 
 def use_gpu(boolean):
     global DEVICE

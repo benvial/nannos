@@ -6,13 +6,6 @@
 # See the documentation at nannos.gitlab.io
 
 
-def test_metadata(monkeypatch):
-    import sys
-
-    monkeypatch.setitem(sys.modules, "importlib.metadata", None)
-    import nannos
-
-
 def test_nometadata():
     import importlib
 

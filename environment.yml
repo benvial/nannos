@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - pytorch
 dependencies:
-  - python=3.9
+  - python>=3.8
   - pip
   - numpy
   - scipy
@@ -21,6 +21,6 @@ dependencies:
   - pythreejs
   - ipyvtklink
   - panel
+  - autograd
   - pip:
-    - autograd-latest
     - git+https://gitlab.com/nannos/nannos.git

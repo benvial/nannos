@@ -26,15 +26,16 @@ def test_backend():
     assert nn.get_backend() == "autograd"
     assert nn.BACKEND == "autograd"
 
-    nn.set_backend("jax")
-    assert nn.numpy.__name__ == "jax.numpy"
-    assert nn.backend.__name__ == "jax.numpy"
-    assert nn.get_backend() == "jax"
-    assert nn.BACKEND == "jax"
+    if nn.has_jax():
+        nn.set_backend("jax")
+        assert nn.numpy.__name__ == "jax.numpy"
+        assert nn.backend.__name__ == "jax.numpy"
+        assert nn.get_backend() == "jax"
+        assert nn.BACKEND == "jax"
 
-    nn.set_backend("torch")
-    assert nn.numpy.__name__ == "numpy"
     if nn.has_torch():
+        nn.set_backend("torch")
+        assert nn.numpy.__name__ == "numpy"
         assert nn.get_backend() == "torch"
         assert nn.backend.__name__ == "torch"
         assert nn.BACKEND == "torch"
