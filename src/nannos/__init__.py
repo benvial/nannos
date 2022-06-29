@@ -11,7 +11,7 @@ from .__about__ import __author__, __description__, __version__
 from .__about__ import data as _data
 from .log import *
 
-available_backends = ["numpy", "scipy", "autograd", "jax", "torch"]
+available_backends = ["numpy", "scipy", "autograd"]
 
 
 def print_info():

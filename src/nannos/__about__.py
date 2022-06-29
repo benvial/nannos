@@ -6,7 +6,11 @@
 # See the documentation at nannos.gitlab.io
 
 
-import importlib.metadata as metadata
+try:
+    # Python 3.8
+    import importlib.metadata as metadata
+except ImportError:
+    import importlib_metadata as metadata
 
 
 def get_meta(metadata):
