@@ -389,12 +389,19 @@ checksum:
 ## Update conda-forge package
 conda: checksum
 	$(call message,${@})
-	@echo Conda package not published yet
-
+	cd .. && rm -rf nannos-feedstock && \
+	git clone https://github.com/benvial/nannos-feedstock && cd nannos-feedstock  && \
+	git branch v$(VERSION) && git checkout v$(VERSION) && \
+	sed -i "s/sha256: .*/sha256: $(SHA256)/" recipe/meta.yaml && \
+	sed -i "s/number: .*/number: 0/" recipe/meta.yaml && \
+	sed -i "s/{% set version = .*/{% set version = \"$(VERSION)\" %}/" recipe/meta.yaml && \
+	git add . && \
+	git commit -a -m "New version $(VERSION)" && \
+	git push origin v$(VERSION) && echo done
 
 
 ## Publish release on pypi and conda-forge
-publish: tag release pypi #conda
+publish: tag release pypi conda
 	$(call message,${@})
 
 ## Update header text
