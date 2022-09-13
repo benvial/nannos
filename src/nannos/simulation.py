@@ -551,7 +551,7 @@ class Simulation:
             ix = bk.arange(self.nh)
             jx, jy = bk.meshgrid(ix, ix, indexing="ij")
             delta = self.harmonics[:, jx] - self.harmonics[:, jy]
-            return uft[delta[0, :], delta[1, :]]
+            return uft[delta[0], delta[1]]
 
     def build_matrix(self, layer):
         _t0 = timer.tic()

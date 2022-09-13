@@ -201,7 +201,6 @@ class Layer:
             # else:
             #     eig_func = bk.linalg.eig
             eig_func = jit(bk.linalg.eig)
-
             w, v = eig_func(matrix)
             q = w**0.5
             q = bk.where(bk.imag(q) < 0.0, -q, q)
