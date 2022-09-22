@@ -40,7 +40,7 @@ def adaptive_sampler(f, x, max_bend=10, max_x_rel=1e-3, max_df=0.05, n_jobs=1):
     tuple
         The sampling points and sampled values
     """
-    if njobs > 1:
+    if n_jobs > 1:
 
         @parloop(n_jobs=n_jobs)
         def _function_adapted(x):
