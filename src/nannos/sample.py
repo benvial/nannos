@@ -12,11 +12,35 @@ from . import numpy as np
 from .parallel import parloop
 
 
-def adaptive_sampler(
-    f, x, max_bend=10, max_x_rel=1e-3, max_df=0.05, parallel=False, n_jobs=1
-):
+def adaptive_sampler(f, x, max_bend=10, max_x_rel=1e-3, max_df=0.05, n_jobs=1):
+    """Adaptive sampler.
 
-    if parallel:
+    Parameters
+    ----------
+    f : function
+        The function to sample. The first return value should be real scalar
+        that would be used as a metric for adaptive sampling.
+    x : _type_
+        _description_
+    max_bend : float, optional
+        Maximum bend angle of the normalized angle between
+        adjacent segments. For angles larger than the maximum bend angle,
+        one of the adjacent intervals is subdivided, by default 10
+    max_x_rel : float, optional
+        The relative space (relative to the sampling interval size) below
+        which subdivision will not occur, by default 1e-3
+    max_df : float, optional
+        The threshold below which the difference between adjacent result
+        values will not cause an interval to be subdivided, by default 0.05
+    n_jobs : int, optional
+        Number of parallel jobs, by default 1
+
+    Returns
+    -------
+    tuple
+        The sampling points and sampled values
+    """
+    if njobs > 1:
 
         @parloop(n_jobs=n_jobs)
         def _function_adapted(x):
