@@ -25,11 +25,11 @@ def f(x):
 def test_all():
 
     all_x, all_y = adaptive_sampler(bumps, x)
-    all_x_para, all_y_para = adaptive_sampler(bumps, x, parallel=True, n_jobs=2)
+    all_x_para, all_y_para = adaptive_sampler(bumps, x, n_jobs=2)
     assert np.allclose(all_x, all_x_para)
     assert np.allclose(all_y, all_y_para)
 
     all_x, all_y = adaptive_sampler(f, x)
-    all_x_para, all_y_para = adaptive_sampler(f, x, parallel=True, n_jobs=2)
+    all_x_para, all_y_para = adaptive_sampler(f, x, n_jobs=2)
     assert np.allclose(all_x, all_x_para)
     assert np.allclose(all_y, all_y_para)

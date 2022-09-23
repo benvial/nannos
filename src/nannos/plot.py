@@ -80,7 +80,9 @@ def plot_layer(
             trans_data = transform + ax.transData
             im.set_transform(trans_data)
             ims.append(im)
-    lx, ly = [bk.linalg.norm(v) for v in lattice.basis_vectors]
+    lx, ly = [
+        bk.linalg.norm(bk.array(v, dtype=bk.float64)) for v in lattice.basis_vectors
+    ]
     lmax = max(lx, ly)
     delta = 0.1 * lmax
     ax.set_xlim(-delta, nperx * bv[0][0] + npery * bv[1][0] + delta)
