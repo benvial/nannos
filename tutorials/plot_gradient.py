@@ -128,3 +128,5 @@ tauto = nn.toc(t0)
 assert nn.backend.allclose(df_fd, df_auto, atol=1e-7)
 
 print("speedup: ", tfd / tauto)
+
+nn.set_backend("numpy")
