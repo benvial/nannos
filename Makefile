@@ -409,6 +409,19 @@ header:
 	$(call message,${@})
 	@cd dev && python update_header.py
 
+
+## Download and install fonts locally
+fonts:
+	$(call message,${@})
+	@rm -rf ~/.cache/matplotlib && \
+	bash doc/binder/postBuild
+
+## Copy matplotlib stylesheet
+stylesheet:
+	$(call message,${@})
+	@mkdir -p ${HOME}/.config/matplotlib && \
+	cp doc/_custom/nannos.mplstyle matplotlibrc ${HOME}/.config/matplotlib/
+
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################

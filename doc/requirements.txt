@@ -1,6 +1,6 @@
 sphinx
-pydata-sphinx-theme
-sphinx_gallery
+pydata-sphinx-theme<0.10
+sphinx_gallery==v0.10.1 
 sphinx-copybutton
 memory_profiler
 numpydoc
