@@ -59,15 +59,12 @@ class VersionTable(Magics):
 
         packages = []
 
-        packages_names = ["nannos", "numpy", "scipy", "matplotlib"]
+        packages_names = ["nannos", "numpy", "scipy", "autograd", "jax", "torch"]
 
         for pkg in packages_names:
             ver = pkg_resources.get_distribution(pkg).version
 
             packages.append((f"<code>{pkg}</code>", ver))
-
-        ver = pkg_resources.get_distribution("autograd").version
-        packages.append(("<code>autograd</code>", ver))
 
         for name, version in packages:
             html += f"<tr><td>{name}</td><td>{version}</td></tr>"
