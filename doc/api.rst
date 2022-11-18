@@ -23,5 +23,6 @@ API Reference
   :toctree: generated/
   :template: function.rst
   
-  set_backend
   set_log_level
+  set_backend
+  adaptive_sampler

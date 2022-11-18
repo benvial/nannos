@@ -135,8 +135,8 @@ class Lattice:
 
         """
         Nx, Ny = self.discretization
-        x0 = bk.linspace(0, 1.0, Nx)
-        y0 = bk.linspace(0, 1.0, Ny)
+        x0 = bk.array(bk.linspace(0, 1.0, Nx))
+        y0 = bk.array(bk.linspace(0, 1.0, Ny))
         x_, y_ = bk.meshgrid(x0, y0, indexing="ij")
         grid = bk.stack([x_, y_])
         return grid

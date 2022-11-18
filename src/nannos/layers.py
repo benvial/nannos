@@ -17,7 +17,7 @@ from .formulations.jones import get_jones_field
 from .formulations.tangent import get_tangent_field
 from .plot import *
 from .utils import block
-from .utils.helpers import _reseter
+from .utils.helpers import _reseter, is_anisotropic, is_uniform
 
 
 class Layer:
@@ -243,16 +243,7 @@ class Layer:
             ``True`` if the layer is uniform, ``False`` if not.
 
         """
-        if self.is_epsilon_anisotropic:
-            e = self.epsilon.shape == (3, 3)
-        else:
-            e = self.epsilon.shape == ()
-        if self.is_mu_anisotropic:
-            m = self.mu.shape == (3, 3)
-        else:
-            m = self.mu.shape == ()
-
-        return e and m
+        return is_uniform(self.epsilon) and is_uniform(self.mu)
 
     def get_tangent_field(self, harmonics, normalize=False, type=None):
         type = type or self.tangent_field_type
@@ -276,10 +267,6 @@ class Layer:
             return None
         else:
             return get_jones_field(t)
-
-
-def is_anisotropic(f):
-    return f.shape[:2] == (3, 3)
 
 
 def _get_layer(id, layers, layer_names):

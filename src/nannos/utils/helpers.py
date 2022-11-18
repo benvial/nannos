@@ -30,8 +30,27 @@ def unique(x):
     return not any(i in seen or seen.append(i) for i in x)
 
 
-def is_scalar(z):
-    return not hasattr(z, "__len__")
+def is_scalar(x):
+    return not hasattr(x, "__len__")
+
+
+def is_anisotropic(x):
+    if is_scalar(x):
+        return False
+    else:
+        return x.shape[:2] == (3, 3)
+
+
+def is_uniform(x):
+    if is_scalar(x):
+        return True
+    if is_anisotropic(x):
+        return x.shape == (3, 3)
+    else:
+        if len(x.shape) == 1:
+            return x.shape[0] == 1
+        else:
+            return x.shape == ()
 
 
 def set_index(mat, idx, val):

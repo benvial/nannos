@@ -294,6 +294,7 @@ def get_device():
 BACKEND = get_backend()
 DEVICE = get_device()
 
+
 _backend_env_var = os.environ.get("NANNOS_BACKEND")
 
 if _backend_env_var in available_backends and _backend_env_var is not None:
