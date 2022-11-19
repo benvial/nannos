@@ -1,6 +1,7 @@
 
-image: condaforge/mambaforge:latest
 
+# pyvista config for x server
+# see https://github.com/pyvista/gl-ci-helpers/blob/master/travis/setup_headless_display.sh
 
 variables:
   TERM: "xterm"
@@ -8,35 +9,24 @@ variables:
   PYVISTA_OFF_SCREEN: "true"
 
 
+stages:
+  - badge
+  - zenodo
+  - trigdoc
+  - trigdocker
+  - test
 
 .before-python: &before-python
   ## install os tools
   - apt-get update -q && apt-get install -q -y --no-install-recommends make libgl1-mesa-dev xvfb
-  - mamba env create -f environment.yml
-  - conda init bash
-  - conda config --set always_yes yes --set changeps1 no
-  - source ~/.bashrc
-  - source activate nannos
   - python -V  # Print out python version for debugging
-  # pyvista config for x server
-  # see https://github.com/pyvista/gl-ci-helpers/blob/master/travis/setup_headless_display.sh
-  # - export DISPLAY=:99.0
-  # - export PYVISTA_OFF_SCREEN=True
   - which Xvfb
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   - sleep 3
 
 
-
-# stages:
-#   - badge
-#   # - zenodo
-#   - trigdoc
-#   - test
-
-
-
 badge:
+  stage: badge
   image: alpine/git:latest
   entrypoint: [""]
   script:
@@ -52,12 +42,22 @@ badge:
         - logobadge.json
 
 staging:
+  stage: trigdoc
   trigger: nannos/nannos.gitlab.io
   only:
     - master
 
 
+container:
+  stage: trigdocker
+  trigger: nannos/docker
+  only:
+    - tags
+
+
 test:
+  stage: test
+  image: benvial/nannos:latest
   before_script:
     - *before-python
   script:
@@ -75,6 +75,7 @@ test:
     - master
 
 send-snapshot:
+  stage: zenodo
   image: python
   script:
     - apk update && apk add git
