@@ -27,8 +27,9 @@ stages:
 
 badge:
   stage: badge
-  image: alpine/git:latest
-  entrypoint: [""]
+  image:
+    name: alpine/git:latest
+    entrypoint: [""]
   script:
     - echo "collecting stats for badges"
     - commits=`git rev-list --all --count`
