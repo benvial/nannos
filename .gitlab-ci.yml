@@ -1,5 +1,5 @@
+image: condaforge/mambaforge:latest
 
-image: continuumio/miniconda3:latest
 
 
 variables:
@@ -9,12 +9,13 @@ variables:
 
 
 
-before_script:
+.before-python: &before-python
   ## install os tools
   - apt-get update -q && apt-get install -q -y --no-install-recommends make libgl1-mesa-dev xvfb
+  - mamba env create -f environment.yml
+  - conda init bash
   - conda config --set always_yes yes --set changeps1 no
-  - conda config --add channels conda-forge
-  - conda env create -f environment.yml
+  - source ~/.bashrc
   - source activate nannos
   - python -V  # Print out python version for debugging
   # pyvista config for x server
@@ -36,6 +37,7 @@ before_script:
 
 
 badge:
+  image: alpine/git:latest
   script:
     - echo "collecting stats for badges"
     - commits=`git rev-list --all --count`
@@ -55,7 +57,8 @@ staging:
 
 
 test:
-  script:
+  before_script:
+    - *before-python
     - make install
     - make test-req
     - make test
@@ -70,7 +73,9 @@ test:
     - master
 
 send-snapshot:
+  image: python
   script:
+    - apk update && apk add git
     - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
     - pip install gitlab2zenodo
     - git archive --format zip --output ${CI_COMMIT_TAG#v}.zip ${CI_COMMIT_TAG}
