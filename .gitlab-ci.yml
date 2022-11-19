@@ -1,5 +1,5 @@
-image: condaforge/mambaforge:latest
 
+image: condaforge/mambaforge:latest
 
 
 variables:
@@ -38,6 +38,7 @@ variables:
 
 badge:
   image: alpine/git:latest
+  entrypoint: [""]
   script:
     - echo "collecting stats for badges"
     - commits=`git rev-list --all --count`

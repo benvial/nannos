@@ -15,10 +15,10 @@ dependencies:
   - ipython
   - nlopt
   - pytorch
+  - pytorch-gpu
   - jax
   - jaxlib
   - magma
-  - cudatoolkit=10.2
   - pyvista
   - pythreejs
   - ipyvtklink
