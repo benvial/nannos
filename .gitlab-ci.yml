@@ -59,6 +59,7 @@ staging:
 test:
   before_script:
     - *before-python
+  script:
     - make install
     - make test-req
     - make test
