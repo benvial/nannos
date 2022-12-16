@@ -1,9 +1,9 @@
 
-.. |release_badge| image:: https://img.shields.io/endpoint?url=https://gitlab.com/nannos/nannos/-/jobs/artifacts/master/file/logobadge.json?job=badge
+.. |release_badge| image:: https://img.shields.io/endpoint?url=https://gitlab.com/nannos/nannos/-/jobs/artifacts/master/raw/logobadge.json?job=badge
   :target: https://gitlab.com/nannos/nannos/-/releases
   :alt: Release
 
-.. |GL_CI| image:: https://img.shields.io/gitlab/pipeline/nannos/nannos/master?logo=gitlab&labelColor=dedede&logoColor=ffffff&style=for-the-badge
+.. |GL_CI| image:: https://img.shields.io/gitlab/pipeline/nannos/nannos/master?logo=gitlab&labelColor=grey&style=for-the-badge
   :target: https://gitlab.com/nannos/nannos/commits/master
   :alt: pipeline status
 
@@ -42,6 +42,8 @@
   :target: https://gitlab.com/nannos/nannos/-/blob/master/LICENCE.txt
   :alt: license
 
++----------------------+----------------------+----------------------+
+| Release              |            |release_badge|                  |
 +----------------------+----------------------+----------------------+
 | Deployment           | |pip|                |        |conda|       |
 +----------------------+----------------------+----------------------+
