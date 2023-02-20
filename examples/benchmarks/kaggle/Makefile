@@ -2,8 +2,6 @@
 SHELL := /bin/bash
 
 
-all: pull dld push
-
 pull:
 	kaggle kernels pull benjaminvial/nannos -m -p nannos/
 

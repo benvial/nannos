@@ -32,9 +32,6 @@ TEST_ARGS=-n auto #--dist loadscope
 endif
 
 
-
-
-
 message = @make -s printmessage RULE=${1}
 
 printmessage:

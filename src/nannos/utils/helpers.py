@@ -124,14 +124,12 @@ def _reseter(prop, attr=None):
 
 
 def _apply_filter(x, rfilt, vectors=None):
-    if rfilt == 0 or bk.allclose(
-        bk.array(rfilt, dtype=bk.float64), bk.array((0, 0), dtype=bk.float64)
-    ):
+    if is_scalar(rfilt):
+        rfilt = (rfilt, rfilt)
+
+    if rfilt == (0, 0):
         return x
     else:
-
-        if is_scalar(rfilt):
-            rfilt = (rfilt, rfilt)
         Nx, Ny = x.shape
 
         if vectors is not None:
