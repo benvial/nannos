@@ -1,0 +1,17 @@
+{
+  "id": "benjaminvial/nannos",
+  "id_no": 35257948,
+  "title": "nannos",
+  "code_file": "nannos.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "keywords": [
+    "gpu"
+  ],
+  "dataset_sources": [],
+  "kernel_sources": [],
+  "competition_sources": []
+}

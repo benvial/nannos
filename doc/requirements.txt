@@ -12,3 +12,4 @@ jupyter-sphinx
 pythreejs
 ipyvtklink
 sphinx-thebe
+kaggle

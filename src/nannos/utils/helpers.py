@@ -124,7 +124,9 @@ def _reseter(prop, attr=None):
 
 
 def _apply_filter(x, rfilt, vectors=None):
-    if rfilt == 0 or rfilt == (0, 0):
+    if rfilt == 0 or bk.allclose(
+        bk.array(rfilt, dtype=bk.float64), bk.array((0, 0), dtype=bk.float64)
+    ):
         return x
     else:
 
