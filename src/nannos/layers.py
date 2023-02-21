@@ -11,6 +11,7 @@ __all__ = ["Layer"]
 
 from copy import copy
 
+from . import BACKEND, DEVICE
 from . import backend as bk
 from . import jit
 from .formulations.jones import get_jones_field
@@ -187,21 +188,21 @@ class Layer:
             )
 
         else:
-            # # TODO: implement custom autodiff rules for the evp with jax
-            # if BACKEND == "jax":
-            #     # from ._jax_eig_workaround import eig_jax
-            #     eig_func = bk.linalg.eig
-            # elif BACKEND == "torch":
-            #     from . import torch
-            #
-            #     def eig_func(u):
-            #         u = torch.tensor(u)#.to(_device)
-            #         return torch.linalg.eig(u)
-            #
-            # else:
-            #     eig_func = bk.linalg.eig
-            eig_func = jit(bk.linalg.eig)
-            w, v = eig_func(matrix)
+            # TODO: implement custom autodiff rules for the evp with jax
+            # if get_backend() == "jax" and get_device()=="cuda":
+            if BACKEND == "jax" and DEVICE == "cuda":
+                # fix for GPU
+                # from ._jax_eig_workaround import eig_jax
+                import jax
+
+                w, v = jax.jit(jax.numpy.linalg.eig, backend="cpu")(matrix)
+                w = jax.device_put(w, jax.devices("gpu")[0])
+                v = jax.device_put(v, jax.devices("gpu")[0])
+
+            else:
+                eig_func = bk.linalg.eig
+                eig_func = jit(bk.linalg.eig)
+                w, v = eig_func(matrix)
             q = w**0.5
             q = bk.where(bk.imag(q) < 0.0, -q, q)
             self.eigenvalues, self.eigenvectors = q, v

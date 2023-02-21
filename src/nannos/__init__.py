@@ -68,13 +68,17 @@ def use_gpu(boolean):
 
     if boolean:
 
-        if BACKEND not in ["torch"]:
+        if BACKEND not in ["torch", "jax"]:
             logger.debug(f"Cannot use GPU with {BACKEND} backend.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
         else:
             if not HAS_TORCH:
                 logger.warning("pytorch not found. Cannot use GPU.")
+                _delvar("_GPU_DEVICE")
+                _CPU_DEVICE = True
+            elif not HAS_CUDA:
+                logger.warning("jax not found. Cannot use GPU.")
                 _delvar("_GPU_DEVICE")
                 _CPU_DEVICE = True
             elif not HAS_CUDA:
@@ -95,6 +99,7 @@ def use_gpu(boolean):
 
 
 def jit(fun, **kwargs):
+    return fun
     if BACKEND == "jax":
         from jax import jit
 
@@ -223,10 +228,16 @@ elif "_AUTOGRAD" in globals():
 elif "_JAX" in globals():
     if HAS_JAX:
 
-        from jax.config import config
+        import jax
 
-        config.update("jax_platform_name", "cpu")
-        config.update("jax_enable_x64", True)
+        if DEVICE == "cpu":
+            # os.environ["CUDA_VISIBLE_DEVICES"] = ""
+            jax.config.update("jax_platform_name", "cpu")
+        else:
+            # os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+            jax.config.update("jax_platform_name", "gpu")
+
+        jax.config.update("jax_enable_x64", True)
 
         # TODO: jax eig not implemented on GPU
         # see https://github.com/google/jax/issues/1259
@@ -236,10 +247,6 @@ elif "_JAX" in globals():
         # for autodif wrt eigenvectors yet.
         # see: https://github.com/google/jax/issues/2748
 
-        # if DEVICE == "cpu":
-        #     config.update("jax_platform_name", "cpu")
-        # else:
-        #     config.update("jax_platform_name", "gpu")
         # from jax import grad, numpy
         from jax import numpy
 
