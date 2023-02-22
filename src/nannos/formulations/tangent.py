@@ -65,7 +65,6 @@ def _get_tangent_field_fft(grid, normalize=False, rfilt=4, expo=0.5):
 def _get_tangent_field_min(
     grid, harmonics, normalize=False, rfilt=4, opt_backend="autograd"
 ):
-
     if opt_backend == "jax":
         from jax import grad
         from jax import numpy as npg

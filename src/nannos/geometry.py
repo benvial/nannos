@@ -76,12 +76,10 @@ def shape_mask(shp, x, y, m=None):
         lx, ly = m.shape
 
         if lx == 1 and ly == 1:
-
             val = shp.contains(sg.Point(x[0], y[0]))
             m = set_index_2d(m, val)
 
         elif lx == 1:
-
             val = shape_mask(shp, x[: ly // 2], y, m[:, : ly // 2])
             m = set_index_2d(m, val, idx2=(None, ly // 2))
             val = shape_mask(shp, x[ly // 2 :], y, m[:, ly // 2 :])

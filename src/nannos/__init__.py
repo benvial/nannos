@@ -67,7 +67,6 @@ def use_gpu(boolean):
     global _GPU_DEVICE
 
     if boolean:
-
         if BACKEND not in ["torch", "jax"]:
             logger.debug(f"Cannot use GPU with {BACKEND} backend.")
             _delvar("_GPU_DEVICE")
@@ -184,7 +183,6 @@ def set_backend(backend):
 
 
 def _reload_package():
-
     import importlib
     import sys
 
@@ -198,7 +196,6 @@ def _reload_package():
 
 
 def get_backend():
-
     if "_SCIPY" in globals():
         return "scipy"
     elif "_AUTOGRAD" in globals():
@@ -216,7 +213,6 @@ def _grad(f):
 
 
 if "_SCIPY" in globals():
-
     import numpy
 
     grad = _grad
@@ -227,7 +223,6 @@ elif "_AUTOGRAD" in globals():
     backend = numpy
 elif "_JAX" in globals():
     if HAS_JAX:
-
         import jax
 
         if DEVICE == "cpu":

@@ -237,7 +237,6 @@ class Simulation:
         try:
             S = self._intermediate_S[f"{stack[0]},{stack[-1]}"]
         except Exception:
-
             for i in stack:
                 layer, layer_next = self.layers[i], self.layers[i + 1]
                 z = layer.thickness or 0
@@ -352,7 +351,6 @@ class Simulation:
     def get_field_grid(
         self, layer_index, z=0, shape=None, field="all", component="all"
     ):
-
         if field not in ["all", "E", "H"]:
             raise ValueError("Wrong field argument, must be `all`, `E` or `H`")
         if component not in ["all", "x", "y", "z"]:
@@ -746,7 +744,6 @@ class Simulation:
         N, nuhat_inv = self._get_nu_hat_inv(layer)
 
         if direct:
-
             T = block([[t[1], bk.conj(t[0])], [-t[0], bk.conj(t[1])]])
 
             invT = inv2by2block(T, N)

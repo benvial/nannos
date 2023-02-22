@@ -20,7 +20,6 @@ no_grad_backends = ["numpy", "scipy", "jax"]
 
 @pytest.mark.parametrize("formulation", formulations)
 def test_grad(formulation):
-
     res = dict()
     dres = dict()
     import nannos as nn
@@ -30,7 +29,6 @@ def test_grad(formulation):
     if nn.HAS_TORCH:
         backends.append("torch")
     for backend in backends:
-
         nn.set_backend(backend)
         from nannos import grad
         from nannos import numpy as np
@@ -59,7 +57,6 @@ def test_grad(formulation):
             assert "grad is not implemented" in str(excinfo.value)
 
         else:
-
             x = nn.backend.array(xlist, dtype=nn.backend.float64)
             y = f(x)
             res[backend] = y

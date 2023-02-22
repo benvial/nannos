@@ -60,6 +60,7 @@ thebe_config = {
     "repository_branch": "doc",
 }
 
+
 # a simple label style which uses the bibtex keys for labels
 class MatchLabelStyle(BaseLabelStyle):
     def format_labels(self, sorted_entries):
@@ -68,7 +69,6 @@ class MatchLabelStyle(BaseLabelStyle):
 
 
 class NannosStyle(UnsrtStyle):
-
     default_label_style = MatchLabelStyle
 
 

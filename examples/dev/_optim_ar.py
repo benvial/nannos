@@ -106,7 +106,6 @@ freqs = np.linspace(1.3, 1.5, 300)
 Rslab = []
 
 for freq in freqs:
-
     sim = run(density=None, freq=freq, nh=2)
     R, T = sim.diffraction_efficiencies()
     print(R)

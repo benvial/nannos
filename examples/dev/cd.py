@@ -49,7 +49,6 @@ plt.clf()
 Wc = W0 - 0.5 * W1 - 0.5 * W2
 
 for wl in wavelengths:
-
     lattice = nn.Lattice([[P, 0], [0, P]], discretization=2**9)
     sup = lattice.Layer("Superstrate", epsilon=eps_SiO2)
     sub = lattice.Layer("Substrate", epsilon=1)

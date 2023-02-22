@@ -23,7 +23,6 @@ def f(x):
 
 
 def test_all():
-
     all_x, all_y = adaptive_sampler(bumps, x)
     all_x_para, all_y_para = adaptive_sampler(bumps, x, n_jobs=2)
     assert np.allclose(all_x, all_x_para)

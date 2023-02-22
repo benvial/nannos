@@ -150,7 +150,6 @@ def pad(dens, Npad):
 
 
 def run(density, proj_level=None, rfilt=0, freq=1, nh=nh, psi=0, nn=nn):
-
     a, hs, density = xtoparams(density)
 
     L1 = (a, 0)
@@ -267,12 +266,10 @@ densities0 = []
 densities_plot0 = []
 
 for i in range(Nlayers):
-
     x, y = bk.linspace(0, 1, Nx), bk.linspace(0, 1, Ny)
     x, y = bk.meshgrid(x, y)
     density0 = bk.ones((Nx, Ny))
     if init == "random":
-
         density0rand = np.random.rand(Nx, Ny)
         # random
         # density0 = bk.array(density0rand)
@@ -294,7 +291,6 @@ for i in range(Nlayers):
         density0 += 0.0001 * np.random.rand(Nx, Ny)
 
     else:
-
         #### uniform
         ## need to add random because if uniform gradient is NaN with torch  (MKL error)
         density0 = bk.ones((Nx, Ny)) * 0.5 + 0.0001 * np.random.rand(Nx, Ny)
@@ -493,11 +489,9 @@ colors = ["#ed7559", "#4589b5", "#cad45f", "#7a6773", "#ed59da"]
 
 
 def plot_struc(sim, p, nper=(1, 1), dz=0.0, opacity=1):
-
     bvs = sim.lattice.basis_vectors
 
     for jx in range(nper[0]):
-
         for jy in range(nper[1]):
             z = 0
             x0, y0 = bvs[0][0] * jx, bvs[1][1] * jy
@@ -506,7 +500,6 @@ def plot_struc(sim, p, nper=(1, 1), dz=0.0, opacity=1):
                 thickness = layer.thickness
                 if thickness == 0:
                     if float(layer.epsilon).real != 1:
-
                         thickness = 3
                 if layer.is_uniform:
                     if thickness != 0:

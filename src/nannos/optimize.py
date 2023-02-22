@@ -113,7 +113,6 @@ class TopologyOptimizer:
             return print(s)
 
     def minimize(self):
-
         self.print("#################################################")
         self.print(f"Topology optimization with {self.nvar} variables")
         self.print("#################################################")

@@ -7,7 +7,6 @@
 
 
 def test_geo():
-
     import shapely.geometry as sg
 
     import nannos as nn

@@ -12,7 +12,7 @@ import pyvista
 
 from . import backend as bk
 
-pyvista.set_jupyter_backend("pythreejs")
+pyvista.set_jupyter_backend("trame")
 pyvista.set_plot_theme("document")
 pyvista.global_theme.background = "white"
 # pyvista.global_theme.window_size = [600, 400]
@@ -123,7 +123,6 @@ def plot_structure(
         ]
     )
     for jx in range(nper[0]):
-
         for jy in range(nper[1]):
             z = 0
             x0, y0 = jx, jy

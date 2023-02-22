@@ -59,7 +59,6 @@ thicknesses = np.linspace(200, 500, nb_thick)
 conv_effs = np.zeros(nb_thick)
 
 for ih, H in enumerate(thicknesses):
-
     # x-polarization
     if ih == 0:
         simx = simu(H, 0)

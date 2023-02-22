@@ -18,7 +18,6 @@ header = """#!/usr/bin/env python
 
 
 def rep_header(python_file, header):
-
     with open(python_file, "r") as f:
         lines = f.readlines()
     i = 0

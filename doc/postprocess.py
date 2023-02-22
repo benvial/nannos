@@ -74,10 +74,8 @@ def postpro_download_links(fn):
 
 
 def process_html(fn, lines):
-
     new_lines = []
     for line in lines:
-
         # Remove escaped arguments from the html files.
         line = line.replace("\*args", "*args")
         line = line.replace("\*\*kwargs", "**kwargs")

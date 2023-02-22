@@ -12,6 +12,7 @@ from jax import custom_vjp
 # batched diag
 _diag = lambda a: jnp.eye(a.shape[-1]) * a
 
+
 # batched diagonal, similar to matrix_diag in tensorflow
 def _matrix_diag(a):
     reps = jnp.array(a.shape)
@@ -24,6 +25,7 @@ def _matrix_diag(a):
 
 
 _dot = partial(jnp.einsum, "...ij,...jk->...ik")
+
 
 # f :: a -> b
 @custom_vjp
