@@ -103,7 +103,7 @@ doc/_custom/static/css/*.css
 doc/generated
 doc/biblio
 
-examples/benchmarks/kaggle/nannos/*
+examples/benchmarks/kaggle/nannos*
 
 # include test data directory
 !tests/data/

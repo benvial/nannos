@@ -20,7 +20,8 @@ dependencies:
   - jaxlib
   - magma
   - pyvista
-  - pythreejs
+  - trame
+  - ipywidgets
   - ipyvtklink
   - panel
   - autograd
