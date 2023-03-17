@@ -33,9 +33,7 @@ def project(x, beta=1, thres=0.5):
 
 def multi_project(x, beta=1, Nthres=2):
     thresholds = bk.linspace(0, 1, Nthres + 1)[1:-1]
-    out = 0
-    for thres in thresholds:
-        out += project(x, beta, thres)
+    out = sum(project(x, beta, thres) for thres in thresholds)
     return out / len(thresholds)
 
 
@@ -45,18 +43,17 @@ def multi_simp(x, epsilons, p=1):
     npts = nthres
     if nthres == 2:
         return simp(x, epsilons[0], epsilons[1], p)
-    else:
-        pts = bk.linspace(0, 1, npts)
+    pts = bk.linspace(0, 1, npts)
 
-        def pol(coefs, x):
-            return sum(c * x ** (n * p) for n, c in enumerate(coefs))
+    def pol(coefs, x):
+        return sum(c * x ** (n * p) for n, c in enumerate(coefs))
 
-        def mat(pts):
-            return bk.array([[_x ** (n * p) + 0j for n in range(npts)] for _x in pts])
+    def mat(pts):
+        return bk.array([[_x ** (n * p) + 0j for n in range(npts)] for _x in pts])
 
-        M = mat(pts)
-        coefs = bk.linalg.inv(M) @ epsilons
-        return pol(coefs, x)
+    M = mat(pts)
+    coefs = bk.linalg.inv(M) @ epsilons
+    return pol(coefs, x)
 
 
 class StopFunError(Exception):
@@ -72,9 +69,8 @@ class StopFun:
 
     def fun(self, x, *args):
         self.f = self.fun_in(x, *args)
-        if self.stopval is not None:
-            if self.f < self.stopval:
-                raise StopFunError("Stop value reached.")
+        if self.stopval is not None and self.f < self.stopval:
+            raise StopFunError("Stop value reached.")
         self.x = x
         return self.f
 
@@ -91,8 +87,10 @@ class TopologyOptimizer:
         args=None,
         callback=None,
         verbose=False,
-        options={},
+        options=None,
     ):
+        if options is None:
+            options = {}
         self.fun = fun
         self.x0 = x0
         self.nvar = len(x0)

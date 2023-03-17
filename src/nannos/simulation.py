@@ -138,7 +138,7 @@ class Simulation:
         self.is_solved = False
         # dictionary to store intermediate S-matrices
         # TODO: check memory consumption of doing that, maybe make it optional.
-        self._intermediate_S = dict()
+        self._intermediate_S = {}
 
     def get_layer(self, id):
         """Helper to get layer index and name.
@@ -324,8 +324,7 @@ class Simulation:
             f = set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
             a = u[i]
             s += a * f
-        ft = fft.inverse_fourier_transform(s, axes=axes)
-        return ft
+        return fft.inverse_fourier_transform(s, axes=axes)
 
     def get_ifft_amplitudes(self, amplitudes, shape, axes=(0, 1)):
         _t0 = timer.tic()
@@ -525,13 +524,13 @@ class Simulation:
     def get_order_index(self, order):
         try:
             len(order) == 2
-        except Exception:
+        except Exception as e:
             if self.lattice.is_1D and isinstance(order, int):
                 order = (order, 0)
             else:
                 raise ValueError(
                     "order must be a tuple of integers length 2 for bi-periodic gratings"
-                )
+                ) from e
         return [
             k for k, i in enumerate(self.harmonics.T) if bk.allclose(i, bk.array(order))
         ][0]
@@ -544,12 +543,11 @@ class Simulation:
             return [
                 [self._get_toeplitz_matrix(u[i, j]) for j in range(2)] for i in range(2)
             ]
-        else:
-            uft = fft.fourier_transform(u)
-            ix = bk.arange(self.nh)
-            jx, jy = bk.meshgrid(ix, ix, indexing="ij")
-            delta = self.harmonics[:, jx] - self.harmonics[:, jy]
-            return uft[delta[0], delta[1]]
+        uft = fft.fourier_transform(u)
+        ix = bk.arange(self.nh)
+        jx, jy = bk.meshgrid(ix, ix, indexing="ij")
+        delta = self.harmonics[:, jx] - self.harmonics[:, jy]
+        return uft[delta[0], delta[1]]
 
     def build_matrix(self, layer):
         _t0 = timer.tic()
@@ -567,12 +565,8 @@ class Simulation:
             layer.Qeps = layer.original.Qeps
             return layer
         Kx, Ky = self.Kx, self.Ky
-        if layer.is_uniform:
-            epsilon = layer.epsilon
-            mu = layer.mu
-        else:
-            epsilon = layer.epsilon
-            mu = layer.mu
+        mu = layer.mu
+        epsilon = layer.epsilon
         if layer.is_uniform:
             # if layer.is_epsilon_anisotropic:
             #     _epsilon = block(
@@ -677,8 +671,9 @@ class Simulation:
             layer.epsilon[2, 2] if layer.is_epsilon_anisotropic else layer.epsilon
         )
         eps_hat = self._get_toeplitz_matrix(epsilon_zz)
-        out = self.get_ifft(eps_hat[:, 0], shape=self.lattice.discretization, axes=axes)
-        return out
+        return self.get_ifft(
+            eps_hat[:, 0], shape=self.lattice.discretization, axes=axes
+        )
         # if inv:
         #     u = layer.eps_hat_inv ## nu_hat
         #     out = self.get_ifft(u[0,:], shape=self.lattice.discretization, axes=axes)
@@ -693,7 +688,7 @@ class Simulation:
         if layer_index == 0:
             aN, b0 = self._solve_ext()
             ai, bi = self.a0, b0
-        elif layer_index == n_interfaces or layer_index == -1:
+        elif layer_index in [n_interfaces, -1]:
             aN, b0 = self._solve_ext()
             ai, bi = aN, self.bN
         else:
@@ -748,14 +743,16 @@ class Simulation:
 
             invT = inv2by2block(T, N)
             # invT = _inv(T)
-            if layer.is_epsilon_anisotropic:
-                Q = block(
-                    [[eps_hat[0][0], nuhat_inv[0][1]], [eps_hat[1][0], nuhat_inv[1][1]]]
+            Q = (
+                block(
+                    [
+                        [eps_hat[0][0], nuhat_inv[0][1]],
+                        [eps_hat[1][0], nuhat_inv[1][1]],
+                    ]
                 )
-
-            else:
-                Q = block([[eps_hat[0][0], self.ZeroG], [self.ZeroG, nuhat_inv]])
-
+                if layer.is_epsilon_anisotropic
+                else block([[eps_hat[0][0], self.ZeroG], [self.ZeroG, nuhat_inv]])
+            )
             That = block(
                 [
                     [self._get_toeplitz_matrix(get_block(T, i, j, N)) for j in range(2)]
@@ -771,7 +768,7 @@ class Simulation:
                     for i in range(2)
                 ]
             )
-            Peps = That @ Q @ invThat
+            return That @ Q @ invThat
 
         else:
             norm_t = norm(t)
@@ -798,8 +795,7 @@ class Simulation:
                     [[nuhat_inv, self.ZeroG], [self.ZeroG, nuhat_inv]]
                 )
 
-            Peps = eps_para_hat - D @ Pi
-        return Peps
+            return eps_para_hat - D @ Pi
 
     def plot_structure(
         self, plotter=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwargs

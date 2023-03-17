@@ -30,7 +30,7 @@ def local_hardware_info():
     Returns:
         dict: The hardware information.
     """
-    results = {
+    return {
         "python_compiler": platform.python_compiler(),
         "python_build": ", ".join(platform.python_build()),
         "python_version": platform.python_version(),
@@ -38,7 +38,6 @@ def local_hardware_info():
         "memory": psutil.virtual_memory().total / (1024**3),
         "cpus": psutil.cpu_count(logical=False) or 1,
     }
-    return results
 
 
 @magics_class
@@ -53,8 +52,7 @@ class VersionTable(Magics):
         and the calculation later on.
         """
 
-        html = "<h3>Version Information</h3>"
-        html += "<table>"
+        html = "<h3>Version Information</h3>" + "<table>"
         html += "<tr><th>Package</th></tr>"
 
         packages = []
@@ -76,17 +74,15 @@ class VersionTable(Magics):
             ("Python version", local_hw_info["python_version"]),
             ("Python compiler", local_hw_info["python_compiler"]),
             ("Python build", local_hw_info["python_build"]),
-            ("OS", "%s" % local_hw_info["os"]),
-            ("CPUs", "%s" % local_hw_info["cpus"]),
-            ("Memory (Gb)", "%s" % local_hw_info["memory"]),
+            ("OS", f'{local_hw_info["os"]}'),
+            ("CPUs", f'{local_hw_info["cpus"]}'),
+            ("Memory (Gb)", f'{local_hw_info["memory"]}'),
         ]
 
         for name, version in sys_info:
             html += f"<tr><td>{name}</td><td>{version}</td></tr>"
 
-        html += "<tr><td colspan='2'>%s</td></tr>" % time.strftime(
-            "%a %b %d %H:%M:%S %Y %Z"
-        )
+        html += f"""<tr><td colspan='2'>{time.strftime("%a %b %d %H:%M:%S %Y %Z")}</td></tr>"""
         html += "</table>"
 
         return display(HTML(html))

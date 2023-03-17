@@ -96,10 +96,7 @@ def plot_layer(
 def plot_structure(
     sim, plotter=None, nper=(1, 1), dz=0.0, null_thickness=None, **kwargs
 ):
-    if "layer_colors" in kwargs:
-        layer_colors = kwargs.pop("layer_colors")
-    else:
-        layer_colors = None
+    layer_colors = kwargs.pop("layer_colors") if "layer_colors" in kwargs else None
     if "layer_metallic" in kwargs:
         layer_metallic = kwargs.pop("layer_metallic")
     else:

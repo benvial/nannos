@@ -40,8 +40,7 @@ meta.epsilon = epsgrid
 lays.append(meta)
 
 
-il = 0
-for radius, thickness in zip([0.4, 0.2, 0.1], [0.3, 0.7, 0.1]):
+for il, (radius, thickness) in enumerate(zip([0.4, 0.2, 0.1], [0.3, 0.7, 0.1])):
     hole = lattice.circle(center=(0.5, 0.5), radius=radius)
     ids = lattice.ones()
     epsgrid = ids * (np.random.rand(1) * 10 + 2)
@@ -49,9 +48,6 @@ for radius, thickness in zip([0.4, 0.2, 0.1], [0.3, 0.7, 0.1]):
     st = lattice.Layer(f"Pattern Hole {il}", thickness=thickness)
     st.epsilon = epsgrid
     lays.append(st)
-    il += 1
-
-
 sub = lattice.Layer("Substrate", epsilon=4)
 lays.append(sub)
 

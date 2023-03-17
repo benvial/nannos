@@ -33,7 +33,7 @@ for Rad in patch_size:
     metaatom = lattice.circle((0.5 * P, 0.5 * P), Rad)
     epsilon[metaatom] = eps_Si
     ms = lattice.Layer("Metasurface", thickness=H, epsilon=epsilon)
-    pw = nn.PlaneWave(wavelength=1 / 1 / wl, angles=(0.0 * nn.pi / 2, 0, 0))
+    pw = nn.PlaneWave(wavelength=1 / wl, angles=(0.0 * nn.pi / 2, 0, 0))
     sim = nn.Simulation([sup, ms, sub], pw, nh=nh, formulation=formulation)
     R, T = sim.diffraction_efficiencies()
     aN = sim.S @ sim.a0

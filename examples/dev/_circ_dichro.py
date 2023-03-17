@@ -115,13 +115,12 @@ theta, phi, psi = 3.7, 0, 0
 freq = 1 / wls[0]
 
 
-Tpola = dict()
+Tpola = {}
 
 
 plt.figure()
 CD_spetra = []
-i = 0
-for wl in wls:
+for i, wl in enumerate(wls, start=1):
     freq = 1 / wl
 
     for orientation in ["right", "left"]:
@@ -143,7 +142,6 @@ for wl in wls:
     CD_spetra.append(CD)
 
     plt.plot(wl, CD, "sr")
-    i += 1
     plt.plot(wls[:i], CD_spetra, "r")
     plt.pause(0.1)
 
@@ -181,7 +179,7 @@ for wl in wls:
         # np.abs(at[0] / ai[0]) ** 2
         # np.abs(at[sim.nh] / ai[0]) ** 2
 
-        htot = sum([s.thickness for s in sim.layers])
+        htot = sum(s.thickness for s in sim.layers)
 
         e, h = sim.get_field_fourier(2, z=htot)[0]
         # e, h = sim.fields_fourier[0]

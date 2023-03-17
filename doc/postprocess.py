@@ -32,7 +32,7 @@ def main():
     mode = args.pop(0)
 
     if mode not in ("html", "tex"):
-        p.error("unknown mode %s" % mode)
+        p.error(f"unknown mode {mode}")
 
     for fn in args:
         f = io.open(fn, "r", encoding="utf-8")
@@ -60,15 +60,13 @@ def postpro_download_links(fn):
     with open(fn, "r") as file:
         soup = BeautifulSoup(file, "html.parser")
     for item in soup.findAll(["div"]):
-        if item.get("class") is not None:
-            if "sphx-glr-footer" in item.get("class"):
-                sgfoot = item
+        if item.get("class") is not None and "sphx-glr-footer" in item.get("class"):
+            sgfoot = item
 
     if sgfoot is not None:
         for item in soup.findAll(["div"]):
-            if item.get("class") is not None:
-                if "d-none" in item.get("class"):
-                    item.insert(0, sgfoot)
+            if item.get("class") is not None and "d-none" in item.get("class"):
+                item.insert(0, sgfoot)
     with open(fn, "w") as file:
         file.write(str(soup))
 
@@ -130,7 +128,7 @@ def process_html(fn, lines):
 
         first_tag = '<span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code'
         second_tag = "</span></code></a></p>"
-        reg = "(?<=%s).*?(?=%s)" % (first_tag, second_tag)
+        reg = f"(?<={first_tag}).*?(?={second_tag})"
 
         line = re.sub(reg, "", line, flags=re.DOTALL)
         if icon_python not in line:
@@ -141,7 +139,7 @@ def process_html(fn, lines):
             )
 
         first_tag = '<span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook'
-        reg = "(?<=%s).*?(?=%s)" % (first_tag, second_tag)
+        reg = f"(?<={first_tag}).*?(?={second_tag})"
         line = re.sub(reg, "", line, flags=re.DOTALL)
         # if icon_jupyter in line:
         if icon_jupyter not in line:
@@ -149,13 +147,13 @@ def process_html(fn, lines):
 
         first_tag = '<span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code'
         second_tag = "</span></code></a></p>"
-        reg = "(?<=%s).*?(?=%s)" % (first_tag, second_tag)
+        reg = f"(?<={first_tag}).*?(?={second_tag})"
         line = re.sub(reg, "", line, flags=re.DOTALL)
         if icon_python not in line:
             line = line.replace(first_tag, icon_python + first_tag)
 
         first_tag = '<span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Jupyter</span> <span class="pre">notebooks'
-        reg = "(?<=%s).*?(?=%s)" % (first_tag, second_tag)
+        reg = f"(?<={first_tag}).*?(?={second_tag})"
         line = re.sub(reg, "", line, flags=re.DOTALL)
         if icon_jupyter not in line:
             line = line.replace(first_tag, icon_jupyter + first_tag)
@@ -169,19 +167,15 @@ def process_tex(lines):
     Remove unnecessary section titles from the LaTeX file.
 
     """
-    new_lines = []
-    for line in lines:
-        if (
-            line.startswith(r"\section{nannos.")
-            or line.startswith(r"\subsection{nannos.")
-            or line.startswith(r"\subsubsection{nannos.")
-            or line.startswith(r"\paragraph{nannos.")
-            or line.startswith(r"\subparagraph{nannos.")
-        ):
-            pass  # skip!
-        else:
-            new_lines.append(line)
-    return new_lines
+    return [
+        line
+        for line in lines
+        if not line.startswith(r"\section{nannos.")
+        and not line.startswith(r"\subsection{nannos.")
+        and not line.startswith(r"\subsubsection{nannos.")
+        and not line.startswith(r"\paragraph{nannos.")
+        and not line.startswith(r"\subparagraph{nannos.")
+    ]
 
 
 if __name__ == "__main__":

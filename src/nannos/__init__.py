@@ -71,24 +71,19 @@ def use_gpu(boolean):
             logger.debug(f"Cannot use GPU with {BACKEND} backend.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
+        elif not HAS_TORCH:
+            logger.warning("pytorch not found. Cannot use GPU.")
+            _delvar("_GPU_DEVICE")
+            _CPU_DEVICE = True
+        elif not HAS_CUDA:
+            logger.warning("jax not found. Cannot use GPU.")
+            _delvar("_GPU_DEVICE")
+            _CPU_DEVICE = True
         else:
-            if not HAS_TORCH:
-                logger.warning("pytorch not found. Cannot use GPU.")
-                _delvar("_GPU_DEVICE")
-                _CPU_DEVICE = True
-            elif not HAS_CUDA:
-                logger.warning("jax not found. Cannot use GPU.")
-                _delvar("_GPU_DEVICE")
-                _CPU_DEVICE = True
-            elif not HAS_CUDA:
-                logger.warning("cuda not found. Cannot use GPU.")
-                _delvar("_GPU_DEVICE")
-                _CPU_DEVICE = True
-            else:
-                DEVICE = "cuda"
-                logger.debug("Using GPU.")
-                _delvar("_CPU_DEVICE")
-                _GPU_DEVICE = True
+            DEVICE = "cuda"
+            logger.debug("Using GPU.")
+            _delvar("_CPU_DEVICE")
+            _GPU_DEVICE = True
     else:
         _CPU_DEVICE = True
         _delvar("_GPU_DEVICE")
@@ -99,12 +94,6 @@ def use_gpu(boolean):
 
 def jit(fun, **kwargs):
     return fun
-    if BACKEND == "jax":
-        from jax import jit
-
-        return jit(fun, **kwargs)
-    else:
-        return fun
 
 
 def _delvar(VAR):
@@ -299,10 +288,14 @@ DEVICE = get_device()
 
 _backend_env_var = os.environ.get("NANNOS_BACKEND")
 
-if _backend_env_var in available_backends and _backend_env_var is not None:
-    if BACKEND != _backend_env_var and "_FORCE_BACKEND" not in globals():
-        logger.debug(f"Found environment variable NANNOS_BACKEND={_backend_env_var}")
-        set_backend(_backend_env_var)
+if (
+    _backend_env_var in available_backends
+    and _backend_env_var is not None
+    and BACKEND != _backend_env_var
+    and "_FORCE_BACKEND" not in globals()
+):
+    logger.debug(f"Found environment variable NANNOS_BACKEND={_backend_env_var}")
+    set_backend(_backend_env_var)
 
 from . import optimize
 from .constants import *

@@ -13,6 +13,7 @@ Photonic crystal slab
 Metasurface with holes.
 """
 
+
 # sphinx_gallery_thumbnail_number = 1
 
 import matplotlib as mpl
@@ -118,7 +119,7 @@ axT.annotate(
     (0.5, 0.9),
     xycoords="axes fraction",
 )
-plt.suptitle("Diffraction efficiencies: $R+T=$" + f"{sum(Ri[:nmax]+Ti[:nmax]):0.4f}")
+plt.suptitle(f"Diffraction efficiencies: $R+T=${sum(Ri[:nmax] + Ti[:nmax]):0.4f}")
 plt.tight_layout()
 plt.show()
 

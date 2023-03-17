@@ -13,6 +13,7 @@ Benchmarks
 Backend performace comparison, with GPU acceleration, as run on Kaggle (https://www.kaggle.com/code/benjaminvial/nannos_cpu)
 """
 
+
 import os
 
 import matplotlib.pyplot as plt
@@ -44,8 +45,8 @@ cases = ["numpy", "scipy", "autograd", "torch cpu", "torch gpu", "jax cpu", "jax
 ##############################################################################
 # Time vs. number of harmonics
 # ------------------------------
-tav = dict()
-tstd = dict()
+tav = {}
+tstd = {}
 for case in cases:
     t = np.array(timings[case])[:, ifirst:]
     tav[case] = np.mean(t, axis=1)
@@ -80,8 +81,8 @@ plt.tight_layout()
 # Speedup vs. number of harmonics
 # -----------------------------------
 
-speedup_av = dict()
-speedup_std = dict()
+speedup_av = {}
+speedup_std = {}
 
 for case in cases[1:]:
     s = np.array(timings["numpy"])[:, ifirst:] / np.array(timings[case])[:, ifirst:]

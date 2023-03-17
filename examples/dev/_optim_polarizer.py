@@ -20,7 +20,7 @@ import nannos as nn
 
 
 def savefig(dir, base, it):
-    name = dir + "/" + base + str(it).zfill(4) + ".png"
+    name = f"{dir}/{base}{str(it).zfill(4)}.png"
     plt.savefig(name)
 
 
@@ -178,9 +178,7 @@ def run(density, proj_level=None, rfilt=0, freq=1, nh=nh, psi=0, nn=nn):
         stack.append(ms)
     # stack += [lay, sub]
     stack += [sub]
-    sim = nn.Simulation(stack, pw, nh, formulation=formulation)
-
-    return sim
+    return nn.Simulation(stack, pw, nh, formulation=formulation)
 
 
 ##############################################################################
@@ -269,19 +267,9 @@ for i in range(Nlayers):
     x, y = bk.linspace(0, 1, Nx), bk.linspace(0, 1, Ny)
     x, y = bk.meshgrid(x, y)
     density0 = bk.ones((Nx, Ny))
-    if init == "random":
-        density0rand = np.random.rand(Nx, Ny)
-        # random
-        # density0 = bk.array(density0rand)
-        # density0 = 0.5 * (density0 + bk.fliplr(density0))
-        # density0 = 0.5 * (density0 + bk.flipud(density0))
-        # density0 = 0.5 * (density0 + density0.T)
-        density0 = symmetrize_pattern(density0rand)
-    elif init == "circle":
+    if init == "circle":
         ### circle
         density0[(x - 0.5) ** 2 + (y - 0.5) ** 2 < R0**2] = 0
-        # density0 *= 0.5
-
     elif init == "lines":
         if i % 2:
             density0[abs(x - 0.5) < R0] = 0
@@ -290,6 +278,14 @@ for i in range(Nlayers):
 
         density0 += 0.0001 * np.random.rand(Nx, Ny)
 
+    elif init == "random":
+        density0rand = np.random.rand(Nx, Ny)
+        # random
+        # density0 = bk.array(density0rand)
+        # density0 = 0.5 * (density0 + bk.fliplr(density0))
+        # density0 = 0.5 * (density0 + bk.flipud(density0))
+        # density0 = 0.5 * (density0 + density0.T)
+        density0 = symmetrize_pattern(density0rand)
     else:
         #### uniform
         ## need to add random because if uniform gradient is NaN with torch  (MKL error)
@@ -371,10 +367,10 @@ def callback(x, y, proj_level, rfilt):
 
     savefig("/home/ben/Code/dev/prod/nannos/polarizer", "dens", it)
 
-    # ---------
-
-    nlines = 5
     if it > 0:
+        # ---------
+
+        nlines = 5
         for line in ax_obj.get_lines()[-2 * nlines :]:
             line.set_alpha(0.04)
         for line in ax_obj.get_lines()[: -2 * nlines]:
@@ -498,9 +494,8 @@ def plot_struc(sim, p, nper=(1, 1), dz=0.0, opacity=1):
 
             for layer in np.flipud(sim.layers):
                 thickness = layer.thickness
-                if thickness == 0:
-                    if float(layer.epsilon).real != 1:
-                        thickness = 3
+                if thickness == 0 and float(layer.epsilon).real != 1:
+                    thickness = 3
                 if layer.is_uniform:
                     if thickness != 0:
                         grid = pv.UniformGrid()
@@ -532,7 +527,7 @@ def plot_struc(sim, p, nper=(1, 1), dz=0.0, opacity=1):
                 else:
                     try:
                         epsgrid = layer.patterns[0].epsilon.real
-                    except:
+                    except Exception:
                         epsgrid = layer.patterns[0].epsilon
                     # values = np.linspace(0, 10, 1000).reshape((20, 5, 10))
                     values = np.reshape(epsgrid, (Nx, Ny, 1))
@@ -589,7 +584,7 @@ def spec(wl):
         Ttarget = sim.get_order(T, order_target)
         print("")
         print(f"Target transmission in order {order_target}")
-        print(f"===================================")
+        print("===================================")
         print(f"T_{order_target} = ", float(Ttarget))
 
         TT.append(Ttarget)

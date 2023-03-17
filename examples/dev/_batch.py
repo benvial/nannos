@@ -63,14 +63,12 @@ def benchmark(f, N, nbatch):
     P0 = npo.random.rand(nbatch, N, N) + 1j * npo.random.rand(nbatch, N, N)
     # M0 = M0 + npo.conj(npo.transpose(M0, axes=(0,2,1)))
 
-    res = dict()
+    res = {}
 
     for backend in ["numpy", "torch"]:
         nn.set_backend(backend)
         for dev in ["cpu", "gpu"]:
-            if dev == "gpu" and backend == "numpy":
-                pass
-            else:
+            if dev != "gpu" or backend != "numpy":
                 if dev == "gpu":
                     nn.use_gpu()
 

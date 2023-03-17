@@ -23,9 +23,9 @@ wl = 532
 
 wls = np.linspace(745, 750, 51)
 wls = [748.5]
+P = 300
+H = 400
 for wl in wls:
-    P = 300
-    H = 400
     # H = wl*0.5
     A, Phi = [], []
     lattice = nn.Lattice([[P, 0], [0, P]], discretization=2**9)

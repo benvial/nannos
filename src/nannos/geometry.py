@@ -114,8 +114,7 @@ def geometry_mask(geom, lattice, Nx, Ny):
     invM = bk.linalg.inv(lattice.matrix)
     matrix = invM.ravel().tolist() + [0, 0]
     geom = sa.affine_transform(geom, matrix)
-    mask = shape_mask(geom, x, y).T
-    return mask
+    return shape_mask(geom, x, y).T
 
 
 def polygon(vertices, lattice, Nx, Ny):
@@ -139,10 +138,12 @@ def ellipse(center, radii, lattice, Nx, Ny, rotate=0):
 
 
 def rectangle(center, widths, lattice, Nx, Ny, rotate=0):
-    vertices = [[center[0] - widths[0] / 2, center[1] - widths[1] / 2]]
-    vertices.append([center[0] + widths[0] / 2, center[1] - widths[1] / 2])
-    vertices.append([center[0] + widths[0] / 2, center[1] + widths[1] / 2])
-    vertices.append([center[0] - widths[0] / 2, center[1] + widths[1] / 2])
+    vertices = [
+        [center[0] - widths[0] / 2, center[1] - widths[1] / 2],
+        [center[0] + widths[0] / 2, center[1] - widths[1] / 2],
+        [center[0] + widths[0] / 2, center[1] + widths[1] / 2],
+        [center[0] - widths[0] / 2, center[1] + widths[1] / 2],
+    ]
     rect = sg.Polygon(vertices)
     cent = sg.Point(*center)
     if rotate != 0:

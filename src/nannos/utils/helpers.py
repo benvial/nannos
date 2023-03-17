@@ -26,7 +26,7 @@ from ..formulations.fft import fourier_transform, inverse_fourier_transform
 
 
 def unique(x):
-    seen = list()
+    seen = []
     return not any(i in seen or seen.append(i) for i in x)
 
 
@@ -35,10 +35,7 @@ def is_scalar(x):
 
 
 def is_anisotropic(x):
-    if is_scalar(x):
-        return False
-    else:
-        return x.shape[:2] == (3, 3)
+    return False if is_scalar(x) else x.shape[:2] == (3, 3)
 
 
 def is_uniform(x):
@@ -47,10 +44,7 @@ def is_uniform(x):
     if is_anisotropic(x):
         return x.shape == (3, 3)
     else:
-        if len(x.shape) == 1:
-            return x.shape[0] == 1
-        else:
-            return x.shape == ()
+        return x.shape[0] == 1 if len(x.shape) == 1 else x.shape == ()
 
 
 def set_index(mat, idx, val):
@@ -90,7 +84,7 @@ def blockmatmul(A, B, N):
     a = [[get_block(A, i, j, N) for j in range(2)] for i in range(2)]
     b = [[get_block(B, i, j, N) for j in range(2)] for i in range(2)]
     out = [
-        [sum([a[i][k] * b[k][j] for k in range(2)]) for j in range(2)] for i in range(2)
+        [sum(a[i][k] * b[k][j] for k in range(2)) for j in range(2)] for i in range(2)
     ]
     return block(out)
 
@@ -111,16 +105,13 @@ def inv2by2block(T, N):
 
 
 def _reseter(prop, attr=None):
-    if attr is None:
-        try:
+    try:
+        if attr is None:
             del prop
-        except Exception:
-            pass
-    else:
-        try:
+        else:
             delattr(prop, attr)
-        except Exception:
-            pass
+    except Exception:
+        pass
 
 
 def _apply_filter(x, rfilt, vectors=None):
@@ -129,28 +120,27 @@ def _apply_filter(x, rfilt, vectors=None):
 
     if rfilt == (0, 0):
         return x
+    Nx, Ny = x.shape
+
+    if vectors is None:
+        tx = bk.array(bk.linspace(-Nx / 2, Nx / 2, Nx))
+        ty = bk.array(bk.linspace(-Ny / 2, Ny / 2, Ny))
+
     else:
-        Nx, Ny = x.shape
-
-        if vectors is not None:
-            tx = bk.array(bk.linspace(-0.5 * vectors[0][0], 0.5 * vectors[0][0], Nx))
-            ty = bk.array(bk.linspace(-0.5 * vectors[1][1], 0.5 * vectors[1][1], Ny))
-        else:
-            tx = bk.array(bk.linspace(-Nx / 2, Nx / 2, Nx))
-            ty = bk.array(bk.linspace(-Ny / 2, Ny / 2, Ny))
-
-        bumpx = bk.exp(-(tx**2) / rfilt[0] ** 2)
-        bumpx /= bk.trapz(bumpx)  # normalize the integral to 1
-        bumpy = bk.exp(-(ty**2) / rfilt[1] ** 2)
-        bumpy /= bk.trapz(bumpy)  # normalize the integral to 1
-        # make a 2-D kernel out of it
-        kernel = bumpx[:, None] * bumpy[None, :]
-        kernel_ft = fourier_transform(kernel, s=x.shape[:2], axes=(0, 1))
-        img_ft = fourier_transform(x, axes=(0, 1))
-        # convolve
-        img2_ft = kernel_ft * img_ft
-        out = bk.real(inverse_fourier_transform(img2_ft, axes=(0, 1)))
-        return bk.fft.fftshift(out) * (Nx * Ny)
+        tx = bk.array(bk.linspace(-0.5 * vectors[0][0], 0.5 * vectors[0][0], Nx))
+        ty = bk.array(bk.linspace(-0.5 * vectors[1][1], 0.5 * vectors[1][1], Ny))
+    bumpx = bk.exp(-(tx**2) / rfilt[0] ** 2)
+    bumpx /= bk.trapz(bumpx)  # normalize the integral to 1
+    bumpy = bk.exp(-(ty**2) / rfilt[1] ** 2)
+    bumpy /= bk.trapz(bumpy)  # normalize the integral to 1
+    # make a 2-D kernel out of it
+    kernel = bumpx[:, None] * bumpy[None, :]
+    kernel_ft = fourier_transform(kernel, s=x.shape[:2], axes=(0, 1))
+    img_ft = fourier_transform(x, axes=(0, 1))
+    # convolve
+    img2_ft = kernel_ft * img_ft
+    out = bk.real(inverse_fourier_transform(img2_ft, axes=(0, 1)))
+    return bk.fft.fftshift(out) * (Nx * Ny)
 
 
 apply_filter = jit(_apply_filter, static_argnums=(1))

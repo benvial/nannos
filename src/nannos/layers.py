@@ -48,9 +48,8 @@ class Layer:
         tangent_field=None,
         tangent_field_type="fft",
     ):
-        if thickness is not None:
-            if thickness < 0:
-                raise ValueError("thickness must be positive.")
+        if thickness is not None and thickness < 0:
+            raise ValueError("thickness must be positive.")
         self.name = name
         self.thickness = thickness
         self.epsilon = bk.array(epsilon, dtype=bk.complex128)
@@ -247,27 +246,22 @@ class Layer:
         return is_uniform(self.epsilon) and is_uniform(self.mu)
 
     def get_tangent_field(self, harmonics, normalize=False, type=None):
-        type = type or self.tangent_field_type
         if self.is_uniform:
             return None
-        else:
-            if self.tangent_field is not None:
-                return self.tangent_field
-            else:
-                epsilon = self.epsilon
-                epsilon_zz = epsilon[2, 2] if self.is_epsilon_anisotropic else epsilon
-                return get_tangent_field(
-                    epsilon_zz,
-                    harmonics,
-                    normalize=normalize,
-                    type=self.tangent_field_type,
-                )
+        if self.tangent_field is not None:
+            return self.tangent_field
+        epsilon = self.epsilon
+        epsilon_zz = epsilon[2, 2] if self.is_epsilon_anisotropic else epsilon
+        type = type or self.tangent_field_type
+        return get_tangent_field(
+            epsilon_zz,
+            harmonics,
+            normalize=normalize,
+            type=self.tangent_field_type,
+        )
 
     def get_jones_field(self, t):
-        if self.is_uniform:
-            return None
-        else:
-            return get_jones_field(t)
+        return None if self.is_uniform else get_jones_field(t)
 
 
 def _get_layer(id, layers, layer_names):
@@ -290,12 +284,11 @@ def _get_layer(id, layers, layer_names):
         The layer index in the stack.
     """
     if isinstance(id, str):
-        if id in layer_names:
-            for i, l in enumerate(layers):
-                if l.name == id:
-                    return l, i
-        else:
+        if id not in layer_names:
             raise ValueError(f"Unknown layer name {id}")
+        for i, l in enumerate(layers):
+            if l.name == id:
+                return l, i
     elif isinstance(id, int):
         return layers[id], id
     elif hasattr(id, "name"):

@@ -61,9 +61,8 @@ class Lattice:
     def area(self):
         if self.is_1D:
             return self.basis_vectors[0][0]
-        else:
-            v = self.basis_vectors
-            return bk.linalg.norm(bk.cross(v[0], v[1]))
+        v = self.basis_vectors
+        return bk.linalg.norm(bk.cross(v[0], v[1]))
 
     @property
     def matrix(self):
@@ -105,7 +104,7 @@ class Lattice:
             The number of harmonics after truncation.
 
         """
-        if not int(nh) == nh:
+        if int(nh) != nh:
             raise ValueError("nh must be integer.")
         if self.truncation == "circular":
             return _circular_truncation(nh, self.reciprocal)
@@ -138,8 +137,7 @@ class Lattice:
         x0 = bk.array(bk.linspace(0, 1.0, Nx))
         y0 = bk.array(bk.linspace(0, 1.0, Ny))
         x_, y_ = bk.meshgrid(x0, y0, indexing="ij")
-        grid = bk.stack([x_, y_])
-        return grid
+        return bk.stack([x_, y_])
 
     @property
     def grid(self):
@@ -247,8 +245,7 @@ def _one_dim_truncation(nh):
     n = int((nh - 1) / 2)
     G = [(0, 0)]
     for i in range(1, n + 1):
-        G.append((i, 0))
-        G.append((-i, 0))
+        G.extend(((i, 0), (-i, 0)))
     return bk.array(G).T, len(G)
 
 

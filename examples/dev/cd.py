@@ -65,9 +65,9 @@ for wl in wavelengths:
 
     # ms.plot()
 
-    pwx = nn.PlaneWave(wavelength=1 / 1 / wl, angles=(0, 0, 1 * nn.pi / 2))
+    pwx = nn.PlaneWave(wavelength=1 / wl, angles=(0, 0, 1 * nn.pi / 2))
     simx = nn.Simulation([sup, ms, sub], pwx, nh=nh, formulation=formulation)
-    pwy = nn.PlaneWave(wavelength=1 / 1 / wl, angles=(0, 0, 0 * nn.pi / 2))
+    pwy = nn.PlaneWave(wavelength=1 / wl, angles=(0, 0, 0 * nn.pi / 2))
     simy = nn.Simulation([sup, ms, sub], pwy, nh=nh, formulation=formulation)
 
     norma = 1  # eps_SiO2

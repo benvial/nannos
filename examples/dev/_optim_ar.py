@@ -91,12 +91,7 @@ def run(density, proj_level=None, rfilt=0, freq=1, nh=nh):
     else:
         stack = [sup, slab, sub]
 
-    ##############################################################################
-    # Define the simulation
-
-    sim = nn.Simulation(stack, pw, nh, formulation=formulation)
-
-    return sim
+    return nn.Simulation(stack, pw, nh, formulation=formulation)
 
 
 ##############################################################################

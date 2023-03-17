@@ -34,7 +34,7 @@ h = ms.thickness
 eps = 4  # ms.epsilon
 
 alpha = (eps**0.5 + 1) / (eps**0.5 - 1)
-n = np.array(range(0, 10))
+n = np.array(range(10))
 ev = (nn.pi * n - 1j * np.log(alpha)) / (2 * nn.pi * h * eps**0.5)
 
 freqs = np.linspace(1.3, 1.5, 55)
@@ -163,9 +163,7 @@ def func(x):
     # S = nn.helpers.block(S)
     det = bk.linalg.det(S)
 
-    out = -bk.log10(bk.abs(det))
-    # print(f, out)
-    return out
+    return -bk.log10(bk.abs(det))
 
 
 {

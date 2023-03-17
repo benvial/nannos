@@ -96,8 +96,7 @@ def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
     st = lattice.Layer("Structured", h)
     st.epsilon = epsgrid
     st.mu = mugrid
-    sim = nn.Simulation([sup, st, sub], pw, nh, formulation=formulation)
-    return sim
+    return nn.Simulation([sup, st, sub], pw, nh, formulation=formulation)
 
 
 formulations = ["original", "tangent", "jones", "pol"]

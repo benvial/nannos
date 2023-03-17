@@ -94,10 +94,7 @@ def adaptive_sampler(f, x, max_bend=10, max_x_rel=1e-3, max_df=0.05, n_jobs=1):
                 if xn - x0 < min_dx:
                     isegment = 0
                     seg.append(isegment)
-                if x0 - xp > xn - x0:
-                    isegment = 0
-                else:
-                    isegment = 1
+                isegment = 0 if x0 - xp > xn - x0 else 1
                 seg.append(isegment)
                 seg = np.unique(seg)
                 for isegment in seg:
@@ -114,10 +111,7 @@ def adaptive_sampler(f, x, max_bend=10, max_x_rel=1e-3, max_df=0.05, n_jobs=1):
         y_monitor = y.copy()
     while True:
         old_x = x.tolist()
-        if multi_output:
-            new_x = get_new(x, y_monitor)
-        else:
-            new_x = get_new(x, y)
+        new_x = get_new(x, y_monitor) if multi_output else get_new(x, y)
         if len(new_x) == 0:
             break
 
@@ -126,11 +120,7 @@ def adaptive_sampler(f, x, max_bend=10, max_x_rel=1e-3, max_df=0.05, n_jobs=1):
         q = [_x for _x in x if _x not in old_x]
 
         new_y = _function_adapted(q)
-        if multi_output:
-            y = np.vstack([y, new_y])
-        else:
-            y = np.hstack([y, new_y])
-
+        y = np.vstack([y, new_y]) if multi_output else np.hstack([y, new_y])
         y = y[iu]
 
         if multi_output:

@@ -20,8 +20,8 @@ no_grad_backends = ["numpy", "scipy", "jax"]
 
 @pytest.mark.parametrize("formulation", formulations)
 def test_grad(formulation):
-    res = dict()
-    dres = dict()
+    res = {}
+    dres = {}
     import nannos as nn
 
     backends = no_grad_backends + ["autograd"]

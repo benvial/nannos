@@ -12,13 +12,13 @@ Benchmarks
 Backend performace comparison.
 """
 
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 plt.ion()
 plt.close("all")
 
-colors = ["#3b9dd4", "#ecd142", "#e87c40", "#b33dd1", "#50ba61", "#cd2323"]
 markers = ["o", "s", "d", "v", "^", ">"]
 figsize = (2, 2)
 threads = [1, 2, 4, 8, 16]
@@ -27,6 +27,7 @@ devices = ["cpu", "gpu"]
 # we skip jax as it is complicated to deal with multithreading so a fair comparison is impossible
 backends = ["numpy", "scipy", "autograd", "torch"]
 
+colors = ["#3b9dd4", "#ecd142", "#e87c40", "#b33dd1", "#50ba61", "#cd2323"]
 ##############################################################################
 # Time vs. number of harmonics
 # ------------------------------
@@ -38,9 +39,12 @@ for num_threads in threads:
     for backend in backends:
         for device in devices:
             g = "cuda" if device == "gpu" else device
-            if not (
-                device == "gpu" and backend in ["numpy", "scipy", "autograd", "jax"]
-            ):
+            if device != "gpu" or backend not in [
+                "numpy",
+                "scipy",
+                "autograd",
+                "jax",
+            ]:
                 arch = np.load(
                     f"{num_threads}/benchmark_{backend}_{g}.npz", allow_pickle=True
                 )
@@ -85,7 +89,7 @@ for num_threads in threads:
     for backend in backends:
         for device in devices:
             g = "cuda" if device == "gpu" else device
-            if not (device == "gpu" and backend != "torch"):
+            if device != "gpu" or backend == "torch":
                 arch = np.load(
                     f"{num_threads}/benchmark_{backend}_{g}.npz", allow_pickle=True
                 )
@@ -133,7 +137,7 @@ for inh in range(len(NH)):
             t_threads = []
             t_threads_all = []
             for num_threads in threads:
-                if not (device == "gpu" and backend != "torch"):
+                if device != "gpu" or backend == "torch":
                     g = "cuda" if device == "gpu" else device
                     arch = np.load(
                         f"{num_threads}/benchmark_{backend}_{g}.npz", allow_pickle=True
@@ -185,7 +189,7 @@ for inh in range(len(NH)):
             speedup_threads = []
             speedup_threads_all = []
             for num_threads in threads:
-                if not (device == "gpu" and backend != "torch"):
+                if device != "gpu" or backend == "torch":
                     g = "cuda" if device == "gpu" else device
                     arch = np.load(
                         f"{num_threads}/benchmark_{backend}_{g}.npz", allow_pickle=True

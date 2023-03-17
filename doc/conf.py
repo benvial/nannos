@@ -110,7 +110,7 @@ master_doc = "index"
 project = package.__name__
 # copyright = package.__copyright__
 author = package.__author__
-copyright = "{}, {}".format(date.today().year, author)
+copyright = f"{date.today().year}, {author}"
 
 
 host = "gitlab"
@@ -274,7 +274,7 @@ html_show_copyright = True
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = package.__name__ + "_doc"
+htmlhelp_basename = f"{package.__name__}_doc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -321,7 +321,7 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        package.__name__ + ".tex",
+        f"{package.__name__}.tex",
         "Documentation",
         package.__author__,
         "manual",
@@ -341,7 +341,13 @@ latex_logo = html_logo
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, package.__name__, package.__name__ + " Documentation", [author], 1)
+    (
+        master_doc,
+        package.__name__,
+        f"{package.__name__} Documentation",
+        [author],
+        1,
+    )
 ]
 
 
@@ -354,7 +360,7 @@ texinfo_documents = [
     (
         master_doc,
         package.__name__,
-        package.__name__ + " Documentation",
+        f"{package.__name__} Documentation",
         author,
         package.__name__,
         package.__description__,

@@ -77,8 +77,7 @@ def run(density, proj_level=None, rfilt=0, freq=1, nh=nh, psi=0):
     pattern = nn.Pattern(epsgrid, name="design")
     ms.add_pattern(pattern)
     stack = [sup, ms, sub]
-    sim = nn.Simulation(stack, pw, nh, formulation=formulation)
-    return sim
+    return nn.Simulation(stack, pw, nh, formulation=formulation)
 
 
 ##############################################################################
@@ -191,7 +190,7 @@ for psi in [0, nn.pi / 2]:
     Ttarget = sim.get_order(T, order_target)
     print("")
     print(f"Target transmission in order {order_target}")
-    print(f"===================================")
+    print("===================================")
     print(f"T_{order_target} = ", float(Ttarget))
 
 plt.clf()

@@ -80,10 +80,7 @@ def simulation(mat, slab_flag=False):
     for f in freqs:
         w = h * c / e / f * 1e6
         pw = nn.PlaneWave(wavelength=w, angles=(0, 0, 0))
-        if mat == "GaP":
-            eps_sub = epsilon_GaP(w)
-        else:
-            eps_sub = epsilon_Al(w)
+        eps_sub = epsilon_GaP(w) if mat == "GaP" else epsilon_Al(w)
         if slab_flag:
             sub = lattice.Layer("Substrate", epsilon=1)
             slab = lattice.Layer("Slab", epsilon=eps_sub, thickness=0.4)

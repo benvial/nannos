@@ -22,16 +22,14 @@ def benchmark(f, N, nbatch):
     for backend in ["numpy", "torch"]:
         nn.set_backend(backend)
         for dev in ["cpu", "gpu"]:
-            if dev == "gpu" and backend == "numpy":
-                pass
-            else:
+            if dev != "gpu" or backend != "numpy":
                 if dev == "gpu":
                     nn.use_gpu()
 
-                if f == "fft":
-                    F = nn.formulations.fft.fourier_transform
-                elif f == "eig":
+                if f == "eig":
                     F = nn.backend.linalg.eig
+                elif f == "fft":
+                    F = nn.formulations.fft.fourier_transform
                 elif f == "inv":
                     F = nn.backend.linalg.inv
                 else:

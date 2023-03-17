@@ -20,7 +20,6 @@ def get_jones_field(t):
     theta = _arctan2(t[1], t[0])
     phi = pi / 8 * (1 + bk.cos(pi * norm_t))
     expo = bk.exp(1j * theta)
-    J = [
+    return [
         expo / norm_t * (t[i] * bk.cos(phi) + 1j * n[i] * bk.sin(phi)) for i in range(2)
     ]
-    return J

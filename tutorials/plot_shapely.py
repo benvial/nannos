@@ -177,7 +177,7 @@ im_bin[im_bin < 0.5] = 0
 im_bin[im_bin >= 0.5] = 1
 im_bin = np.array(im_bin, dtype=bool)
 im_pat = np.zeros((N, N), dtype=bool)
-n0 = int(M / 2)
+n0 = M // 2
 im_pat[n0 : n0 + s[0], n0 : n0 + s[1]] = im_bin
 
 
