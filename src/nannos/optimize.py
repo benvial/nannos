@@ -184,7 +184,7 @@ class TopologyOptimizer:
                         gradn[:] = npo.array(dy, dtype=npo.float64)
 
                     self.current_iteration += 1
-                    return npo.float(y)
+                    return float(y)
 
                 lb = npo.zeros(self.nvar, dtype=npo.float64)
                 ub = npo.ones(self.nvar, dtype=npo.float64)
