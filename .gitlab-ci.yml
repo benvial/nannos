@@ -10,13 +10,13 @@ variables:
 
 
 stages:
-  - badge
-  - zenodo
+  # - badge
+  # - zenodo
   - kaggle
-  - trigdoc
-  - trigdocker
-  - test
-  - deploy
+  # - trigdoc
+  # - trigdocker
+  # - test
+  # - deploy
 
 .before-python: &before-python
   ## install os tools
@@ -96,8 +96,8 @@ push-kernel:
     - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
     - pip install kaggle
     - cd examples/benchmarks/kaggle && make -s pull &&  make -s push
-  only:
-    - tags
+  # only:
+  #   - tags
 
 
 pypi:
