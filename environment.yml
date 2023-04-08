@@ -22,8 +22,6 @@ dependencies:
   - pyvista
   - trame
   - ipywidgets
-  - ipyvtklink
-  - panel
   - autograd
   - pip:
     - git+https://gitlab.com/nannos/nannos.git

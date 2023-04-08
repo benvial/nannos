@@ -71,11 +71,15 @@ def use_gpu(boolean):
             logger.debug(f"Cannot use GPU with {BACKEND} backend.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
-        elif not HAS_TORCH:
+        elif BACKEND=="torch" and not HAS_TORCH:
             logger.warning("pytorch not found. Cannot use GPU.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
-        elif not HAS_CUDA:
+        elif BACKEND=="torch" and not HAS_CUDA:
+            logger.warning("cuda not found. Cannot use GPU.")
+            _delvar("_GPU_DEVICE")
+            _CPU_DEVICE = True
+        elif BACKEND=="jax" and not HAS_JAX:
             logger.warning("jax not found. Cannot use GPU.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
