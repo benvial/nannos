@@ -7,8 +7,8 @@
 
 
 """
-Benchmarks
-==========
+Benchmark 2
+===========
 
 Backend performace comparison, with GPU acceleration, as run on Kaggle (https://www.kaggle.com/code/benjaminvial/nannos_cpu)
 """
@@ -18,8 +18,6 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-plt.ion()
 
 ##############################################################################
 # Load data
