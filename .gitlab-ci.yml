@@ -94,7 +94,7 @@ push-kernel:
   image: python
   script:
     # - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
-    - pip install kaggle
+    - pip install -U kaggle
     - cd examples/benchmarks/kaggle && make -s pull &&  make -s push
   # only:
   #   - tags
