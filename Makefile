@@ -11,11 +11,11 @@ SHELL := /bin/bash
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PROJECT_NAME = nannos
-PYTHON_INTERPRETER = python
+PYTHON_INTERPRETER = python3
 HOSTING = gitlab
-VERSION=$(shell python -c "from configparser import ConfigParser; p = ConfigParser(); p.read('setup.cfg'); print(p['metadata']['version'])")
+VERSION=$(shell python3 -c "from configparser import ConfigParser; p = ConfigParser(); p.read('setup.cfg'); print(p['metadata']['version'])")
 BRANCH=$(shell git branch --show-current)
-URL=$(shell python -c "import nannos; print(nannos.__website__)")
+URL=$(shell python3 -c "import nannos; print(nannos.__website__)")
 LESSC=$(PROJECT_DIR)/doc/node_modules/less/bin/lessc
 GITLAB_PROJECT_ID=28703132
 GITLAB_GROUP_ID=12956132
@@ -369,7 +369,7 @@ package:
 	$(call message,${@})
 	@if [ "$(shell git rev-parse --abbrev-ref HEAD)" != "master" ]; then exit 1; fi
 	@rm -f dist/*
-	@python -m build --sdist --wheel .
+	@python3 -m build --sdist --wheel .
 
 ## Upload to pypi
 pypi: package
@@ -387,7 +387,7 @@ checksum:
 conda: checksum
 	$(call message,${@})
 	cd .. && rm -rf nannos-feedstock && \
-	git clone https://github.com/benvial/nannos-feedstock && cd nannos-feedstock  && \
+	git clone git@github.com/benvial/nannos-feedstock && cd nannos-feedstock  && \
 	git branch v$(VERSION) && git checkout v$(VERSION) && \
 	sed -i "s/sha256: .*/sha256: $(SHA256)/" recipe/meta.yaml && \
 	sed -i "s/number: .*/number: 0/" recipe/meta.yaml && \
