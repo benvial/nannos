@@ -18,105 +18,107 @@ stages:
   - test
   - deploy
 
-.before-python: &before-python
-  ## install os tools
-  - apt-get update -q && apt-get install -q -y --no-install-recommends make libgl1-mesa-dev xvfb
-  - python -V  # Print out python version for debugging
-  - which Xvfb
-  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-  - sleep 3
+# .before-python: &before-python
+#   ## install os tools
+#   - apt-get update -q && apt-get install -q -y --no-install-recommends make libgl1-mesa-dev xvfb
+#   - python -V  # Print out python version for debugging
+#   - which Xvfb
+#   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+#   - sleep 3
 
 
-badge:
-  stage: badge
-  image:
-    name: alpine/git:latest
-    entrypoint: [""]
-  script:
-    - echo "collecting stats for badges"
-    - commits=`git rev-list --all --count`
-    - latest_release_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-    - logo=$(cat ./doc/_assets/opt.svg | tr '"' "'")
-    - echo {\"schemaVersion\":"1", \"commits\":\"$commits\", \"release_tag\":\"$latest_release_tag\"} > badges.json
-    - echo {\"schemaVersion\":"1", \"logoSvg\":\"$logo\", \"label\":\"release\", \"message\":\"$latest_release_tag\", \"color\":\"1672a7\", \"labelColor\":\"dedede\", \"style\":\"for-the-badge\"} > logobadge.json
-  artifacts:
-    paths:
-        - badges.json
-        - logobadge.json
+# badge:
+#   stage: badge
+#   image:
+#     name: alpine/git:latest
+#     entrypoint: [""]
+#   script:
+#     - echo "collecting stats for badges"
+#     - commits=`git rev-list --all --count`
+#     - latest_release_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+#     - logo=$(cat ./doc/_assets/opt.svg | tr '"' "'")
+#     - echo {\"schemaVersion\":"1", \"commits\":\"$commits\", \"release_tag\":\"$latest_release_tag\"} > badges.json
+#     - echo {\"schemaVersion\":"1", \"logoSvg\":\"$logo\", \"label\":\"release\", \"message\":\"$latest_release_tag\", \"color\":\"1672a7\", \"labelColor\":\"dedede\", \"style\":\"for-the-badge\"} > logobadge.json
+#   artifacts:
+#     paths:
+#         - badges.json
+#         - logobadge.json
 
-staging:
-  stage: trigdoc
-  trigger: nannos/nannos.gitlab.io
-  only:
-    - master
-
-
-container:
-  stage: trigdocker
-  trigger: nannos/docker
-  only:
-    - tags
+# staging:
+#   stage: trigdoc
+#   trigger: nannos/nannos.gitlab.io
+#   only:
+#     - master
 
 
-test:
-  stage: test
-  image: benvial/nannos:latest
-  before_script:
-    - *before-python
-  script:
-    - make install
-    - make test-req
-    - make test
-    - coverage xml
-  coverage: '/TOTAL.*\s([.\d]+)%/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-  only:
-    - master
-
-send-snapshot:
-  stage: zenodo
-  image: python
-  script:
-    - apk update && apk add git
-    - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
-    - pip install gitlab2zenodo
-    - git archive --format zip --output ${CI_COMMIT_TAG#v}.zip ${CI_COMMIT_TAG}
-    - g2z-send -p -m .zenodo.json ${CI_COMMIT_TAG#v}.zip
-  only:
-    - tags
-
-push-kernel:
-  stage: kaggle
-  image: python
-  script:
-    - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
-    - pip install kaggle
-    - cd examples/benchmarks/kaggle && make -s pull && make -s dld && make -s push
-  only:
-    - tags
+# container:
+#   stage: trigdocker
+#   trigger: nannos/docker
+#   only:
+#     - tags
 
 
-pypi:
-  image: python:latest
-  stage: deploy
-  cache: {}
-  script:
-    - pip install twine build
-    - python3 -m build --sdist --wheel .
-    - twine upload dist/*
-  only:
-    - tags
+# test:
+#   stage: test
+#   image: benvial/nannos:latest
+#   before_script:
+#     - *before-python
+#   script:
+#     - make install
+#     - make test-req
+#     - make test
+#     - coverage xml
+#   coverage: '/TOTAL.*\s([.\d]+)%/'
+#   artifacts:
+#     reports:
+#       coverage_report:
+#         coverage_format: cobertura
+#         path: coverage.xml
+#   only:
+#     - master
+
+# send-snapshot:
+#   stage: zenodo
+#   image: python
+#   script:
+#     - apk update && apk add git
+#     - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
+#     - pip install gitlab2zenodo
+#     - git archive --format zip --output ${CI_COMMIT_TAG#v}.zip ${CI_COMMIT_TAG}
+#     - g2z-send -p -m .zenodo.json ${CI_COMMIT_TAG#v}.zip
+#   only:
+#     - tags
+
+# push-kernel:
+#   stage: kaggle
+#   image: python
+#   script:
+#     - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
+#     - pip install kaggle
+#     - cd examples/benchmarks/kaggle && make -s pull && make -s dld &&  make -s push
+#   only:
+#     - tags
+
+
+# pypi:
+#   image: python:latest
+#   stage: deploy
+#   cache: {}
+#   script:
+#     - pip install twine build
+#     - python3 -m build --sdist --wheel .
+#     - twine upload dist/*
+#   only:
+#     - tags
 
 
 conda:
-  image: benvial/nannos:latest
+  image: ubuntu:latest
   stage: deploy
   cache: {}
   before_script:
+    ## install os tools
+    - apt-get update -q && apt-get install -q -y --no-install-recommends make git
     ## setup ssh
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
@@ -130,5 +132,5 @@ conda:
     - chmod 644 ~/.ssh/known_hosts
   script:
     - make conda
-  only:
-    - tags
+  # only:
+  #   - tags
