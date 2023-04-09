@@ -137,6 +137,13 @@ conda:
     - cd ../nannos-feedstock
     - url_host=git@github.com:benvial/nannos-feedstock.git
     - echo ${url_host}
+    - echo ${CI_REPOSITORY_URL}
+    - url_host_test=$(echo "${CI_REPOSITORY_URL}" | sed -e 's|https\?://gitlab-ci-token:.*@|ssh://git@|g')
+
+    - echo ${url_host_test}
+    - url_host_test2=$(echo "https://github.com/benvial/nannos-feedstock.git" | sed -e 's|https\?://gitlab-ci-token:.*@|ssh://git@|g')
+
+    - echo ${url_host_test2}
     - git remote set-url --push origin "${url_host}"
     - git add . 
     - git commit -a -m "New version ${VERSION}"
