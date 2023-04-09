@@ -388,7 +388,7 @@ checksum:
 checksum-ci:
 	$(call message,${@})
 	@echo v$(VERSION)
-	$(eval SHA256=$(shell curl -sL https://gitlab.com/nannos/nannos/-/archive/v$(VERSION)/nannos-v$(VERSION).tar.gz | openssl sha256 | cut -c18-))
+	$(eval SHA256=$(shell curl -sL https://gitlab.com/nannos/nannos/-/archive/v$(VERSION)/nannos-v$(VERSION).tar.gz | openssl sha256 | cut -c19-))
 	@echo $(SHA256)
 
 ## Update conda-forge recipe
@@ -413,10 +413,10 @@ conda: checksum recipe
 ## Update conda-forge package
 conda-ci: checksum-ci recipe
 	$(call message,${@})
-	# cd ../nannos-feedstock && \
-	# git add . && \
-	# git commit -a -m "New version $(VERSION)" && \
-	# git push origin v$(VERSION) && echo done
+	cd ../nannos-feedstock && \
+	git add . && \
+	git commit -a -m "New version $(VERSION)" && \
+	git push origin v$(VERSION) && echo done
 
 
 ## Publish release on pypi and conda-forge
