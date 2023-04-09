@@ -408,7 +408,7 @@ conda: checksum recipe
 	cd ../nannos-feedstock && \
 	git add . && \
 	git commit -a -m "New version $(VERSION)" && \
-	git push origin v$(VERSION) && echo done
+	git push origin v$(VERSION) --force && echo done
 
 ## Update conda-forge package
 conda-ci: checksum-ci recipe
