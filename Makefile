@@ -391,7 +391,7 @@ recipe: checksum
 	git branch v$(VERSION) && git checkout v$(VERSION) && \
 	sed -i "s/sha256: .*/sha256: $(SHA256)/" recipe/meta.yaml && \
 	sed -i "s/number: .*/number: 0/" recipe/meta.yaml && \
-	sed -i "s/{% set version = .*/{% set version = \"$(VERSION)\" %}/" recipe/meta.yaml && \
+	sed -i "s/{% set version = .*/{% set version = \"$(VERSION)\" %}/" recipe/meta.yaml
 
 
 ## Update conda-forge package
