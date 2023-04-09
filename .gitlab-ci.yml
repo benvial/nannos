@@ -118,7 +118,8 @@ conda:
   cache: {}
   before_script:
     ## install os tools
-    - apt-get update -q && apt-get install -q -y --no-install-recommends make git
+    - apt-get update -q && apt-get install -q -y --no-install-recommends make git apt-get install --reinstall ca-certificates
+    - update-ca-certificates
     ## setup ssh
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
