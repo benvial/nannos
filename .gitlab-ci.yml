@@ -135,6 +135,7 @@ conda:
     - make recipe
     - VERSION=$(python3 -c "from configparser import ConfigParser; p = ConfigParser(); p.read('setup.cfg'); print(p['metadata']['version'])")
     - url_host=$(echo "${CI_REPOSITORY_URL}" | sed -e 's|https\?://gitlab-ci-token:.*@|ssh://git@|g')
+    - echo ${url_host}
     - cd ../nannos-feedstock
     - git remote set-url --push origin "${url_host}"
     - git add . 
