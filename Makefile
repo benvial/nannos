@@ -383,11 +383,19 @@ checksum:
 	$(eval SHA256=$(shell curl -sL https://gitlab.com/nannos/nannos/-/archive/v$(VERSION)/nannos-v$(VERSION).tar.gz | openssl sha256 | cut -c17-))
 	@echo $(SHA256)
 
+
+## Make checksum for release
+checksum-ci:
+	$(call message,${@})
+	@echo v$(VERSION)
+	$(eval SHA256=$(shell curl -sL https://gitlab.com/nannos/nannos/-/archive/v$(VERSION)/nannos-v$(VERSION).tar.gz | openssl sha256 | cut -c18-))
+	@echo $(SHA256)
+
 ## Update conda-forge recipe
-recipe: checksum
+recipe: 
 	$(call message,${@})
 	cd .. && rm -rf nannos-feedstock && \
-	git clone https://github.com/benvial/nannos-feedstock.git && cd nannos-feedstock  && \
+	git clone git@github.com:benvial/nannos-feedstock.git && cd nannos-feedstock  && \
 	git branch v$(VERSION) && git checkout v$(VERSION) && \
 	sed -i "s/sha256: .*/sha256: $(SHA256)/" recipe/meta.yaml && \
 	sed -i "s/number: .*/number: 0/" recipe/meta.yaml && \
@@ -395,13 +403,20 @@ recipe: checksum
 
 
 ## Update conda-forge package
-conda: recipe
+conda: checksum recipe
 	$(call message,${@})
 	cd ../nannos-feedstock && \
 	git add . && \
 	git commit -a -m "New version $(VERSION)" && \
 	git push origin v$(VERSION) && echo done
 
+## Update conda-forge package
+conda-ci: checksum-ci recipe
+	$(call message,${@})
+	# cd ../nannos-feedstock && \
+	# git add . && \
+	# git commit -a -m "New version $(VERSION)" && \
+	# git push origin v$(VERSION) && echo done
 
 
 ## Publish release on pypi and conda-forge
