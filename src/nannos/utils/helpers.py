@@ -20,9 +20,25 @@ all = [
     "apply_filter",
 ]
 
+import numpy as npo
+
 from .. import backend as bk
 from .. import get_backend, jit
 from ..formulations.fft import fourier_transform, inverse_fourier_transform
+
+
+def allclose(a, b, **kwargs):
+    try:
+        a = a.detach().cpu().numpy()
+    except:
+        pass
+
+    try:
+        b = b.detach().cpu().numpy()
+    except:
+        pass
+
+    return npo.allclose(a, b, **kwargs)
 
 
 def unique(x):

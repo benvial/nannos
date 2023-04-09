@@ -337,6 +337,7 @@ class Simulation:
         s = 0
         for i in range(self.nh):
             f = bk.zeros(shape + (amplitudes.shape[0],), dtype=bk.complex128)
+            f = bk.array(f)
             f = set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
             # f[self.harmonics[0, i], self.harmonics[1, i], :] = 1.0
             a = amplitudes[:, i]
@@ -475,7 +476,7 @@ class Simulation:
 
         t = self.get_field_fourier("Substrate")[0, 0] * norma_t
         bx0 = self.get_field_fourier("Superstrate")[0, 0] * norma_r
-        o0 = bk.zeros(self.nh)
+        o0 = bk.array(bk.zeros(self.nh))
         o0 = set_index(o0, [0], 1)
         r = bk.stack([b - o0 * c for b, c in zip(bx0, self.excitation.amplitude)])
         return r, t
@@ -544,7 +545,7 @@ class Simulation:
                 [self._get_toeplitz_matrix(u[i, j]) for j in range(2)] for i in range(2)
             ]
         uft = fft.fourier_transform(u)
-        ix = bk.arange(self.nh)
+        ix = bk.array(bk.arange(self.nh))
         jx, jy = bk.meshgrid(ix, ix, indexing="ij")
         delta = self.harmonics[:, jx] - self.harmonics[:, jy]
         return uft[delta[0], delta[1]]

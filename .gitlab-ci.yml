@@ -95,7 +95,7 @@ push-kernel:
   script:
     - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
     - pip install kaggle
-    - cd examples/benchmarks/kaggle && make -s pull && make -s dld &&  make -s push
+    - cd examples/benchmarks/kaggle && make -s pull && make -s dld && make -s push
   only:
     - tags
 
@@ -117,8 +117,6 @@ conda:
   stage: deploy
   cache: {}
   before_script:
-    ## install os tools
-    - apt-get update -q && apt-get install -q -y --no-install-recommends make git
     ## setup ssh
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)

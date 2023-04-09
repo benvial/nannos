@@ -11,10 +11,13 @@ import numpy as npo
 
 import nannos as nn
 from nannos import numpy as np
+from nannos.utils import allclose
 
 print("##########")
 print(nn.BACKEND)
 print("##########")
+
+bk = nn.backend
 
 
 def test_para():
@@ -52,4 +55,4 @@ def test_para():
 
     print(f"speedup = {speedup}")
 
-    assert npo.allclose(res[0], res[1])
+    assert allclose(bk.stack(res[0]), bk.stack(res[1]))

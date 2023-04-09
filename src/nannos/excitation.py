@@ -29,13 +29,11 @@ class PlaneWave:
     """
 
     def __init__(self, wavelength=1, angles=(0, 0, 0)):
-        self.wavelength = bk.array(wavelength)
+        self.wavelength = bk.array(wavelength, dtype=bk.float64)
         self.angles_deg = bk.array(angles, dtype=bk.float64)
         self.angles = self.angles_deg * _deg2rad
-        self.theta = bk.array(self.angles[0], dtype=bk.float64)
-        self.phi = bk.array(self.angles[1], dtype=bk.float64)
-        self.psi = bk.array(self.angles[2], dtype=bk.float64)
-        self.frequency_scaled = bk.array(1 / self.wavelength)
+        self.theta, self.phi, self.psi = self.angles
+        self.frequency_scaled = 1 / self.wavelength
 
         k0 = 2 * pi * self.frequency_scaled
 

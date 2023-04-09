@@ -162,8 +162,8 @@ class Layer:
             ** 0.5
         )
         # q = bk.where(bk.imag(q) < 0.0, -q, q)
-        self.eigenvalues = bk.hstack((q, q))
-        self.eigenvectors = bk.eye(2 * len(kx), dtype=bk.complex128)
+        self.eigenvalues = bk.array(bk.hstack((q, q)))
+        self.eigenvectors = bk.array(bk.eye(2 * len(kx), dtype=bk.complex128))
         return self.eigenvalues, self.eigenvectors
 
     def solve_eigenproblem(self, matrix):

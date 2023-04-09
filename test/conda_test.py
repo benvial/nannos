@@ -5,10 +5,10 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
-import nannos as nn
 
+def run(backend, use_gpu):
+    import nannos as nn
 
-def run(nn, backend, use_gpu):
     print(f"backend: {backend}, GPU: {use_gpu}")
     nn.set_backend(backend)
     nn.use_gpu(use_gpu)
@@ -31,7 +31,9 @@ def run(nn, backend, use_gpu):
 
 
 def test_simulation():
+    import nannos as nn
+
     for backend in nn.available_backends:
-        run(nn, backend, False)
+        run(backend, False)
     if nn.HAS_CUDA:
-        run(nn, "torch", True)
+        run("torch", True)

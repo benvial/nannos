@@ -8,6 +8,8 @@
 import numpy as npo
 import pytest
 
+from nannos.utils import allclose
+
 npo.random.seed(84)
 N = 3
 
@@ -27,8 +29,8 @@ def test_layer():
     lc = lay.copy()
     lc.name = "copy"
     lc.thickness = 2.1
-    assert npo.allclose(lc.eigenvalues, w)
-    assert npo.allclose(lc.eigenvectors, v)
+    assert allclose(lc.eigenvalues, w)
+    assert allclose(lc.eigenvectors, v)
 
     with pytest.raises(ValueError) as excinfo:
         lay = nn.layers.Layer("test", -0.1)

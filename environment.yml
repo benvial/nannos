@@ -18,10 +18,11 @@ dependencies:
   - pytorch-gpu
   - jax
   - jaxlib
+  - autograd
   - magma
   - pyvista
   - trame
+  - nest-asyncio
   - ipywidgets
-  - autograd
   - pip:
     - git+https://gitlab.com/nannos/nannos.git

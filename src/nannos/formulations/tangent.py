@@ -105,6 +105,12 @@ def _get_tangent_field_min(
     harmonics = harmonics[:, :nh]
 
     xf = apply_filter(grid, rfilt=rfilt)
+
+    try:
+        xf = xf.detach().cpu().numpy()
+    except:
+        pass
+
     dgrid_f = npg.array(npg.gradient(xf))
 
     normdgrid_f = norm(dgrid_f)
@@ -170,7 +176,11 @@ def _get_tangent_field_min(
     t = bk.array(t).real
 
     if normalize:
-        norm_t = norm(t)
+        try:
+            t1 = t.detach().cpu().numpy()
+        except:
+            t1 = t
+        norm_t = bk.array(norm(t1))
         t = _normalize_vec(t, norm_t)
     else:
         t = [t[i] / bk.max(norm(t)) for i in range(2)]

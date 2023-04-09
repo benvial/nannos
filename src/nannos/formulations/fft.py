@@ -26,7 +26,7 @@ def fourier_transform(u, s=None, axes=(-2, -1)):
     else:
         uft = bk.fft.fft2(u, s=s, axes=axes)
     nx, ny = uft.shape[axes[0]], uft.shape[axes[1]]
-    return uft / (nx * ny)
+    return bk.array(uft) / (nx * ny)
 
 
 def inverse_fourier_transform(uft, s=None, axes=(-2, -1)):
@@ -37,7 +37,7 @@ def inverse_fourier_transform(uft, s=None, axes=(-2, -1)):
     else:
         u = bk.fft.ifft2(uft, s=s, axes=axes)
     nx, ny = uft.shape[axes[0]], uft.shape[axes[1]]
-    return u * (nx * ny)
+    return bk.array(u) * (nx * ny)
 
 
 fourier_transform = jit(fourier_transform, static_argnums=(1, 2))

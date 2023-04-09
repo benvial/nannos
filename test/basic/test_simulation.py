@@ -6,14 +6,14 @@
 # See the documentation at nannos.gitlab.io
 
 
-import numpy as npo
 import pytest
 
 import nannos as nn
-
-pi = npo.pi
+from nannos.utils import allclose
 
 bk = nn.backend
+pi = bk.pi
+
 
 nh = 51
 L1 = [1.0, 0]
@@ -25,6 +25,13 @@ eps_hole = 1.0
 mu_pattern = 1.0
 mu_hole = 1.0
 h = 2
+
+formulations = ["original", "tangent", "jones", "pol"]
+wls = [0.9, 1.1]
+thetas = [0, 30]
+phis = [0, 30]
+psis = [0, 30]
+
 
 lattice = nn.Lattice((L1, L2), discretization=Nx)
 sup = lattice.Layer("Superstrate", epsilon=1.3, mu=1)
@@ -53,10 +60,10 @@ def build_pattern(anisotropic=False):
     return epsgrid, mugrid
 
 
-@pytest.mark.parametrize("wl", [0.9, 1.1])
-@pytest.mark.parametrize("theta", [0, 30])
-@pytest.mark.parametrize("phi", [0, 30])
-@pytest.mark.parametrize("psi", [0, 30])
+@pytest.mark.parametrize("wl", wls)
+@pytest.mark.parametrize("theta", thetas)
+@pytest.mark.parametrize("phi", phis)
+@pytest.mark.parametrize("psi", psis)
 def test_uniform(wl, theta, phi, psi):
     pw = nn.PlaneWave(wavelength=wl, angles=(theta, phi, psi))
     # eps = bk.diag([2, 3, 4])
@@ -73,7 +80,7 @@ def test_uniform(wl, theta, phi, psi):
     sim = nn.Simulation([sup, un, sub], pw, nh=5)
     R, T = sim.diffraction_efficiencies()
     B = R + T
-    assert npo.allclose(B, 1)
+    assert allclose(B, 1)
 
     # sup = Layer("Superstrate", epsilon=mu_sup, mu=eps_sup)
     # sub = Layer("Substrate", epsilon=mu_sub, mu=eps_sub)
@@ -81,15 +88,15 @@ def test_uniform(wl, theta, phi, psi):
     # un = Layer("Uniform", h, epsilon=mu, mu=eps)
     # sim = Simulation( [sup, un, sub], pw, nh)
     # Rdual, Tdual = sim.diffraction_efficiencies()
-    # assert npo.allclose(Rdual + Tdual, 1)
+    # assert allclose(Rdual + Tdual, 1)
     #
     # print(R)
     # print(Rdual)
     # print(T)
     # print(Tdual)
     #
-    # assert npo.allclose(R, Rdual, rtol=1e-3)
-    # assert npo.allclose(T, Tdual, rtol=1e-3)
+    # assert allclose(R, Rdual, rtol=1e-3)
+    # assert allclose(T, Tdual, rtol=1e-3)
 
 
 def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
@@ -99,13 +106,10 @@ def hole_array(epsgrid, mugrid, pw, nh=nh, formulation="original"):
     return nn.Simulation([sup, st, sub], pw, nh, formulation=formulation)
 
 
-formulations = ["original", "tangent", "jones", "pol"]
-
-
-@pytest.mark.parametrize("wl", [0.9, 1.1])
-@pytest.mark.parametrize("theta", [0, 30])
-@pytest.mark.parametrize("phi", [0, 30])
-@pytest.mark.parametrize("psi", [0, 30])
+@pytest.mark.parametrize("wl", wls)
+@pytest.mark.parametrize("theta", thetas)
+@pytest.mark.parametrize("phi", phis)
+@pytest.mark.parametrize("psi", psis)
 @pytest.mark.parametrize("formulation", formulations)
 def test_structured(wl, theta, phi, psi, formulation):
     pw = nn.PlaneWave(wavelength=wl, angles=(theta, phi, psi))
@@ -119,15 +123,15 @@ def test_structured(wl, theta, phi, psi, formulation):
     print("T = ", T)
     print("R = ", R)
     print("R + T = ", B)
-    assert npo.allclose(B, 1, atol=1e-1)
+    assert allclose(B, 1, atol=1e-1)
 
     Ri, Ti = sim.diffraction_efficiencies(orders=True)
     ri, ti = sim.diffraction_efficiencies(orders=True, complex=True)
     #
-    assert npo.allclose(bk.sum(bk.abs(ti) ** 2, axis=0), Ti)
-    assert npo.allclose(bk.sum(bk.abs(ri) ** 2, axis=0), Ri)
-    assert npo.allclose(bk.sum(bk.abs(ti) ** 2), T)
-    assert npo.allclose(bk.sum(bk.abs(ri) ** 2), R)
+    assert allclose(bk.sum(bk.abs(ti) ** 2, axis=0), Ti)
+    assert allclose(bk.sum(bk.abs(ri) ** 2, axis=0), Ri)
+    assert allclose(bk.sum(bk.abs(ti) ** 2), T)
+    assert allclose(bk.sum(bk.abs(ri) ** 2), R)
 
     a, b = sim._get_amplitudes(1, z=0.1)
     sim.get_field_fourier(1, z=0.1)
@@ -139,15 +143,15 @@ def test_structured(wl, theta, phi, psi, formulation):
     # simu_aniso = hole_array(epsgrid, mugrid, pw, formulation=formulation)
     # Raniso, Taniso = simu_aniso.diffraction_efficiencies()
     # Baniso = Raniso + Taniso
-    # # assert npo.allclose(Baniso, 1,atol=1e-3)
+    # # assert allclose(Baniso, 1,atol=1e-3)
     #
     # print(">>> formulation (anisotropic)= ", formulation)
     # print("T = ", Taniso)
     # print("R = ", Raniso)
     # print("R + T = ", Baniso)
-    # assert npo.allclose(Baniso, 1,atol=1e-1)
-    # assert npo.allclose(R, Raniso)
-    # assert npo.allclose(T, Taniso)
+    # assert allclose(Baniso, 1,atol=1e-1)
+    # assert allclose(R, Raniso)
+    # assert allclose(T, Taniso)
     return R, T, sim
 
 

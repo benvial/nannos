@@ -65,21 +65,23 @@ def use_gpu(boolean):
     global DEVICE
     global _CPU_DEVICE
     global _GPU_DEVICE
+    global _FORCE_GPU
+    _FORCE_GPU = 1
 
     if boolean:
         if BACKEND not in ["torch", "jax"]:
             logger.debug(f"Cannot use GPU with {BACKEND} backend.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
-        elif BACKEND=="torch" and not HAS_TORCH:
+        elif BACKEND == "torch" and not HAS_TORCH:
             logger.warning("pytorch not found. Cannot use GPU.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
-        elif BACKEND=="torch" and not HAS_CUDA:
+        elif BACKEND == "torch" and not HAS_CUDA:
             logger.warning("cuda not found. Cannot use GPU.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
-        elif BACKEND=="jax" and not HAS_JAX:
+        elif BACKEND == "jax" and not HAS_JAX:
             logger.warning("jax not found. Cannot use GPU.")
             _delvar("_GPU_DEVICE")
             _CPU_DEVICE = True
@@ -219,10 +221,11 @@ elif "_JAX" in globals():
         import jax
 
         if DEVICE == "cpu":
-            # os.environ["CUDA_VISIBLE_DEVICES"] = ""
+            os.environ["CUDA_VISIBLE_DEVICES"] = ""
             jax.config.update("jax_platform_name", "cpu")
         else:
             # os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             jax.config.update("jax_platform_name", "gpu")
 
         jax.config.update("jax_enable_x64", True)
@@ -291,6 +294,7 @@ DEVICE = get_device()
 
 
 _backend_env_var = os.environ.get("NANNOS_BACKEND")
+_gpu_env_var = os.environ.get("NANNOS_GPU")
 
 if (
     _backend_env_var in available_backends
@@ -301,6 +305,10 @@ if (
     logger.debug(f"Found environment variable NANNOS_BACKEND={_backend_env_var}")
     set_backend(_backend_env_var)
 
+if _gpu_env_var is not None and "_FORCE_GPU" not in globals():
+    logger.debug(f"Found environment variable NANNOS_GPU={_gpu_env_var}")
+    use_gpu(True)
+
 from . import optimize
 from .constants import *
 from .excitation import *
@@ -309,3 +317,5 @@ from .parallel import *
 from .sample import *
 from .simulation import *
 from .utils import *
+
+array = backend.array
