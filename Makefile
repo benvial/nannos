@@ -416,7 +416,7 @@ conda-ci: checksum-ci recipe
 	cd ../nannos-feedstock && \
 	git add . && \
 	git commit -a -m "New version $(VERSION)" && \
-	git push origin v$(VERSION) && echo done
+	git push origin v$(VERSION) --force && echo done
 
 
 ## Publish release on pypi and conda-forge
