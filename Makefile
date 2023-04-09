@@ -380,7 +380,7 @@ pypi: package
 checksum:
 	$(call message,${@})
 	@echo v$(VERSION)
-	$(eval SHA256 := $(shell curl -sL https://gitlab.com/nannos/nannos/-/archive/v$(VERSION)/nannos-v$(VERSION).tar.gz | openssl sha256 | cut  -c18-))
+	$(eval SHA256=$(shell curl -sL https://gitlab.com/nannos/nannos/-/archive/v$(VERSION)/nannos-v$(VERSION).tar.gz | openssl sha256 | cut -c17-))
 	@echo $(SHA256)
 
 ## Update conda-forge recipe

@@ -112,7 +112,7 @@ stages:
 #     - tags
 
 
-conda:
+# conda:
   image: ubuntu:latest
   stage: deploy
   cache: {}
