@@ -45,6 +45,7 @@ def set_log_level(level):
     stream.setLevel(LOG_LEVEL)
     stream.setFormatter(formatter)
     logger = logging.getLogger("pythonConfig")
+    logger.propagate = False
     logger.setLevel(LOG_LEVEL)
     [logger.removeHandler(h) for h in logger.handlers]
     logger.addHandler(stream)

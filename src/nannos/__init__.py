@@ -99,6 +99,9 @@ def use_gpu(boolean):
 
 
 def jit(fun, **kwargs):
+    if get_backend() == "jax":
+        import jax
+        return jax.jit(fun)
     return fun
 
 

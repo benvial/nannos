@@ -60,8 +60,8 @@ class Simulation:
         self.lattice = lattice0
         # nh0 is the number of harmonics required as input that might be different
         # from the one used after truncation
-        self.nh0 = int(nh)
         nh0 = int(nh)
+        self.nh0 = nh0
         # this is to avoid error when truncating to a single harmonic for example
         # when all layers are uniform
         if bk.all(bk.array([s.is_uniform for s in self.layers])) and nh0 != 1:
@@ -82,6 +82,16 @@ class Simulation:
 
         # Get the harmonics
         self.harmonics, self.nh = self.lattice.get_harmonics(nh0)
+        # Build a dictionary of indices
+        idict = {}
+        for j,(i1,i2) in enumerate(self.harmonics.T):
+            i1=int(i1)
+            i2=int(i2)
+            if i1 in idict:
+                idict[i1][i2] = j
+            else:
+                idict[i1]= {i2:j}
+        self.harmidx_dict = idict
         # Check if nh and resolution satisfy Nyquist criteria
         maxN = bk.max(self.harmonics)
         if self.lattice.discretization[0] <= 2 * maxN or (
@@ -167,7 +177,7 @@ class Simulation:
         layers_solved = []
         for layer in self.layers:
             _t0lay = timer.tic()
-            logger.info("Computing eigenpairs for layer {layer}")
+            logger.info(f"Computing eigenpairs for layer {layer}")
             layer = self.build_matrix(layer)
             if layer.is_uniform:
                 layer.solve_uniform(self.omega, self.kx, self.ky, self.nh)
@@ -422,7 +432,7 @@ class Simulation:
             layer_index, z=z, shape=shape, field="H", component=component
         )
 
-    def diffraction_efficiencies(self, orders=False, complex=False):
+    def diffraction_efficiencies(self, orders=False, complex=False, return_dict=False):
         """Compute the diffraction efficiencies.
 
         Parameters
@@ -430,6 +440,14 @@ class Simulation:
         orders : bool
             If ``True``, returns diffracted orders, else returns the sum of
             reflection and transmission for all propagating orders (the default is ``False``).
+
+        complex : bool
+            If ``True``, return complex valued quantities corresponding to ampitude related coefficients.
+            (the default is ``False``).
+
+        return_dict : bool
+            If ``True``, return quantities as nested dictionaries with keys corresponding to diffraction orders.
+            This works only if ``orders=True`` (the default is ``False``).
 
         Returns
         -------
@@ -455,6 +473,16 @@ class Simulation:
             if not orders:
                 R = bk.sum(R)
                 T = bk.sum(T)
+        if return_dict and orders:
+            Rdict = self.harmidx_dict.copy()
+            Tdict = self.harmidx_dict.copy()
+            for i1,i2 in self.harmonics.T:
+                i1=int(i1)
+                i2=int(i2)
+                idx=self.harmidx_dict[i1][i2]
+                Rdict[i1][i2] = R[idx]
+                Tdict[i1][i2] = T[idx]
+            return Rdict, Tdict
         return R, T
 
     def _get_complex_orders(self):
@@ -532,9 +560,10 @@ class Simulation:
                 raise ValueError(
                     "order must be a tuple of integers length 2 for bi-periodic gratings"
                 ) from e
-        return [
-            k for k, i in enumerate(self.harmonics.T) if bk.allclose(i, bk.array(order))
-        ][0]
+        # return [
+        #     k for k, i in enumerate(self.harmonics.T) if bk.allclose(i, bk.array(order))
+        # ][0]
+        return self.harmidx_dict[order[0]][order[1]]
 
     def get_order(self, A, order):
         return A[self.get_order_index(order)]
