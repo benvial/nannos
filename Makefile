@@ -357,7 +357,7 @@ tag: clean style
 	@git push --tags || echo Ignoring tag since it already exists on the remote
 
 ## Create a release
-release:
+release: tag
 	$(call message,${@})
 	@if [ "$(shell git rev-parse --abbrev-ref HEAD)" != "master" ]; then exit 1; fi
 	@gitlab project-release create --project-id $(GITLAB_PROJECT_ID) \
