@@ -99,15 +99,20 @@ def use_gpu(boolean):
 
 
 def jit(fun, **kwargs):
-    if get_backend() == "jax":
-        import jax
-        return jax.jit(fun)
+    # if get_backend() == "jax":
+    #     import jax
+    #     return jax.jit(fun)
     return fun
 
 
 def _delvar(VAR):
     if VAR in globals():
         del globals()[VAR]
+
+
+def _del_vars(VARS):
+    for VAR in VARS:
+        _delvar(VAR)
 
 
 def set_backend(backend):
@@ -145,34 +150,23 @@ def set_backend(backend):
     if backend == "autograd":
         logger.debug("Setting autograd backend")
         _AUTOGRAD = True
-        _delvar("_JAX")
-        _delvar("_TORCH")
-        _delvar("_SCIPY")
+        _del_vars(["_JAX", "_TORCH", "_SCIPY"])
     elif backend == "scipy":
         logger.debug("Setting scipy backend")
         _SCIPY = True
-        _delvar("_JAX")
-        _delvar("_TORCH")
-        _delvar("_AUTOGRAD")
+        _del_vars(["_JAX", "_TORCH", "_AUTOGRAD"])
     elif backend == "jax":
         logger.debug("Setting jax backend")
         _JAX = True
-        _delvar("_SCIPY")
-        _delvar("_TORCH")
-        _delvar("_AUTOGRAD")
+        _del_vars(["_SCIPY", "_TORCH", "_AUTOGRAD"])
     elif backend == "torch":
         _TORCH = True
         logger.debug("Setting torch backend")
-        _delvar("_SCIPY")
-        _delvar("_JAX")
-        _delvar("_AUTOGRAD")
+        _del_vars(["_SCIPY", "_JAX", "_AUTOGRAD"])
     elif backend == "numpy":
         _NUMPY = True
         logger.debug("Setting numpy backend")
-        _delvar("_SCIPY")
-        _delvar("_JAX")
-        _delvar("_AUTOGRAD")
-        _delvar("_TORCH")
+        _del_vars(["_SCIPY", "_JAX", "_AUTOGRAD", "_TORCH"])
     else:
         raise ValueError(
             f"Unknown backend '{backend}'. Please choose between 'numpy', 'scipy', 'jax', 'torch' and 'autograd'."

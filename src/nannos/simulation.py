@@ -84,13 +84,13 @@ class Simulation:
         self.harmonics, self.nh = self.lattice.get_harmonics(nh0)
         # Build a dictionary of indices
         idict = {}
-        for j,(i1,i2) in enumerate(self.harmonics.T):
-            i1=int(i1)
-            i2=int(i2)
+        for j, (i1, i2) in enumerate(self.harmonics.T):
+            i1 = int(i1)
+            i2 = int(i2)
             if i1 in idict:
                 idict[i1][i2] = j
             else:
-                idict[i1]= {i2:j}
+                idict[i1] = {i2: j}
         self.harmidx_dict = idict
         # Check if nh and resolution satisfy Nyquist criteria
         maxN = bk.max(self.harmonics)
@@ -476,10 +476,10 @@ class Simulation:
         if return_dict and orders:
             Rdict = self.harmidx_dict.copy()
             Tdict = self.harmidx_dict.copy()
-            for i1,i2 in self.harmonics.T:
-                i1=int(i1)
-                i2=int(i2)
-                idx=self.harmidx_dict[i1][i2]
+            for i1, i2 in self.harmonics.T:
+                i1 = int(i1)
+                i2 = int(i2)
+                idx = self.harmidx_dict[i1][i2]
                 Rdict[i1][i2] = R[idx]
                 Tdict[i1][i2] = T[idx]
             return Rdict, Tdict
