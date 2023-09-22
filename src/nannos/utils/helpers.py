@@ -30,12 +30,12 @@ from ..formulations.fft import fourier_transform, inverse_fourier_transform
 def allclose(a, b, **kwargs):
     try:
         a = a.detach().cpu().numpy()
-    except:
+    except Exception:
         pass
 
     try:
         b = b.detach().cpu().numpy()
-    except:
+    except Exception:
         pass
 
     return npo.allclose(a, b, **kwargs)

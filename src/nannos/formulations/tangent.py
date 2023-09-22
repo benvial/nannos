@@ -108,7 +108,7 @@ def _get_tangent_field_min(
 
     try:
         xf = xf.detach().cpu().numpy()
-    except:
+    except Exception:
         pass
 
     dgrid_f = npg.array(npg.gradient(xf))
@@ -178,7 +178,7 @@ def _get_tangent_field_min(
     if normalize:
         try:
             t1 = t.detach().cpu().numpy()
-        except:
+        except Exception:
             t1 = t
         norm_t = bk.array(norm(t1))
         t = _normalize_vec(t, norm_t)

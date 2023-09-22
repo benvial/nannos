@@ -396,10 +396,12 @@ recipe:
 	$(call message,${@})
 	cd .. && rm -rf nannos-feedstock && \
 	git clone git@github.com:benvial/nannos-feedstock.git && cd nannos-feedstock  && \
-	git branch v$(VERSION) && git checkout v$(VERSION) && \
 	sed -i "s/sha256: .*/sha256: $(SHA256)/" recipe/meta.yaml && \
 	sed -i "s/number: .*/number: 0/" recipe/meta.yaml && \
 	sed -i "s/{% set version = .*/{% set version = \"$(VERSION)\" %}/" recipe/meta.yaml
+
+
+# git branch v$(VERSION) && git checkout v$(VERSION) && \
 
 
 ## Update conda-forge package
