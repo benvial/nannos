@@ -11,5 +11,5 @@ push:
 	kaggle kernels push -p nannos_gpu
 
 dld:
-	kaggle kernels output benjaminvial/nannos-cpu -p nannos_cpu/
-	kaggle kernels output benjaminvial/nannos-gpu -p nannos_gpu/
+	kaggle kernels output benjaminvial/nannos-cpu -p nannos_cpu/ -o
+	kaggle kernels output benjaminvial/nannos-gpu -p nannos_gpu/ -o
