@@ -400,7 +400,7 @@ axes.spines.right  : True
                             ## rather than hyphen.  See
                             ## https://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
 
-axes.prop_cycle : cycler('color', ['d25f5f', '45957d', '357d8f', 'e6843d', 'dde370',  'be6c93', '455463', '44a38c', 'a2a2a2'])
+axes.prop_cycle : cycler('color', ['1672a7', 'd7a44c', '75b095', 'd25f5f', '45957d', '357d8f', 'e6843d', 'dde370',  'be6c93', '455463', '44a38c', 'a2a2a2'])
 
                    ## color cycle for plot lines as list of string colorspecs:
                    ##     single letter, long name, or web-style hex

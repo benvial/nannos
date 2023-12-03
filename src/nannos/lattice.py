@@ -194,6 +194,28 @@ class Lattice:
         """
         return bk.ones(self.discretization, dtype=bk.complex128)
 
+    def zeros(self):
+        """Return a new array filled with zeros.
+
+        Returns
+        -------
+        array like
+            A uniform complex 2D array with shape ``self.discretization``.
+
+        """
+        return bk.zeros(self.discretization, dtype=bk.complex128)
+
+    def constant(self, value):
+        """Return a new array filled with value.
+
+        Returns
+        -------
+        array like
+            A uniform complex 2D array with shape ``self.discretization``.
+
+        """
+        return self.ones() * value
+
     def geometry_mask(self, geom):
         """Return a geametry boolean mask discretized on the lattice grid.
 
