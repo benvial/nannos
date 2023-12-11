@@ -76,44 +76,20 @@ printmessage:
 #################################################################################
 
 
-## Set up python interpreter environment
-env:
-ifeq (True,$(HAS_CONDA))
-		@echo -e ">>> Detected conda, creating conda environment."
-ifeq (3,$(findstring 3,$(PYTHON_INTERPRETER)))
-	conda create --name $(PROJECT_NAME) python=3
-else
-	conda create --name $(PROJECT_NAME) python=2.7
-endif
-		@echo -e ">>> New conda env created. Activate with:\nsource activate $(PROJECT_NAME)"
-else
-	$(PYTHON_INTERPRETER) -m pip install -q virtualenv virtualenvwrapper
-	@echo -e ">>> Installing virtualenvwrapper if not already intalled.\nMake sure the following lines are in shell startup file\n\
-	export WORKON_HOME=$$HOME/.virtualenvs\nexport PROJECT_HOME=$$HOME/Devel\nsource /usr/local/bin/virtualenvwrapper.sh\n"
-	@bash -c "source `which virtualenvwrapper.sh`;mkvirtualenv $(PROJECT_NAME) --python=$(PYTHON_INTERPRETER)"
-	@echo -e ">>> New virtualenv created. Activate with:\nworkon $(PROJECT_NAME)"
-endif
-
-## Test if python environment is setup correctly
-testenv:
-	$(call message,${@})
-	source activate $(PROJECT_NAME); \
-	$(PYTHON_INTERPRETER) dev/testenv.py
-
 ## Install Python dependencies
 req:
 	$(call message,${@})
-	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+	pip install -r requirements.txt
 
 ## Install Python dependencies for dev and test
 dev:
-	@$(PYTHON_INTERPRETER) -m pip install -r dev/requirements.txt
+	@pip install -r dev/requirements.txt
 
 ## Clean generated files
 cleangen:
 	$(call message,${@})
 	@find . -not -path "./test/data/*" | grep -E "(__pycache__|\.pyc|\.ipynb_checkpoints|\.pyo$\)" | xargs rm -rf
-	@rm -rf .pytest_cache  build/ dist/ tmp/ htmlcov/ #src/nannos.egg-info/
+	@rm -rf .pytest_cache  build/ dist/ tmp/ htmlcov/ #nannos/nannos.egg-info/
 
 ## Clean documentation
 cleandoc:
@@ -127,17 +103,17 @@ clean: cleantest cleangen cleanreport cleandoc
 ## Lint using flake8 (sources only)
 lint:
 	$(call message,${@})
-	@flake8 --exit-zero --ignore=$(LINT_FLAGS) src/$(PROJECT_NAME)
+	@flake8 --exit-zero --ignore=$(LINT_FLAGS) nannos/$(PROJECT_NAME)
 	
 ## Lint using flake8
 lint-all:
 	$(call message,${@})
-	@flake8 --exit-zero --ignore=$(LINT_FLAGS) src/$(PROJECT_NAME) test/ examples/ --exclude "dev*"
+	@flake8 --exit-zero --ignore=$(LINT_FLAGS) nannos/$(PROJECT_NAME) test/ examples/ --exclude "dev*"
 
 ## Check for duplicated code
 dup:
 	$(call message,${@})
-	@pylint --exit-zero -f colorized --disable=all --enable=similarities src/$(PROJECT_NAME)
+	@pylint --exit-zero -f colorized --disable=all --enable=similarities nannos/$(PROJECT_NAME)
 
 
 ## Clean code stats
@@ -148,18 +124,18 @@ cleanreport:
 ## Report code stats
 report: cleanreport
 	$(call message,${@})
-	@pylint src/$(PROJECT_NAME) | pylint-json2html -f jsonextended -o pylint.html
+	@pylint nannos/$(PROJECT_NAME) | pylint-json2html -f jsonextended -o pylint.html
 
 
 ## Check for missing docstring
 dcstr:
 	$(call message,${@})
-	@pydocstyle src/$(PROJECT_NAME)  || true
+	@pydocstyle nannos/$(PROJECT_NAME)  || true
 
 ## Metric for complexity
 rad:
 	$(call message,${@})
-	@radon cc src/$(PROJECT_NAME) -a -nb
+	@radon cc nannos/$(PROJECT_NAME) -a -nb
 
 ## Run all code checks
 code-check: lint dup dcstr rad
@@ -279,7 +255,7 @@ define runtest
 		@echo
 		@export MPLBACKEND=agg && export NANNOS_BACKEND=$(1) && \
 		pytest ./test/basic \
-		--cov=src/$(PROJECT_NAME) --cov-append --cov-report term \
+		--cov=nannos/$(PROJECT_NAME) --cov-append --cov-report term \
 		--durations=0 $(TEST_ARGS)
 endef
 
@@ -320,7 +296,7 @@ test-allbk: test-numpy test-scipy test-autograd test-jax test-torch
 test-common:
 	$(call message,${@})
 	@export MPLBACKEND=agg && export NANNOS_BACKEND=numpy && pytest ./test/common \
-	--cov=src/$(PROJECT_NAME) --cov-append --cov-report term \
+	--cov=nannos/$(PROJECT_NAME) --cov-append --cov-report term \
 	--cov-report html --cov-report xml --durations=0 $(TEST_ARGS)
 
 ## Run the test suite

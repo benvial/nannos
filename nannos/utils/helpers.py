@@ -23,8 +23,9 @@ all = [
 import numpy as npo
 
 from .. import backend as bk
-from .. import get_backend, jit
+from .. import get_backend, jit, get_types
 from ..formulations.fft import fourier_transform, inverse_fourier_transform
+FLOAT, COMPLEX = get_types()
 
 
 def allclose(a, b, **kwargs):
@@ -81,7 +82,7 @@ def norm(v):
     eps = bk.finfo(float).eps
     out = bk.array(
         0j + eps + bk.sqrt(v[0] * bk.conj(v[0]) + v[1] * bk.conj(v[1])),
-        dtype=bk.complex128,
+        dtype=COMPLEX,
     )
     return bk.real(out)
 

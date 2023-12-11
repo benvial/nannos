@@ -8,7 +8,7 @@
 __all__ = ["Simulation"]
 
 from . import backend as bk
-from . import jit, logger
+from . import jit, logger, get_types
 from .formulations import fft
 from .layers import _get_layer
 from .plot import plot_structure, pyvista
@@ -16,6 +16,8 @@ from .utils import block, block2list, get_block, inv2by2block, norm, set_index
 from .utils import time as timer
 from .utils import unique
 from .utils.helpers import _reseter
+
+FLOAT, COMPLEX = get_types()
 
 # from .parallel import parloop
 
@@ -81,7 +83,7 @@ class Simulation:
         self.formulation = formulation
 
         # Get the harmonics
-        self.harmonics, self.nh = self.lattice.get_harmonics(nh0)
+        self.harmonics, self.nh = self.lattice.get_harmonics(nh0, sort=True)
         # Build a dictionary of indices
         idict = {}
         for j, (i1, i2) in enumerate(self.harmonics.T):
@@ -127,21 +129,25 @@ class Simulation:
         self.Ky = bk.diag(self.ky)
 
         # Some useful matrices
-        self.IdG = bk.array(bk.eye(self.nh, dtype=bk.complex128))
-        self.ZeroG = bk.array(bk.zeros_like(self.IdG, dtype=bk.complex128))
+        self.IdG = bk.array(bk.eye(self.nh, dtype=COMPLEX))
+        self.ZeroG = bk.array(bk.zeros_like(self.IdG, dtype=COMPLEX))
 
         # Initialize amplitudes
+        for index_zeroth_order, h in enumerate(self.harmonics.T):
+            if h[0] == 0 and h[1] == 0:
+                break
         self.a0 = []
         for i in range(self.nh * 2):
-            if i == 0:
+            if i == index_zeroth_order:
                 a0 = self.excitation.a0[0]
-            elif i == self.nh:
+            elif i == self.nh + index_zeroth_order:
                 a0 = self.excitation.a0[1]
             else:
                 a0 = 0
             self.a0.append(a0)
-        self.a0 = bk.array(self.a0, dtype=bk.complex128)
-        self.bN = bk.array(bk.zeros(2 * self.nh, dtype=bk.complex128))
+        self.a0 = bk.array(self.a0, dtype=COMPLEX)
+        self.bN = bk.array(bk.zeros(2 * self.nh, dtype=COMPLEX))
+        self.index_zeroth_order = index_zeroth_order
 
         # This is a boolean checking that the eigenproblems are solved for all layers
         # TODO: This is to avoid solving again, but could be confusing
@@ -231,10 +237,10 @@ class Simulation:
 
         _t0 = timer.tic()
 
-        S11 = bk.array(bk.eye(2 * self.nh, dtype=bk.complex128))
+        S11 = bk.array(bk.eye(2 * self.nh, dtype=COMPLEX))
         S12 = bk.zeros_like(S11)
         S21 = bk.zeros_like(S11)
-        S22 = bk.array(bk.eye(2 * self.nh, dtype=bk.complex128))
+        S22 = bk.array(bk.eye(2 * self.nh, dtype=COMPLEX))
 
         if indices is None:
             n_interfaces = len(self.layers) - 1
@@ -299,7 +305,7 @@ class Simulation:
             self.solve()
         ai0, bi0 = self._get_amplitudes(layer_index, translate=False)
         Z = z if hasattr(z, "__len__") else [z]
-        fields = bk.zeros((len(Z), 2, 3, self.nh), dtype=bk.complex128)
+        fields = bk.zeros((len(Z), 2, 3, self.nh), dtype=COMPLEX)
         for iz, z_ in enumerate(Z):
             ai, bi = _translate_amplitudes(layer, z_, ai0, bi0)
             ht_fourier = layer.eigenvectors @ (ai + bi)
@@ -330,7 +336,7 @@ class Simulation:
         u = bk.array(u)
         s = 0
         for i in range(self.nh):
-            f = bk.zeros(shape, dtype=bk.complex128)
+            f = bk.zeros(shape, dtype=COMPLEX)
             f = set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
             a = u[i]
             s += a * f
@@ -346,7 +352,7 @@ class Simulation:
 
         s = 0
         for i in range(self.nh):
-            f = bk.zeros(shape + (amplitudes.shape[0],), dtype=bk.complex128)
+            f = bk.zeros(shape + (amplitudes.shape[0],), dtype=COMPLEX)
             f = bk.array(f)
             f = set_index(f, [self.harmonics[0, i], self.harmonics[1, i]], 1.0)
             # f[self.harmonics[0, i], self.harmonics[1, i], :] = 1.0
@@ -505,7 +511,7 @@ class Simulation:
         t = self.get_field_fourier("Substrate")[0, 0] * norma_t
         bx0 = self.get_field_fourier("Superstrate")[0, 0] * norma_r
         o0 = bk.array(bk.zeros(self.nh))
-        o0 = set_index(o0, [0], 1)
+        o0 = set_index(o0, [self.index_zeroth_order], 1)
         r = bk.stack([b - o0 * c for b, c in zip(bx0, self.excitation.amplitude)])
         return r, t
 
@@ -624,21 +630,29 @@ class Simulation:
 
         else:
             epsilon_zz = epsilon[2, 2] if layer.is_epsilon_anisotropic else epsilon
-            # mu_zz = mu[2, 2] if layer.is_mu_anisotropic else mu
-            # TODO: check if mu or epsilon is homogeneous, no need to compute the Toepliz matrix
+            if layer.is_epsilon_uniform:
+                eps_hat = self.IdG * epsilon_zz
+                eps_hat_inv = self.IdG / epsilon_zz
+            else:
+                eps_hat = self._get_toeplitz_matrix(epsilon_zz)
+                eps_hat_inv = _inv(eps_hat)
 
-            eps_hat = self._get_toeplitz_matrix(epsilon_zz)
-            # eps_hat = self._get_toeplitz_matrix(epsilon_zz,ana=False)
-            mu_hat = self.IdG  # self._get_toeplitz_matrix(mu_zz)
-            eps_hat_inv = _inv(eps_hat)
-            mu_hat_inv = _inv(mu_hat)
-            Keps = _build_Kmatrix(eps_hat_inv, Ky, -Kx)
-            Kmu = _build_Kmatrix(mu_hat_inv, Kx, Ky)
+            mu_zz = mu[2, 2] if layer.is_mu_anisotropic else mu
+            if layer.is_mu_uniform:
+                mu_hat = self.IdG * mu_zz
+                mu_hat_inv = self.IdG / mu_zz
+            else:
+                mu_hat = self._get_toeplitz_matrix(mu_zz)
+                mu_hat_inv = _inv(mu_hat)
 
             if layer.is_epsilon_anisotropic:
                 eps_para_hat = self._get_toeplitz_matrix(epsilon, transverse=True)
             else:
                 eps_para_hat = [[eps_hat, self.ZeroG], [self.ZeroG, eps_hat]]
+
+            Keps = _build_Kmatrix(eps_hat_inv, Ky, -Kx)
+            Kmu = _build_Kmatrix(mu_hat_inv, Kx, Ky)
+
             if self.formulation == "original":
                 Peps = block(eps_para_hat)
             elif self.formulation == "tangent":

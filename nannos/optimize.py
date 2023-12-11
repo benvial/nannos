@@ -10,10 +10,11 @@ import nlopt
 import numpy as npo
 from scipy.optimize import minimize
 
-from . import DEVICE
+from . import DEVICE, get_types
 from . import backend as bk
 from . import get_backend, grad
 from .utils import apply_filter, tic, toc
+FLOAT, COMPLEX = get_types()
 
 
 def simp(x, eps_min, eps_max, p=1):
@@ -134,7 +135,7 @@ class TopologyOptimizer:
 
                 def fun_scipy(x, *args):
                     self.print(f">>> iteration {self.current_iteration}")
-                    x = bk.array(x, dtype=bk.float64)
+                    x = bk.array(x, dtype=FLOAT)
                     y = self.fun(x, *args)
                     self.print(f"current value = {y}")
                     if self.callback is not None:
@@ -169,7 +170,7 @@ class TopologyOptimizer:
 
                 def fun_nlopt(x, gradn):
                     self.print(f">>> iteration {self.current_iteration}")
-                    x = bk.array(x, dtype=bk.float64)
+                    x = bk.array(x, dtype=FLOAT)
                     y = self.fun(x, *args)
                     self.print(f"current value = {y}")
                     if self.callback is not None:

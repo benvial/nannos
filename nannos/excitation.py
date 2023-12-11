@@ -6,7 +6,9 @@
 # See the documentation at nannos.gitlab.io
 
 from . import backend as bk
+from . import get_types
 from .constants import pi
+FLOAT, COMPLEX = get_types()
 
 __all__ = ["PlaneWave"]
 
@@ -29,8 +31,8 @@ class PlaneWave:
     """
 
     def __init__(self, wavelength=1, angles=(0, 0, 0)):
-        self.wavelength = bk.array(wavelength, dtype=bk.float64)
-        self.angles_deg = bk.array(angles, dtype=bk.float64)
+        self.wavelength = bk.array(wavelength, dtype=FLOAT)
+        self.angles_deg = bk.array(angles, dtype=FLOAT)
         self.angles = self.angles_deg * _deg2rad
         self.theta, self.phi, self.psi = self.angles
         self.frequency_scaled = 1 / self.wavelength

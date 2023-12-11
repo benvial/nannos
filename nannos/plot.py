@@ -11,6 +11,9 @@ import matplotlib.transforms as mtransforms
 import pyvista
 
 from . import backend as bk
+from . import get_types
+
+FLOAT, COMPLEX = get_types()
 
 pyvista.set_jupyter_backend("trame")
 pyvista.set_plot_theme("document")
@@ -81,7 +84,7 @@ def plot_layer(
             im.set_transform(trans_data)
             ims.append(im)
     lx, ly = [
-        bk.linalg.norm(bk.array(v, dtype=bk.float64)) for v in lattice.basis_vectors
+        bk.linalg.norm(bk.array(v, dtype=FLOAT)) for v in lattice.basis_vectors
     ]
     lmax = max(lx, ly)
     delta = 0.1 * lmax

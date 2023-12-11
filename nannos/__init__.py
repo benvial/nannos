@@ -286,9 +286,27 @@ def get_device():
     return "cuda" if "_GPU_DEVICE" in globals() else "cpu"
 
 
+
+def use_32_bit(yes):
+    global _USE_32
+    if yes:
+        _USE_32 = True
+    else:
+        _delvar("_USE_32")
+    _reload_package()
+
+
+def get_types():
+    return (
+        (backend.float32, backend.complex64)
+        if "_USE_32" in globals()
+        else (backend.float64, backend.complex128)
+    )
+
+
 BACKEND = get_backend()
 DEVICE = get_device()
-
+FLOAT, COMPLEX = get_types()
 
 _backend_env_var = os.environ.get("NANNOS_BACKEND")
 _gpu_env_var = os.environ.get("NANNOS_GPU")

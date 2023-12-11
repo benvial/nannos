@@ -8,11 +8,12 @@
 __all__ = ["Lattice"]
 
 from . import backend as bk
-from . import get_backend
+from . import get_backend, get_types
 from .constants import pi
 from .geometry import *
 from .layers import Layer
 from .utils import is_scalar
+FLOAT, COMPLEX = get_types()
 
 
 class Lattice:
@@ -83,7 +84,7 @@ class Lattice:
             Matrix containing the lattice vectors (L1,L2).
 
         """
-        return bk.array(self.basis_vectors, dtype=bk.float64).T
+        return bk.array(self.basis_vectors, dtype=FLOAT).T
 
     @property
     def reciprocal(self):
@@ -97,7 +98,7 @@ class Lattice:
         """
         return 2 * pi * bk.linalg.inv(self.matrix).T
 
-    def get_harmonics(self, nh):
+    def get_harmonics(self, nh,sort=False):
         """Get the harmonics with a given truncation method.
 
         Parameters
@@ -113,7 +114,13 @@ class Lattice:
             The number of harmonics after truncation.
 
         """
+        harmonics,nh = self._get_harmonics(nh)
+        if sort:
+            srt = bk.argsort(harmonics[0])
+            return harmonics[:, srt], nh
+        return harmonics,nh
 
+    def _get_harmonics(self, nh):
         if self.harmonics_array is not None:
             nh = bk.shape(self.harmonics_array)[1]
             return self.harmonics_array, nh
@@ -125,6 +132,7 @@ class Lattice:
             return _parallelogramic_truncation(nh, self.reciprocal)
         else:
             return _one_dim_truncation(nh)
+
 
     def no1d(func):
         def inner(self, *args, **kwargs):
@@ -192,7 +200,7 @@ class Lattice:
             A uniform complex 2D array with shape ``self.discretization``.
 
         """
-        return bk.ones(self.discretization, dtype=bk.complex128)
+        return bk.ones(self.discretization, dtype=COMPLEX)
 
     def zeros(self):
         """Return a new array filled with zeros.
@@ -203,7 +211,7 @@ class Lattice:
             A uniform complex 2D array with shape ``self.discretization``.
 
         """
-        return bk.zeros(self.discretization, dtype=bk.complex128)
+        return bk.zeros(self.discretization, dtype=COMPLEX)
 
     def constant(self, value):
         """Return a new array filled with value.
@@ -347,5 +355,6 @@ def _circular_truncation(nh, Lk):
     nh = i
 
     G = bk.vstack(Gsorted)[:, :nh]
+
 
     return G, nh

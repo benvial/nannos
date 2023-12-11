@@ -11,7 +11,7 @@ __all__ = ["Layer"]
 
 from copy import copy
 
-from . import BACKEND, DEVICE
+from . import BACKEND, DEVICE, get_types
 from . import backend as bk
 from . import jit
 from .formulations.jones import get_jones_field
@@ -19,6 +19,7 @@ from .formulations.tangent import get_tangent_field
 from .plot import *
 from .utils import block
 from .utils.helpers import _reseter, is_anisotropic, is_uniform
+FLOAT, COMPLEX = get_types()
 
 
 class Layer:
@@ -52,8 +53,8 @@ class Layer:
             raise ValueError("thickness must be positive.")
         self.name = name
         self.thickness = thickness
-        self.epsilon = bk.array(epsilon, dtype=bk.complex128)
-        self.mu = bk.array(mu, dtype=bk.complex128)
+        self.epsilon = bk.array(epsilon, dtype=COMPLEX)
+        self.mu = bk.array(mu, dtype=COMPLEX)
         self.lattice = lattice
         self.tangent_field = tangent_field
         self.tangent_field_type = tangent_field_type
@@ -157,13 +158,13 @@ class Layer:
         q = (
             bk.array(
                 _epsilon * _mu * omega**2 - kx**2 - ky**2,
-                dtype=bk.complex128,
+                dtype=COMPLEX,
             )
             ** 0.5
         )
         # q = bk.where(bk.imag(q) < 0.0, -q, q)
         self.eigenvalues = bk.array(bk.hstack((q, q)))
-        self.eigenvectors = bk.array(bk.eye(2 * len(kx), dtype=bk.complex128))
+        self.eigenvectors = bk.array(bk.eye(2 * len(kx), dtype=COMPLEX))
         return self.eigenvalues, self.eigenvectors
 
     def solve_eigenproblem(self, matrix):
@@ -244,6 +245,13 @@ class Layer:
 
         """
         return is_uniform(self.epsilon) and is_uniform(self.mu)
+
+    @property
+    def is_mu_uniform(self):
+        return is_uniform(self.mu)
+    @property
+    def is_epsilon_uniform(self):
+        return is_uniform(self.epsilon)
 
     def get_tangent_field(self, harmonics, normalize=False, type=None):
         if self.is_uniform:
