@@ -8,7 +8,7 @@
 __all__ = ["Simulation"]
 
 from . import backend as bk
-from . import jit, logger, get_types
+from . import get_types, jit, logger
 from .formulations import fft
 from .layers import _get_layer
 from .plot import plot_structure, pyvista

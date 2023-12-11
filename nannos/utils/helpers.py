@@ -23,8 +23,9 @@ all = [
 import numpy as npo
 
 from .. import backend as bk
-from .. import get_backend, jit, get_types
+from .. import get_backend, get_types, jit
 from ..formulations.fft import fourier_transform, inverse_fourier_transform
+
 FLOAT, COMPLEX = get_types()
 
 

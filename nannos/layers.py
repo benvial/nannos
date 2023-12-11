@@ -11,14 +11,15 @@ __all__ = ["Layer"]
 
 from copy import copy
 
-from . import BACKEND, DEVICE, get_types
+from . import BACKEND, DEVICE
 from . import backend as bk
-from . import jit
+from . import get_types, jit
 from .formulations.jones import get_jones_field
 from .formulations.tangent import get_tangent_field
 from .plot import *
 from .utils import block
 from .utils.helpers import _reseter, is_anisotropic, is_uniform
+
 FLOAT, COMPLEX = get_types()
 
 
@@ -249,6 +250,7 @@ class Layer:
     @property
     def is_mu_uniform(self):
         return is_uniform(self.mu)
+
     @property
     def is_epsilon_uniform(self):
         return is_uniform(self.epsilon)

@@ -7,9 +7,10 @@
 
 
 import sys
-import scipy
+
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy
 
 import nannos as nn
 
@@ -32,7 +33,7 @@ lattice = nn.Lattice(1, 2**10)  # ,truncation="parallelogrammic")
 # harmonics_array0 = lattice.get_harmonics(nh,sort=False)[0]
 # harmonics_array = lattice.get_harmonics(nh,sort=True)[0]
 # lattice = nn.Lattice(1, 2**10,harmonics_array=harmonics_array)
-eps_metal = (3-1j*1e-9) ** 2
+eps_metal = (3 - 1j * 1e-9) ** 2
 epsgrid = lattice.ones() * 5
 stripe = lattice.stripe(0.5, 0.5)
 epsgrid[stripe] = eps_metal
@@ -126,14 +127,12 @@ print("speedup block= ", t / t1)
 plt.plot(evs1.real, evs1.imag, "xr")
 plt.plot(evs0.real, evs0.imag, "+b")
 
-evsblock = np.hstack([evs0,evs1])
+evsblock = np.hstack([evs0, evs1])
 srt = np.argsort(abs(evsblock))
 evsblock = evsblock[srt]
 srt = np.argsort(abs(evs))
 evs = evs[srt]
-assert np.allclose(evs,evsblock)
-
-
+assert np.allclose(evs, evsblock)
 
 
 # for i in range(2):
@@ -258,10 +257,10 @@ print("speedup block= ", t / t1)
 plt.plot(evs1.real, evs1.imag, "xr")
 plt.plot(evs0.real, evs0.imag, "+b")
 
-evsblock = np.hstack([evs0,evs1])
+evsblock = np.hstack([evs0, evs1])
 evs = np.sort(evs)
 evsblock = np.sort(evsblock)
-assert np.allclose(evs,evsblock)
+assert np.allclose(evs, evsblock)
 
 
 # fig, ax = plt.subplots(1, 2)

@@ -5,9 +5,10 @@
 #################   2D
 
 import sys
-import scipy
+
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy
 
 import nannos as nn
 
@@ -39,8 +40,8 @@ sim = nn.Simulation(stack, pw, nh=nh)
 
 print(sim.harmonics)
 
-Ri,Ti = sim.diffraction_efficiencies(orders=True)
+Ri, Ti = sim.diffraction_efficiencies(orders=True)
 print(Ri)
 print(Ti)
-R,T = sim.diffraction_efficiencies()
-print(R,T,R+T)
+R, T = sim.diffraction_efficiencies()
+print(R, T, R + T)

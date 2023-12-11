@@ -286,7 +286,6 @@ def get_device():
     return "cuda" if "_GPU_DEVICE" in globals() else "cpu"
 
 
-
 def use_32_bit(yes):
     global _USE_32
     if yes:

@@ -13,6 +13,7 @@ from .constants import pi
 from .geometry import *
 from .layers import Layer
 from .utils import is_scalar
+
 FLOAT, COMPLEX = get_types()
 
 
@@ -98,7 +99,7 @@ class Lattice:
         """
         return 2 * pi * bk.linalg.inv(self.matrix).T
 
-    def get_harmonics(self, nh,sort=False):
+    def get_harmonics(self, nh, sort=False):
         """Get the harmonics with a given truncation method.
 
         Parameters
@@ -114,11 +115,11 @@ class Lattice:
             The number of harmonics after truncation.
 
         """
-        harmonics,nh = self._get_harmonics(nh)
+        harmonics, nh = self._get_harmonics(nh)
         if sort:
             srt = bk.argsort(harmonics[0])
             return harmonics[:, srt], nh
-        return harmonics,nh
+        return harmonics, nh
 
     def _get_harmonics(self, nh):
         if self.harmonics_array is not None:
@@ -132,7 +133,6 @@ class Lattice:
             return _parallelogramic_truncation(nh, self.reciprocal)
         else:
             return _one_dim_truncation(nh)
-
 
     def no1d(func):
         def inner(self, *args, **kwargs):
@@ -355,6 +355,5 @@ def _circular_truncation(nh, Lk):
     nh = i
 
     G = bk.vstack(Gsorted)[:, :nh]
-
 
     return G, nh

@@ -10,10 +10,11 @@ import nlopt
 import numpy as npo
 from scipy.optimize import minimize
 
-from . import DEVICE, get_types
+from . import DEVICE
 from . import backend as bk
-from . import get_backend, grad
+from . import get_backend, get_types, grad
 from .utils import apply_filter, tic, toc
+
 FLOAT, COMPLEX = get_types()
 
 

@@ -8,6 +8,7 @@
 from . import backend as bk
 from . import get_types
 from .constants import pi
+
 FLOAT, COMPLEX = get_types()
 
 __all__ = ["PlaneWave"]
