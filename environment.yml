@@ -20,7 +20,7 @@ dependencies:
   - jaxlib
   - autograd
   - magma
-  - pyvista
+  - pyvista >= 0.43.1
   - trame
   - nest-asyncio
   - ipywidgets

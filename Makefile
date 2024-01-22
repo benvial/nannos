@@ -144,8 +144,8 @@ code-check: lint dup dcstr rad
 ## Reformat code
 style:
 	$(call message,${@})
-	@isort -l 88 . -q
-	@black -l 88 . -q
+	@isort -l 88 .
+	@black -l 88 .
 
 
 ## Push to gitlab

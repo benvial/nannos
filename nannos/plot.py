@@ -133,7 +133,7 @@ def plot_structure(
                     #     thickness = null_thickness
                 if layer.is_uniform:
                     if float(layer.epsilon.real) != 1:
-                        grid = pyvista.UniformGrid()
+                        grid = pyvista.ImageData()
                         grid.dimensions = (2, 2, 2)
                         grid.origin = (
                             x0,
@@ -176,7 +176,7 @@ def plot_structure(
                     epsgrid = epsgrid.T
                     values = epsgrid[:, :, None]
                     # Create the spatial reference
-                    grid = pyvista.UniformGrid()
+                    grid = pyvista.ImageData()
                     grid.dimensions = bk.array(values.shape) + 1
                     grid.origin = (x0, y0, z)  # The bottom left corner of the data set
                     grid.spacing = (1 / Nx, 1 / Ny, thickness)
