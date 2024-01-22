@@ -6,7 +6,7 @@
 # See the documentation at nannos.gitlab.io
 
 """
-Benchmark 1
+Benchmark
 ===========
 
 Backend performace comparison.

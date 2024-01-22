@@ -103,17 +103,17 @@ clean: cleantest cleangen cleanreport cleandoc
 ## Lint using flake8 (sources only)
 lint:
 	$(call message,${@})
-	@flake8 --exit-zero --ignore=$(LINT_FLAGS) nannos/$(PROJECT_NAME)
+	@flake8 --exit-zero --ignore=$(LINT_FLAGS) $(PROJECT_NAME)
 	
 ## Lint using flake8
 lint-all:
 	$(call message,${@})
-	@flake8 --exit-zero --ignore=$(LINT_FLAGS) nannos/$(PROJECT_NAME) test/ examples/ --exclude "dev*"
+	@flake8 --exit-zero --ignore=$(LINT_FLAGS) $(PROJECT_NAME) test/ examples/ --exclude "dev*"
 
 ## Check for duplicated code
 dup:
 	$(call message,${@})
-	@pylint --exit-zero -f colorized --disable=all --enable=similarities nannos/$(PROJECT_NAME)
+	@pylint --exit-zero -f colorized --disable=all --enable=similarities $(PROJECT_NAME)
 
 
 ## Clean code stats
@@ -124,18 +124,18 @@ cleanreport:
 ## Report code stats
 report: cleanreport
 	$(call message,${@})
-	@pylint nannos/$(PROJECT_NAME) | pylint-json2html -f jsonextended -o pylint.html
+	@pylint $(PROJECT_NAME) | pylint-json2html -f jsonextended -o pylint.html
 
 
 ## Check for missing docstring
 dcstr:
 	$(call message,${@})
-	@pydocstyle nannos/$(PROJECT_NAME)  || true
+	@pydocstyle $(PROJECT_NAME)  || true
 
 ## Metric for complexity
 rad:
 	$(call message,${@})
-	@radon cc nannos/$(PROJECT_NAME) -a -nb
+	@radon cc $(PROJECT_NAME) -a -nb
 
 ## Run all code checks
 code-check: lint dup dcstr rad
@@ -144,8 +144,8 @@ code-check: lint dup dcstr rad
 ## Reformat code
 style:
 	$(call message,${@})
-	@isort -l 88 .
-	@black -l 88 .
+	@isort -l 88 . -q
+	@black -l 88 . -q
 
 
 ## Push to gitlab
@@ -255,7 +255,7 @@ define runtest
 		@echo
 		@export MPLBACKEND=agg && export NANNOS_BACKEND=$(1) && \
 		pytest ./test/basic \
-		--cov=nannos/$(PROJECT_NAME) --cov-append --cov-report term \
+		--cov=$(PROJECT_NAME) --cov-append --cov-report term \
 		--durations=0 $(TEST_ARGS)
 endef
 
@@ -296,7 +296,7 @@ test-allbk: test-numpy test-scipy test-autograd test-jax test-torch
 test-common:
 	$(call message,${@})
 	@export MPLBACKEND=agg && export NANNOS_BACKEND=numpy && pytest ./test/common \
-	--cov=nannos/$(PROJECT_NAME) --cov-append --cov-report term \
+	--cov=$(PROJECT_NAME) --cov-append --cov-report term \
 	--cov-report html --cov-report xml --durations=0 $(TEST_ARGS)
 
 ## Run the test suite
@@ -333,7 +333,7 @@ tag: clean style
 	@git push --tags || echo Ignoring tag since it already exists on the remote
 
 ## Create a release
-release: tag
+release:
 	$(call message,${@})
 	@if [ "$(shell git rev-parse --abbrev-ref HEAD)" != "master" ]; then exit 1; fi
 	@gitlab project-release create --project-id $(GITLAB_PROJECT_ID) \
@@ -372,18 +372,19 @@ recipe:
 	$(call message,${@})
 	cd .. && rm -rf nannos-feedstock && \
 	git clone git@github.com:benvial/nannos-feedstock.git && cd nannos-feedstock  && \
+	git remote add upstream git@github.com:conda-forge/nannos-feedstock.git  && \
+	git fetch upstream && \
 	sed -i "s/sha256: .*/sha256: $(SHA256)/" recipe/meta.yaml && \
 	sed -i "s/number: .*/number: 0/" recipe/meta.yaml && \
 	sed -i "s/{% set version = .*/{% set version = \"$(VERSION)\" %}/" recipe/meta.yaml
 
-
-# git branch v$(VERSION) && git checkout v$(VERSION) && \
 
 
 ## Update conda-forge package
 conda: checksum recipe
 	$(call message,${@})
 	cd ../nannos-feedstock && \
+	git branch v$(VERSION) && git checkout v$(VERSION) && \
 	git add . && \
 	git commit -a -m "New version $(VERSION)" && \
 	git push origin v$(VERSION) --force && echo done
@@ -394,7 +395,7 @@ conda-ci: checksum-ci recipe
 	cd ../nannos-feedstock && \
 	git add . && \
 	git commit -a -m "New version $(VERSION)" && \
-	git push origin v$(VERSION) --force && echo done
+	git push && echo done
 
 
 ## Publish release on pypi and conda-forge

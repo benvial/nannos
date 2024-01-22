@@ -7,8 +7,8 @@
 
 
 """
-Benchmark 2
-===========
+Benchmark Kaggle
+================
 
 Backend performace comparison, with GPU acceleration, as run on Kaggle (https://www.kaggle.com/code/benjaminvial/nannos_cpu)
 """
