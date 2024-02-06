@@ -10,7 +10,7 @@
 Benchmark Kaggle
 ================
 
-Backend performace comparison, with GPU acceleration, as run on Kaggle (https://www.kaggle.com/code/benjaminvial/nannos_cpu)
+Backend performace comparison, with GPU acceleration, as run on Kaggle (https://www.kaggle.com/code/benjaminvial/nannos-cpu)
 """
 
 
@@ -18,6 +18,9 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+plt.ion()
+# plt.style.use('../../doc/_custom/nannos.mplstyle')
 
 ##############################################################################
 # Load data
@@ -50,11 +53,12 @@ for case in cases:
     tav[case] = np.mean(t, axis=1)
     tstd[case] = np.std(t, axis=1)
 
-colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+# colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+colors = ["#467ccc","#8746cc","#cc4646","#e4731d","#46cc96","#525252"]
 
 colors = colors[:3] + [colors[4], colors[4]] + [colors[5], colors[5]]
 
-plt.figure()
+plt.figure(figsize=(2,2))
 for i, case in enumerate(cases):
     ls = "--" if case.split(" ")[-1] == "gpu" else "-"
     plt.errorbar(
@@ -65,7 +69,8 @@ for i, case in enumerate(cases):
         ls=ls,
         color=colors[i],
         fmt="s",
-        capsize=5,
+        capsize=1,
+        ms=1,
     )
 
 plt.xlabel("Number of harmonics")
@@ -88,7 +93,7 @@ for case in cases[1:]:
     speedup_std[case] = np.std(s, axis=1)
 
 
-plt.figure()
+plt.figure(figsize=(2,2))
 for i, case in enumerate(cases[1:]):
     ls = "--" if case.split(" ")[-1] == "gpu" else "-"
     plt.errorbar(
@@ -99,7 +104,8 @@ for i, case in enumerate(cases[1:]):
         ls=ls,
         color=colors[i + 1],
         fmt="s",
-        capsize=5,
+        capsize=1,
+        ms=1,
     )
 plt.xlabel("number of harmonics")
 plt.ylabel("Speedup vs. numpy")
