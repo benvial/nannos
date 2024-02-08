@@ -22,6 +22,10 @@ from .utils.helpers import _reseter, is_anisotropic, is_uniform
 
 FLOAT, COMPLEX = get_types()
 
+def eig_func(A):
+    u,v = jit(bk.linalg.eig(A))
+    return  u,v
+
 
 class Layer:
     """A layer object.
@@ -201,8 +205,6 @@ class Layer:
                 v = jax.device_put(v, jax.devices("gpu")[0])
 
             else:
-                eig_func = bk.linalg.eig
-                eig_func = jit(bk.linalg.eig)
                 w, v = eig_func(matrix)
             q = w**0.5
             q = bk.where(bk.imag(q) < 0.0, -q, q)

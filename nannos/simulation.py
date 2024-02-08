@@ -716,7 +716,7 @@ class Simulation:
         )
         eps_hat = self._get_toeplitz_matrix(epsilon_zz)
         return self.get_ifft(
-            eps_hat[:, 0], shape=self.lattice.discretization, axes=axes
+            eps_hat[:, self.index_zeroth_order], shape=self.lattice.discretization, axes=axes
         )
         # if inv:
         #     u = layer.eps_hat_inv ## nu_hat
