@@ -91,11 +91,12 @@ class TopologyOptimizer:
         verbose=False,
         options=None,
     ):
-        if method == nlopt:
+        if method == "nlopt":
             try:
                 import nlopt
             except:
                 logger.info("nlopt not installed, falling back to scipy.optimize")
+                method = "scipy"
         if options is None:
             options = {}
         self.fun = fun
