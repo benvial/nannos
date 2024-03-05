@@ -22,9 +22,10 @@ from .utils.helpers import _reseter, is_anisotropic, is_uniform
 
 FLOAT, COMPLEX = get_types()
 
+
 def eig_func(A):
-    u,v = jit(bk.linalg.eig(A))
-    return  u,v
+    u, v = jit(bk.linalg.eig(A))
+    return u, v
 
 
 class Layer:

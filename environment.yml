@@ -13,7 +13,6 @@ dependencies:
   - colorlog
   - psutil
   - ipython
-  - nlopt
   - pytorch
   - pytorch-gpu
   - jax
@@ -26,4 +25,5 @@ dependencies:
   - trame-vuetify
   - trame-vtk
   - pip:
+    - nlopt
     - git+https://gitlab.com/nannos/nannos.git

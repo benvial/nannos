@@ -6,7 +6,9 @@
 # See the documentation at nannos.gitlab.io
 
 import os
-from  packaging.version import parse as parse_version
+
+from packaging.version import parse as parse_version
+
 from .__about__ import __author__, __description__, __version__
 from .__about__ import data as _data
 from .log import *
@@ -217,8 +219,7 @@ elif "_JAX" in globals():
     if HAS_JAX:
         import jax
 
-
-        if parse_version(jax.__version__)>=parse_version("0.4.16"):
+        if parse_version(jax.__version__) >= parse_version("0.4.16"):
             jax.numpy.trapz = jax.scipy.integrate.trapezoid
 
         if DEVICE == "cpu":

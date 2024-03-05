@@ -54,11 +54,11 @@ for case in cases:
     tstd[case] = np.std(t, axis=1)
 
 # colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-colors = ["#467ccc","#8746cc","#cc4646","#e4731d","#46cc96","#525252"]
+colors = ["#467ccc", "#8746cc", "#cc4646", "#e4731d", "#46cc96", "#525252"]
 
 colors = colors[:3] + [colors[4], colors[4]] + [colors[5], colors[5]]
 
-plt.figure(figsize=(2,2))
+plt.figure(figsize=(2, 2))
 for i, case in enumerate(cases):
     ls = "--" if case.split(" ")[-1] == "gpu" else "-"
     plt.errorbar(
@@ -93,7 +93,7 @@ for case in cases[1:]:
     speedup_std[case] = np.std(s, axis=1)
 
 
-plt.figure(figsize=(2,2))
+plt.figure(figsize=(2, 2))
 for i, case in enumerate(cases[1:]):
     ls = "--" if case.split(" ")[-1] == "gpu" else "-"
     plt.errorbar(
