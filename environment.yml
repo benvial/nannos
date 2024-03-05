@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - pytorch
 dependencies:
-  - python>=3.8
+  - python>=3.9
   - pip
   - numpy
   - scipy
@@ -17,12 +17,13 @@ dependencies:
   - pytorch
   - pytorch-gpu
   - jax
-  - jaxlib
+  - jaxlib=*=*cuda*
   - autograd >= 1.6.2
   - magma
   - pyvista >= 0.43.1
-  - trame
-  - nest-asyncio
   - ipywidgets
+  - trame
+  - trame-vuetify
+  - trame-vtk
   - pip:
     - git+https://gitlab.com/nannos/nannos.git

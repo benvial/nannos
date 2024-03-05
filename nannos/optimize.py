@@ -6,7 +6,6 @@
 # See the documentation at nannos.gitlab.io
 
 
-import nlopt
 import numpy as npo
 from scipy.optimize import minimize
 
@@ -14,6 +13,7 @@ from . import DEVICE
 from . import backend as bk
 from . import get_backend, get_types, grad
 from .utils import apply_filter, tic, toc
+from .log import logger
 
 FLOAT, COMPLEX = get_types()
 
@@ -91,6 +91,11 @@ class TopologyOptimizer:
         verbose=False,
         options=None,
     ):
+        if method == nlopt:
+            try:
+                import nlopt
+            except:
+                logger.info("nlopt not installed, falling back to scipy.optimize")
         if options is None:
             options = {}
         self.fun = fun

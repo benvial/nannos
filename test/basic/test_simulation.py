@@ -152,7 +152,6 @@ def test_structured(wl, theta, phi, psi, formulation):
     # assert allclose(Baniso, 1,atol=1e-1)
     # assert allclose(R, Raniso)
     # assert allclose(T, Taniso)
-    return R, T, sim
 
 
 # for f in formulations:
