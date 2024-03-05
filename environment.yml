@@ -16,7 +16,7 @@ dependencies:
   - pytorch
   - pytorch-gpu
   - jax
-  - jaxlib=*=*cuda*
+  - jaxlib # =*=*cuda* uncomment if you want to use gpu with jax
   - autograd >= 1.6.2
   - magma
   - pyvista >= 0.43.1
