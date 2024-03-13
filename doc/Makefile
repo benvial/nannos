@@ -58,7 +58,6 @@ help:
 clean:
 	@rm -rf $(BUILDDIR)/*
 	@rm -rf examples/
-	@rm -rf auto_mayavi_examples/
 	@rm -rf tutorials/
 	@rm -rf gen_modules/
 	@rm -rf generated/

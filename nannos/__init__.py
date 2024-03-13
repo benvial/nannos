@@ -6,12 +6,19 @@
 # See the documentation at nannos.gitlab.io
 
 import os
+import warnings
 
 from packaging.version import parse as parse_version
 
 from .__about__ import __author__, __description__, __version__
 from .__about__ import data as _data
 from .log import *
+
+warnings.filterwarnings(
+    action="ignore",
+    category=RuntimeWarning,
+    message=".*deadlock.",
+)
 
 available_backends = ["numpy", "scipy", "autograd"]
 
@@ -35,6 +42,7 @@ def has_torch():
 
 def has_jax():
     try:
+
         import jax
 
         return True

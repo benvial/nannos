@@ -7,7 +7,7 @@ dependencies:
   - pip
   - numpy
   - scipy
-  - matplotlib-base
+  - matplotlib   #-base
   - shapely
   - joblib
   - colorlog
@@ -19,7 +19,7 @@ dependencies:
   - jaxlib # =*=*cuda* uncomment if you want to use gpu with jax
   - autograd >= 1.6.2
   - magma
-  - pyvista >= 0.43.1
+  - pyvista[jupyter] >= 0.43.1
   - ipywidgets
   - trame
   - trame-vuetify

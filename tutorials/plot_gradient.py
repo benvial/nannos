@@ -26,7 +26,6 @@ from nannos import grad
 
 bk = nn.backend
 
-
 ##############################################################################
 # Let's define a function that will return the reflection coefficient for
 # a metasurface:
@@ -83,7 +82,7 @@ import random
 
 random.seed(2022)
 
-discretization = 2**3, 2**3
+discretization = 2**4, 2**4
 
 
 def f(var):
@@ -96,7 +95,7 @@ def f(var):
     sim = nn.Simulation(
         [sup, ms, sub],
         nn.PlaneWave(1.5),
-        nh=31,
+        nh=51,
     )
     R, T = sim.diffraction_efficiencies()
     return R
@@ -128,5 +127,18 @@ tauto = nn.toc(t0)
 assert nn.backend.allclose(df_fd, df_auto, atol=1e-7)
 
 print("speedup: ", tfd / tauto)
+
+##############################################################################
+# Plot gradients
+
+fig, ax = plt.subplots(1, 2, figsize=(8, 3))
+_ = ax[0].imshow(df_auto.reshape(*discretization).real)
+plt.colorbar(_, ax=ax[0])
+ax[0].set_title("autodiff")
+_ = ax[1].imshow(df_fd.reshape(*discretization).real)
+plt.colorbar(_, ax=ax[1])
+ax[1].set_title("finite differences")
+plt.tight_layout()
+
 
 nn.set_backend("numpy")

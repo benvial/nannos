@@ -6,18 +6,15 @@
 # See the documentation at nannos.gitlab.io
 
 """
-Benchmark
-===========
+Backends comparison
+===================
 
-Backend performace comparison.
+Numerical backends performace comparison.
 """
 
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-plt.ion()
-plt.close("all")
 
 markers = ["o", "s", "d", "v", "^", ">"]
 figsize = (2, 2)
@@ -28,6 +25,8 @@ devices = ["cpu", "gpu"]
 backends = ["numpy", "scipy", "autograd", "torch"]
 
 colors = ["#3b9dd4", "#ecd142", "#e87c40", "#b33dd1", "#50ba61", "#cd2323"]
+
+
 ##############################################################################
 # Time vs. number of harmonics
 # ------------------------------

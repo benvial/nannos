@@ -382,6 +382,7 @@ intersphinx_mapping = {
 
 
 sphinx_gallery_conf = {
+    "plot_gallery": "'True'",
     # path to your examples scripts
     "examples_dirs": ["../examples", "../tutorials"],
     # path where to save gallery generated examples
