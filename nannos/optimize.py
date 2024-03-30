@@ -94,6 +94,8 @@ class TopologyOptimizer:
         if method == "nlopt":
             try:
                 import nlopt
+
+                self.nlopt = nlopt
             except:
                 logger.info("nlopt not installed, falling back to scipy.optimize")
                 method = "scipy"
@@ -197,7 +199,7 @@ class TopologyOptimizer:
                 lb = npo.zeros(self.nvar, dtype=npo.float64)
                 ub = npo.ones(self.nvar, dtype=npo.float64)
 
-                self.opt = nlopt.opt(nlopt.LD_MMA, self.nvar)
+                self.opt = self.nlopt.opt(self.nlopt.LD_MMA, self.nvar)
                 self.opt.set_lower_bounds(lb)
                 self.opt.set_upper_bounds(ub)
                 if "ftol_rel" in self.options:
