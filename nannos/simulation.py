@@ -122,7 +122,7 @@ class Simulation:
         )
         self.ky = (
             self.k0para[1]
-            + r[0, 1] * self.harmonics[0, :]
+            + r[1, 0] * self.harmonics[0, :]
             + r[1, 1] * self.harmonics[1, :]
         )
         self.Kx = bk.diag(self.kx)

@@ -153,7 +153,6 @@ def plot_structure(
                             kwargs["color"] = layer_colors[ilayer]
                         if layer_metallic is not None:
                             kwargs["metallic"] = layer_metallic[ilayer]
-
                         if layer_roughness is not None:
                             kwargs["roughness"] = layer_roughness[ilayer]
 
@@ -184,7 +183,9 @@ def plot_structure(
                     vals = bk.unique(epsgrid)
                     for ival, v in enumerate(vals):
                         if v != 1:
-                            threshed = grid.threshold([v - 1e-7 * v, v + 1e-7 * v])
+                            threshed = grid.threshold(
+                                [v - 1e-7 * abs(v), v + 1e-7 * abs(v)]
+                            )
 
                             threshed = threshed.transform(transform_matrix)
 

@@ -289,7 +289,7 @@ test-torch:
 	$(call	runtest,torch)
 
 ## Run tests with different backends
-test-allbk: test-numpy test-scipy test-autograd test-jax test-torch
+test-allbk: test-numpy test-scipy test-autograd test-torch test-jax
 	$(call message,${@})
 
 ## Run the commmon tests
