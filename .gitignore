@@ -105,6 +105,9 @@ doc/biblio
 
 examples/benchmarks/kaggle/nannos*
 
+# include fonts
+!doc/_assets/*.zip
+
 # include test data directory
 !tests/data/
 !tests/data/*
