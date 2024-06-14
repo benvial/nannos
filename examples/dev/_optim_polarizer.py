@@ -116,7 +116,11 @@ normalize0 = True
 filter0 = True
 symz0 = True
 # ------ plot ------
-nax = int(Nlayers**0.5) if int(Nlayers**0.5) ** 2 == Nlayers else int(Nlayers**0.5) + 1
+nax = (
+    int(Nlayers**0.5)
+    if int(Nlayers**0.5) ** 2 == Nlayers
+    else int(Nlayers**0.5) + 1
+)
 nax_x, nax_y = nax, nax
 figsize = (3, 3)
 
