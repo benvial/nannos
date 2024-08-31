@@ -14,8 +14,10 @@ dependencies:
   - psutil
   - ipython
   - pytorch
+  - pytorch-gpu
   - jax
   - jaxlib
+  - jaxlib  =*=*cuda*
   - autograd >= 1.6.2
   - libmagma_sparse
   - magma
