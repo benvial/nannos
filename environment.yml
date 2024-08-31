@@ -14,6 +14,7 @@ dependencies:
   - psutil
   - ipython
   - pytorch
+  - cpuonly
   - jax
   - jaxlib
   - autograd >= 1.6.2
