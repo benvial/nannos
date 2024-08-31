@@ -5,6 +5,8 @@
 # License: GPLv3
 # See the documentation at nannos.gitlab.io
 
+
+import pyvista  # isort: skip
 import os
 import warnings
 
