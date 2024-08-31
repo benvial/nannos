@@ -53,7 +53,7 @@ class Layer:
         mu=1,
         lattice=None,
         tangent_field=None,
-        tangent_field_type="fft",
+        tangent_field_type="opt",
     ):
         if thickness is not None and thickness < 0:
             raise ValueError("thickness must be positive.")

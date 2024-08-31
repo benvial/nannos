@@ -271,7 +271,7 @@ class Lattice:
         mu=1,
         lattice=None,
         tangent_field=None,
-        tangent_field_type="fft",
+        tangent_field_type="opt",
     ):
         return Layer(
             name,

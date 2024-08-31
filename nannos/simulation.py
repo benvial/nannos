@@ -653,6 +653,10 @@ class Simulation:
             Keps = _build_Kmatrix(eps_hat_inv, Ky, -Kx)
             Kmu = _build_Kmatrix(mu_hat_inv, Kx, Ky)
 
+            # nh_tan = max(1000, self.nh)
+            nh_tan = self.nh
+            harmonics_tan, _ = self.lattice.get_harmonics(nh_tan, sort=True)
+
             if self.formulation == "original":
                 Peps = block(eps_para_hat)
             elif self.formulation == "tangent":
@@ -661,15 +665,14 @@ class Simulation:
                     eps_para_hat = [[eps_hat, self.ZeroG], [self.ZeroG, nuhat_inv]]
                     Peps = block(eps_para_hat)
                 else:
-                    t = layer.get_tangent_field(self.harmonics, normalize=True)
+                    t = layer.get_tangent_field(harmonics_tan, normalize=True)
                     Peps = self._get_Peps(layer, eps_para_hat, t, direct=False)
             elif self.formulation == "jones":
-                t = layer.get_tangent_field(self.harmonics, normalize=False)
+                t = layer.get_tangent_field(harmonics_tan, normalize=False)
                 J = layer.get_jones_field(t)
                 Peps = self._get_Peps(layer, eps_para_hat, J, direct=False)
             else:
-                # elif self.formulation == "pol":
-                t = layer.get_tangent_field(self.harmonics, normalize=False)
+                t = layer.get_tangent_field(harmonics_tan, normalize=False)
                 Peps = self._get_Peps(layer, eps_para_hat, t, direct=False)
 
             if layer.is_mu_anisotropic:

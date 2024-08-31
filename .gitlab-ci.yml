@@ -111,26 +111,26 @@ pypi:
   only:
     - tags
 
-
-conda:
-  image: ubuntu:latest
-  stage: deploy
-  cache: {}
-  before_script:
-    ## install os tools
-    - apt-get update -q && apt-get install -q -y --no-install-recommends make sed curl git python3 --reinstall ca-certificates
-    - update-ca-certificates
-    ## setup ssh
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add - > /dev/null
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - git config --global user.name "${GITLAB_USER_NAME}"
-    - git config --global user.email "${GITLAB_USER_EMAIL}"
-    - ssh-keyscan github.com >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-  script:
-    - make conda-ci
-  only:
-    - tags
+# # this is now done automatically by conda-forge
+# conda:
+#   image: ubuntu:latest
+#   stage: deploy
+#   cache: {}
+#   before_script:
+#     ## install os tools
+#     - apt-get update -q && apt-get install -q -y --no-install-recommends make sed curl git python3 --reinstall ca-certificates
+#     - update-ca-certificates
+#     ## setup ssh
+#     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+#     - eval $(ssh-agent -s)
+#     - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add - > /dev/null
+#     - mkdir -p ~/.ssh
+#     - chmod 700 ~/.ssh
+#     - git config --global user.name "${GITLAB_USER_NAME}"
+#     - git config --global user.email "${GITLAB_USER_EMAIL}"
+#     - ssh-keyscan github.com >> ~/.ssh/known_hosts
+#     - chmod 644 ~/.ssh/known_hosts
+#   script:
+#     - make conda-ci
+#   only:
+#     - tags
