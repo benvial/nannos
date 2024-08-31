@@ -1,7 +1,7 @@
 name: nannos
 channels:
-  - conda-forge
   - pytorch
+  - conda-forge
 dependencies:
   - python>=3.9
   - pip
