@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
 
 from . import backend as bk
-from . import get_types
+from . import get_types, pyvista
 
 FLOAT, COMPLEX = get_types()
 
