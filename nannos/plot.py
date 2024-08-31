@@ -6,9 +6,9 @@
 # See the documentation at nannos.gitlab.io
 
 
+import pyvista  # isort: skip
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
-import pyvista
 
 from . import backend as bk
 from . import get_types
