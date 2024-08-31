@@ -26,6 +26,6 @@ dependencies:
   - trame
   - trame-vuetify
   - trame-vtk
+  - nlopt
   - pip:
-      - nlopt
       - git+https://gitlab.com/nannos/nannos.git
