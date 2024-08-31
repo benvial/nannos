@@ -7,6 +7,15 @@
 
 
 import pyvista  # isort: skip
+
+pyvista.set_jupyter_backend("trame")
+pyvista.set_plot_theme("document")
+pyvista.global_theme.background = "white"
+# pyvista.global_theme.window_size = [600, 400]
+pyvista.global_theme.axes.show = True
+# pyvista.global_theme.smooth_shading = True
+# pyvista.global_theme.antialiasing = True
+# pyvista.global_theme.axes.box = True
 import os
 import warnings
 
