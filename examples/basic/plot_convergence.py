@@ -53,7 +53,7 @@ def checkerboard_cellA(nh, formulation):
     order = (-1, -1)
     R, T = sim.diffraction_efficiencies(orders=True)
     t = sim.get_order(T, order)
-    return R, T, t, sim
+    return t, sim
 
 
 def checkerboard_cellB(nh, formulation):
@@ -76,7 +76,7 @@ def checkerboard_cellB(nh, formulation):
     order = (0, -1)
     R, T = sim.diffraction_efficiencies(orders=True)
     t = sim.get_order(T, order)
-    return R, T, t, sim
+    return t, sim
 
 
 #########################################################################
@@ -97,24 +97,26 @@ formulations = ["original", "tangent", "pol", "jones"]
 for icell, cell_fun in enumerate([checkerboard_cellA, checkerboard_cellB]):
     celltype = "A" if icell == 0 else "B"
 
+    print("============================")
+    print(f"cell type {celltype}")
+    print("============================")
+
     nhs = {f: [] for f in formulations}
     ts = {f: [] for f in formulations}
     times = {f: [] for f in formulations}
 
     for nh in NH:
-        print("============================")
+
         print("number of harmonics = ", nh)
-        print("============================")
 
         for formulation in formulations:
             t0 = -time.time()
-            Ri, Ti, t, sim = cell_fun(nh, formulation=formulation)
+            t, sim = cell_fun(nh, formulation=formulation)
             t0 += time.time()
             print("formulation = ", formulation)
-            print("nh0 = ", nh)
-            print("nh = ", sim.nh)
-            print(f"time = {t0}s")
-            print("t = ", t)
+            print(f"number of harmonics: asked={nh}, actual={sim.nh}")
+            print(f"elapsed time = {t0}s")
+            print("T(0,-1) = ", t)
             print("-----------------")
             nhs[formulation].append(sim.nh)
             ts[formulation].append(t)
