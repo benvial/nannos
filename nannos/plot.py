@@ -6,7 +6,6 @@
 # See the documentation at nannos.gitlab.io
 
 
-import pyvista  # isort: skip
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
 
@@ -14,15 +13,6 @@ from . import backend as bk
 from . import get_types, pyvista
 
 FLOAT, COMPLEX = get_types()
-
-pyvista.set_jupyter_backend("trame")
-pyvista.set_plot_theme("document")
-pyvista.global_theme.background = "white"
-# pyvista.global_theme.window_size = [600, 400]
-pyvista.global_theme.axes.show = True
-# pyvista.global_theme.smooth_shading = True
-# pyvista.global_theme.antialiasing = True
-# pyvista.global_theme.axes.box = True
 
 
 def plot_line(ax, point1, point2, cellstyle="k-"):

@@ -14,7 +14,7 @@ dependencies:
   - colorlog
   - psutil
   - ipython
-  - pytorch
+  - pytorch < 2.4
   - pytorch-gpu
   - jax
   - jaxlib
