@@ -1,6 +1,5 @@
 name: nannos
 channels:
-  - pytorch
   - conda-forge
 dependencies:
   - python>=3.9
@@ -13,8 +12,7 @@ dependencies:
   - colorlog
   - psutil
   - ipython
-  - pytorch < 2.4
-  - cpuonly
+  - pytorch
   - jax
   - jaxlib
   - autograd >= 1.6.2

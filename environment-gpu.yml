@@ -1,7 +1,5 @@
 name: nannos
 channels:
-  - pytorch
-  - nvidia
   - conda-forge
 dependencies:
   - python>=3.9
@@ -14,12 +12,10 @@ dependencies:
   - colorlog
   - psutil
   - ipython
-  - pytorch < 2.4
-  - pytorch-gpu
+  - pytorch
   - jax
-  - jaxlib
   - jaxlib  =*=*cuda*
-  - autograd >= 1.6.2
+  - autograd
   - libmagma_sparse
   - magma
   - pyvista[jupyter] >= 0.43.1
