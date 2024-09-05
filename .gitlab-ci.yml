@@ -13,6 +13,7 @@ stages:
   - badge
   - zenodo
   - kaggle
+  - modal
   - trigdoc
   - trigdocker
   - test
@@ -99,6 +100,15 @@ push-kernel:
   only:
     - tags
 
+benchmark-modal:
+  stage: modal
+  image: benvial/nannos:latest
+  script:
+    - if [[ ! $CI_COMMIT_TAG =~ ^v?[0-9]+\.[0-9]+ ]]; then exit 0; fi
+    - pip install modal
+    - cd examples/benchmarks/modal && modal run run_nannos.py
+  # only:
+  #   - tags
 
 pypi:
   image: python:latest
